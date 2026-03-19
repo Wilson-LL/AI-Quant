@@ -125,7 +125,7 @@ def build_dataloader(stock_ids, batch_size=64, from_time=(2025, 1),
     print(f"Positive ratio: {pos_ratio:.4f}")
 
     # store valid stock id
-    with open("stock.json", "r", encoding="utf-8") as f:
+    with open("stocks.json", "r", encoding="utf-8") as f:
         stock_data = json.load(f)
     for stock in stock_data["stocks"]:
         if stock["valid"] is None or stock["valid"] is True:
