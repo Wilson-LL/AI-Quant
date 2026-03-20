@@ -9,7 +9,7 @@ from model import LSTM_CondTransformer
 
 def build_model(input_dim, lstm_hidden, lstm_layers,
                 trans_hidden, trans_heads, trans_layers, trans_ff,
-                dropout, seq_len):
+                dropout, lr, seq_len):
 
     model = LSTM_CondTransformer(
         input_dim=input_dim,
@@ -23,13 +23,13 @@ def build_model(input_dim, lstm_hidden, lstm_layers,
         seq_len=seq_len
     )
 
-    optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
         optimizer,
         mode='min',
-        factor=0.5,
-        patience=3,
-        min_lr=1e-6
+        factor=0.9,
+        patience=10,
+        min_lr=1e-5
     )
 
     return model, optimizer, scheduler
@@ -65,7 +65,7 @@ def save_checkpoint(model, optimizer, scheduler, epoch, best_loss, path):
         "epoch": epoch,
         "model_state_dict": model.state_dict(),
         "optimizer_state_dict": optimizer.state_dict(),
-        "scheduler_state_dict": scheduler.state_dict(),  # ⭐
+        "scheduler_state_dict": scheduler.state_dict(),
         "best_loss": best_loss
     }, path)
 
@@ -250,6 +250,7 @@ if __name__ == "__main__":
     TRANS_LAYERS    = 2
     TRANS_FF        = 256
     DROPOUT         = 0.1
+    LEARNING_RATE   = 3e-4
 
     train_loader, val_loader, test_loader = build_dataloaders(
         STOCK_ID, BATCH_SIZE, FROM_TIME,
@@ -259,7 +260,7 @@ if __name__ == "__main__":
     model, optimizer, scheduler = build_model(
         FEATURES, LSTM_HIDDEN, LSTM_LAYERS,
         TRANS_HIDDEN, TRANS_HEADS, TRANS_LAYERS, TRANS_FF,
-        DROPOUT, LOOKBACK_WINDOW
+        DROPOUT, LEARNING_RATE, LOOKBACK_WINDOW
     )
 
     start_epoch = 0
