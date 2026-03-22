@@ -7,6 +7,7 @@ import json
 from dataset import build_dataloader
 from model import LSTM_CondTransformer
 
+
 def build_model(input_dim, lstm_hidden, lstm_layers,
                 trans_hidden, trans_heads, trans_layers, trans_ff,
                 dropout, lr, seq_len):
@@ -60,13 +61,13 @@ def build_dataloaders(stock_ids, batch_size, from_time, x, y, h, l):
 
     return train_loader, val_loader, test_loader
 
-def save_checkpoint(model, optimizer, scheduler, epoch, best_loss, path):
+def save_checkpoint(model, optimizer, scheduler, epoch, best_score, path):
     torch.save({
         "epoch": epoch,
         "model_state_dict": model.state_dict(),
         "optimizer_state_dict": optimizer.state_dict(),
         "scheduler_state_dict": scheduler.state_dict(),
-        "best_loss": best_loss
+        "best_score": best_score
     }, path)
 
 
@@ -77,15 +78,20 @@ def load_checkpoint(model, optimizer, scheduler, path, device):
     model.load_state_dict(checkpoint["model_state_dict"])
     optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
 
+    for state in optimizer.state.values():
+        for k, v in state.items():
+            if isinstance(v, torch.Tensor):
+                state[k] = v.to(device)
+
     if "scheduler_state_dict" in checkpoint:
         scheduler.load_state_dict(checkpoint["scheduler_state_dict"])
 
     start_epoch = checkpoint["epoch"] + 1
-    best_loss = checkpoint.get("best_loss", float("inf"))
+    best_score = checkpoint.get("best_score", -float("inf"))
 
     print(f"✅ Resume from epoch {checkpoint['epoch']}")
 
-    return model, optimizer, scheduler, start_epoch, best_loss
+    return model, optimizer, scheduler, start_epoch, best_score
 
 def evaluate(loader, model, device, dtype):
 
@@ -107,6 +113,8 @@ def evaluate(loader, model, device, dtype):
             y = y.to(device, dtype=dtype)
 
             logits = model(x)
+            logits = torch.clamp(logits, -5, 5)
+
             loss = criterion(logits, y)
 
             probs = torch.sigmoid(logits)
@@ -124,34 +132,51 @@ def evaluate(loader, model, device, dtype):
 
     return avg_loss, acc, torch.cat(all_probs), torch.cat(all_labels)
 
-def backtest(probs, labels, threshold=0.5, tp=0.12, sl=0.06):
+def backtest(probs, labels, tp=0.12, sl=0.06, top_k=30, calibrate=True):
 
-    preds = (probs > threshold).float()
+    probs = probs.clone()
 
-    trades = preds.sum().item()
+    if calibrate:
+        probs = probs ** 1.5
 
-    if trades == 0:
-        return {"trades": 0, "winrate": 0, "pnl": 0}
+    top_idx = torch.topk(probs, min(top_k, len(probs))).indices
+    selected_probs = probs[top_idx]
+    selected_labels = labels[top_idx]
 
-    wins = ((preds == 1) & (labels == 1)).sum().item()
-    losses = trades - wins
+    trades = len(selected_probs)
+    pnl = 0.0
 
-    pnl = wins * tp - losses * sl
-    winrate = wins / trades
+    for p, y in zip(selected_probs, selected_labels):
+        weight = p.item()
+        if y.item() == 1:
+            pnl += weight * tp
+        else:
+            pnl -= weight * sl
 
-    return {"trades": trades, "winrate": winrate, "pnl": pnl}
+    winrate = (selected_labels == 1).sum().item() / trades if trades > 0 else 0
+
+    return {
+        "trades": trades,
+        "winrate": winrate,
+        "pnl": pnl,
+        "market_score": probs.mean().item()
+    }
 
 def train(train_loader, val_loader, model, optimizer, scheduler, epochs,
           device="cuda", dtype=torch.float32,
-          start_epoch=0, best_loss=float("inf"),
+          start_epoch=0, best_score=-float("inf"),
           save_dir="checkpoints"):
 
     os.makedirs(save_dir, exist_ok=True)
 
     model = model.to(device)
 
-    criterion = torch.nn.BCEWithLogitsLoss()
+    criterion = torch.nn.BCEWithLogitsLoss(
+        pos_weight=torch.tensor([2.0], device=device)
+    )
 
+    patience = 50
+    no_improve = 0
     for epoch in range(start_epoch, start_epoch + epochs):
 
         print(f"\n===== Epoch {epoch} =====")
@@ -161,9 +186,6 @@ def train(train_loader, val_loader, model, optimizer, scheduler, epochs,
         total_loss = 0
         total_samples = 0
 
-        ema_loss = 0
-        alpha = 0.98
-
         pbar = tqdm(train_loader, leave=False)
 
         for x, y in pbar:
@@ -171,7 +193,11 @@ def train(train_loader, val_loader, model, optimizer, scheduler, epochs,
             x = x.to(device, dtype=dtype)
             y = y.to(device, dtype=dtype)
 
+            y = y * 0.9 + 0.05
+
             logits = model(x)
+            logits = torch.clamp(logits, -5, 5)
+
             loss = criterion(logits, y)
 
             if torch.isnan(loss):
@@ -179,55 +205,77 @@ def train(train_loader, val_loader, model, optimizer, scheduler, epochs,
 
             optimizer.zero_grad()
             loss.backward()
-
-            grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
-
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             optimizer.step()
 
             total_loss += loss.item() * x.size(0)
             total_samples += x.size(0)
 
-            ema_loss = alpha * ema_loss + (1 - alpha) * loss.item()
-
             pbar.set_postfix({
                 "loss": f"{loss.item():.4f}",
-                "ema": f"{ema_loss:.4f}",
-                "lr": f"{optimizer.param_groups[0]['lr']:.1e}",
-                "grad": f"{grad_norm:.2f}"
+                "lr": f"{optimizer.param_groups[0]['lr']:.1e}"
             })
 
         avg_loss = total_loss / total_samples
         print(f"Train Loss: {avg_loss:.4f}")
 
-        # ===== Validation =====
-        val_loss, val_acc, val_probs, val_labels = evaluate(val_loader, model, device, dtype)
-        bt = backtest(val_probs, val_labels)
+        # Validation
+        val_loss, val_acc, val_probs, val_labels = evaluate(
+            val_loader, model, device, dtype
+        )
+
+        bt = backtest(
+            val_probs,
+            val_labels,
+            tp=TAKE_PROFIT,
+            sl=STOP_LOSS,
+            top_k=30
+        )
 
         print(f"VAL Loss: {val_loss:.4f} | Acc: {val_acc:.4f}")
-        print(f"💰 Trades: {bt['trades']} | WinRate: {bt['winrate']:.2f} | PnL: {bt['pnl']:.4f}")
+        print(
+            f"💰 Trades: {bt['trades']} | "
+            f"WinRate: {bt['winrate']:.2f} | "
+            f"PnL: {bt['pnl']:.4f} | "
+            f"Market: {bt['market_score']:.3f}"
+        )
+
+        score = bt["pnl"]
 
         scheduler.step(val_loss)
 
-        # ===== Save =====
-        save_checkpoint(model, optimizer, scheduler, epoch, best_loss,
-                        os.path.join(save_dir, "latest.pt"))
+        # save latest
+        save_checkpoint(
+            model, optimizer, scheduler, epoch, best_score,
+            os.path.join(save_dir, "latest.pt")
+        )
 
-        if val_loss < best_loss:
-            best_loss = val_loss
-            save_checkpoint(model, optimizer, scheduler, epoch, best_loss,
-                            os.path.join(save_dir, "best.pt"))
+        # save best
+        if score > best_score:
+            best_score = score
+            no_improve = 0
+
+            save_checkpoint(
+                model, optimizer, scheduler, epoch, best_score,
+                os.path.join(save_dir, "best.pt")
+            )
             print("🔥 Saved BEST model")
+
+        else:
+            no_improve += 1
+
+        if no_improve >= patience:
+            print(f"🛑 Early stopping at epoch {epoch}")
+            break
 
 if __name__ == "__main__":
 
     DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
     DTYPE = torch.float32
-    EPOCHS = 1000
+    EPOCHS = 10000
     BATCH_SIZE = 64
+    RESUME = True
 
-    RESUME = False
-
-    # Data
     with open("stocks.json", "r", encoding="utf-8") as f:
         data = json.load(f)
         stocks = data["stocks"]
@@ -235,26 +283,25 @@ if __name__ == "__main__":
     STOCK_ID = [s["id"] for s in stocks]
     FROM_TIME = (datetime.today().year - 3, datetime.today().month)
 
-    # Strategy
     LOOKBACK_WINDOW     = 40
     PREDICTION_HORIZON  = 20
     TAKE_PROFIT         = 0.12
     STOP_LOSS           = 0.06
 
-    # Model
-    FEATURES        = 5
+    FEATURES        = 7
     LSTM_HIDDEN     = 128
     LSTM_LAYERS     = 1
     TRANS_HIDDEN    = 128
     TRANS_HEADS     = 4
     TRANS_LAYERS    = 2
     TRANS_FF        = 256
-    DROPOUT         = 0.1
+    DROPOUT         = 0.3
     LEARNING_RATE   = 3e-4
 
     train_loader, val_loader, test_loader = build_dataloaders(
         STOCK_ID, BATCH_SIZE, FROM_TIME,
-        LOOKBACK_WINDOW, PREDICTION_HORIZON, TAKE_PROFIT, STOP_LOSS
+        LOOKBACK_WINDOW, PREDICTION_HORIZON,
+        TAKE_PROFIT, STOP_LOSS
     )
 
     model, optimizer, scheduler = build_model(
@@ -264,12 +311,12 @@ if __name__ == "__main__":
     )
 
     start_epoch = 0
-    best_loss = float("inf")
+    best_score = -float("inf")
 
     if RESUME:
         path = "checkpoints/latest.pt"
         if os.path.exists(path):
-            model, optimizer, scheduler, start_epoch, best_loss = load_checkpoint(
+            model, optimizer, scheduler, start_epoch, best_score = load_checkpoint(
                 model, optimizer, scheduler, path, DEVICE
             )
 
@@ -285,5 +332,5 @@ if __name__ == "__main__":
         device=DEVICE,
         dtype=DTYPE,
         start_epoch=start_epoch,
-        best_loss=best_loss
+        best_score=best_score
     )

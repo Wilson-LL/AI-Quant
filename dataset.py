@@ -20,7 +20,7 @@ def fetch_stock_history(stock_id, from_year, from_month):
     df = df.dropna().reset_index(drop=True)
     return df
 
-def build_samples(df, X=40, Y=20, H=0.12, L=0.06):
+def build_samples(df, X=40, Y=20, H=0.12, L=0.06, add_time_feature=True):
 
     prices = df["close"].values.astype(np.float32)
     volume = df["volume"].values.astype(np.float32)
@@ -47,6 +47,17 @@ def build_samples(df, X=40, Y=20, H=0.12, L=0.06):
     volatility = volatility[valid_start:]
     momentum = momentum[valid_start:]
 
+    # ===== 時間特徵 =====
+    if add_time_feature:
+        # 先保證 df["date"] 是 datetime
+        dates = pd.to_datetime(df["date"].iloc[valid_start:])
+
+        month_feat = np.sin(2 * np.pi * dates.dt.month / 12).values
+        weekday_feat = np.cos(2 * np.pi * dates.dt.weekday / 7).values
+    else:
+        month_feat = np.zeros_like(prices)
+        weekday_feat = np.zeros_like(prices)
+
     samples = []
     for t in range(X - 1, len(prices) - Y):
 
@@ -57,6 +68,10 @@ def build_samples(df, X=40, Y=20, H=0.12, L=0.06):
         past_volatility = volatility[t-(X-1):t+1]
         past_momentum = momentum[t-(X-1):t+1]
 
+        # 時間特徵
+        past_month = month_feat[t-(X-1):t+1]
+        past_weekday = weekday_feat[t-(X-1):t+1]
+
         base = past_price[-1]
         price_norm = past_price / (base + 1e-8)
 
@@ -65,8 +80,10 @@ def build_samples(df, X=40, Y=20, H=0.12, L=0.06):
             past_return,
             past_vol,
             past_volatility,
-            past_momentum
-        ], axis=1)
+            past_momentum,
+            past_month,
+            past_weekday
+        ], axis=1)  # shape: (X, 7)
 
         # NaN check
         if not np.isfinite(x).all():
@@ -128,7 +145,7 @@ def build_dataloader(stock_ids, batch_size=64, from_time=(2025, 1),
     with open("stocks.json", "r", encoding="utf-8") as f:
         stock_data = json.load(f)
     for stock in stock_data["stocks"]:
-        if stock["valid"] is None or stock["valid"] is True:
+        if (stock["valid"] is None or stock["valid"] is True) and stock["id"] in valid_stock_ids:
             stock["valid"] = True
         else:
             stock["valid"] = False
