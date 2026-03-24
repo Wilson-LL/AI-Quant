@@ -275,7 +275,7 @@
         },
         {
             "id": "2327",
-            "name": "國巨",
+            "name": "國巨*",
             "market": "上市",
             "group": "電子零組件業",
             "valid": null
@@ -362,6 +362,167 @@
             "name": "元大台灣50",
             "market": "上市",
             "group": "",
+            "valid": null
+        },
+        {
+            "id": "2324",
+            "name": "仁寶",
+            "market": "上市",
+            "group": "電腦及週邊設備業",
+            "valid": null
+        },
+        {
+            "id": "2301",
+            "name": "光寶科",
+            "market": "上市",
+            "group": "電腦及週邊設備業",
+            "valid": null
+        },
+        {
+            "id": "3036",
+            "name": "文曄",
+            "market": "上市",
+            "group": "電子通路業",
+            "valid": null
+        },
+        {
+            "id": "3702",
+            "name": "大聯大",
+            "market": "上市",
+            "group": "電子通路業",
+            "valid": null
+        },
+        {
+            "id": "3008",
+            "name": "大立光",
+            "market": "上市",
+            "group": "光電業",
+            "valid": null
+        },
+        {
+            "id": "2345",
+            "name": "智邦",
+            "market": "上市",
+            "group": "通信網路業",
+            "valid": null
+        },
+        {
+            "id": "2357",
+            "name": "華碩",
+            "market": "上市",
+            "group": "電腦及週邊設備業",
+            "valid": null
+        },
+        {
+            "id": "2454",
+            "name": "聯發科",
+            "market": "上市",
+            "group": "半導體業",
+            "valid": null
+        },
+        {
+            "id": "1303",
+            "name": "南亞",
+            "market": "上市",
+            "group": "塑膠工業",
+            "valid": null
+        },
+        {
+            "id": "1519",
+            "name": "華城",
+            "market": "上市",
+            "group": "電機機械",
+            "valid": null
+        },
+        {
+            "id": "2467",
+            "name": "志聖",
+            "market": "上市",
+            "group": "電子零組件業",
+            "valid": null
+        },
+        {
+            "id": "8064",
+            "name": "東捷",
+            "market": "上櫃",
+            "group": "光電業",
+            "valid": null
+        },
+        {
+            "id": "5536",
+            "name": "聖暉*",
+            "market": "上櫃",
+            "group": "其他電子業",
+            "valid": null
+        },
+        {
+            "id": "6187",
+            "name": "萬潤",
+            "market": "上櫃",
+            "group": "半導體業",
+            "valid": null
+        },
+        {
+            "id": "2376",
+            "name": "技嘉",
+            "market": "上市",
+            "group": "電腦及週邊設備業",
+            "valid": null
+        },
+        {
+            "id": "6150",
+            "name": "撼訊",
+            "market": "上櫃",
+            "group": "電腦及週邊設備業",
+            "valid": null
+        },
+        {
+            "id": "2377",
+            "name": "微星",
+            "market": "上市",
+            "group": "電腦及週邊設備業",
+            "valid": null
+        },
+        {
+            "id": "3219",
+            "name": "倚強科",
+            "market": "上櫃",
+            "group": "其他電子業",
+            "valid": null
+        },
+        {
+            "id": "2425",
+            "name": "承啟",
+            "market": "上市",
+            "group": "電腦及週邊設備業",
+            "valid": null
+        },
+        {
+            "id": "3661",
+            "name": "世芯-KY",
+            "market": "上市",
+            "group": "半導體業",
+            "valid": null
+        },
+        {
+            "id": "3515",
+            "name": "華擎",
+            "market": "上市",
+            "group": "電腦及週邊設備業",
+            "valid": null
+        },
+        {
+            "id": "3540",
+            "name": "曜越",
+            "market": "上櫃",
+            "group": "電腦及週邊設備業",
+            "valid": null
+        },
+        {
+            "id": "5386",
+            "name": "青雲",
+            "market": "上櫃",
+            "group": "電腦及週邊設備業",
             "valid": null
         }
     ]

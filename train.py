@@ -234,7 +234,7 @@ def train(train_loader, val_loader, model, optimizer, scheduler, epochs,
 
         print(f"VAL Loss: {val_loss:.4f} | Acc: {val_acc:.4f}")
         print(
-            f"💰 Trades: {bt['trades']} | "
+            f"Trades: {bt['trades']} | "
             f"WinRate: {bt['winrate']:.2f} | "
             f"PnL: {bt['pnl']:.4f} | "
             f"Market: {bt['market_score']:.3f}"
@@ -272,9 +272,9 @@ if __name__ == "__main__":
 
     DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
     DTYPE = torch.float32
-    EPOCHS = 10000
+    EPOCHS = 1000
     BATCH_SIZE = 64
-    RESUME = True
+    RESUME = False
 
     with open("stocks.json", "r", encoding="utf-8") as f:
         data = json.load(f)

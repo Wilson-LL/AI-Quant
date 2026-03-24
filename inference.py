@@ -24,7 +24,7 @@ def load_valid_stocks(json_path="./checkpoints/stock_with_valid.json"):
         data = json.load(f)
 
     stocks = [s["id"] for s in data["stocks"] if s.get("valid", False)]
-    print(f"✅ Loaded {len(stocks)} valid stocks")
+    print(f"Loaded {len(stocks)} valid stocks")
 
     return stocks
 
@@ -48,7 +48,7 @@ def load_model(model, path):
     model.load_state_dict(checkpoint["model_state_dict"])
     model.eval()
 
-    print(f"✅ Loaded model from epoch {checkpoint['epoch']}")
+    print(f"Loaded model from epoch {checkpoint['epoch']}")
     return model
 
 def build_today_sample(df, X=40):
@@ -190,7 +190,7 @@ def trading_decision(results, top_k=30, market_threshold=0.52):
 
 if __name__ == "__main__":
 
-    print("🚀 Inference Start")
+    print(" --- Inference Start --- ")
 
     stock_ids = load_valid_stocks()
 
@@ -201,14 +201,14 @@ if __name__ == "__main__":
 
     decision = trading_decision(results, top_k=TOP_K)
 
-    print(f"\n📊 Market Score: {decision['market_score']:.4f}")
+    print(f"\nMarket Score: {decision['market_score']:.4f}")
 
     if not decision["trade"]:
-        print("🚫 No Trade (below threshold)")
+        print("No Trade (below threshold)")
     else:
         print("✅ Trade Enabled")
 
-    print(f"\n🏆 Top {TOP_K} Candidates:")
+    print(f"\nTop {TOP_K}:")
     print("Rank | Stock | Prob")
 
     for t in decision["topk"]:
