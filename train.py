@@ -1,7 +1,7 @@
 import torch
 import os
 from tqdm import tqdm
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 
 from dataset import build_dataloader
@@ -276,13 +276,6 @@ if __name__ == "__main__":
     BATCH_SIZE = 64
     RESUME = False
 
-    with open("stocks.json", "r", encoding="utf-8") as f:
-        data = json.load(f)
-        stocks = data["stocks"]
-
-    STOCK_ID = [s["id"] for s in stocks]
-    FROM_TIME = (datetime.today().year - 3, datetime.today().month)
-
     LOOKBACK_WINDOW     = 40
     PREDICTION_HORIZON  = 20
     TAKE_PROFIT         = 0.12
@@ -298,39 +291,67 @@ if __name__ == "__main__":
     DROPOUT         = 0.3
     LEARNING_RATE   = 3e-4
 
-    train_loader, val_loader, test_loader = build_dataloaders(
-        STOCK_ID, BATCH_SIZE, FROM_TIME,
-        LOOKBACK_WINDOW, PREDICTION_HORIZON,
-        TAKE_PROFIT, STOP_LOSS
-    )
 
-    model, optimizer, scheduler = build_model(
-        FEATURES, LSTM_HIDDEN, LSTM_LAYERS,
-        TRANS_HIDDEN, TRANS_HEADS, TRANS_LAYERS, TRANS_FF,
-        DROPOUT, LEARNING_RATE, LOOKBACK_WINDOW
-    )
+    TODAY = datetime.today()
+    HORIZONS = [
+        {"name": "three_year", "time": timedelta(days=3 * 365)},
+        {"name": "two_year",   "time": timedelta(days=2 * 365)},
+        {"name": "one_year",   "time": timedelta(days=1 * 365)},
+        {"name": "half_year",  "time": timedelta(days=183)},
+    ]
+    with open("stocks.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
+        stocks = data["stocks"]
 
-    start_epoch = 0
-    best_score = -float("inf")
+    STOCK_ID = [s["id"] for s in stocks]
 
-    if RESUME:
-        path = "checkpoints/latest.pt"
-        if os.path.exists(path):
+    # start setup & train
+    for horizon in HORIZONS:
+
+        name = horizon["name"]
+        print(f" Start building dataloader for {name} data...")
+
+        FROM_TIME = TODAY - horizon["time"]
+        FROM_TIME = (FROM_TIME.year, FROM_TIME.month)
+
+        with open("stocks.json", "r", encoding="utf-8") as f:
+            data = json.load(f)
+            stocks = data["stocks"]
+
+        STOCK_ID = [s["id"] for s in stocks]
+
+        train_loader, val_loader, test_loader = build_dataloaders(
+            STOCK_ID, BATCH_SIZE, FROM_TIME,
+            LOOKBACK_WINDOW, PREDICTION_HORIZON,
+            TAKE_PROFIT, STOP_LOSS
+        )
+
+        model, optimizer, scheduler = build_model(
+            FEATURES, LSTM_HIDDEN, LSTM_LAYERS,
+            TRANS_HIDDEN, TRANS_HEADS, TRANS_LAYERS, TRANS_FF,
+            DROPOUT, LEARNING_RATE, LOOKBACK_WINDOW
+        )
+
+        start_epoch = 0
+        best_score = -float("inf")
+
+        path = f"checkpoints/{name}/latest.pt"
+        if RESUME and os.path.exists(path):
             model, optimizer, scheduler, start_epoch, best_score = load_checkpoint(
                 model, optimizer, scheduler, path, DEVICE
             )
 
-    print("🚀 Start Training")
-
-    train(
-        train_loader,
-        val_loader,
-        model,
-        optimizer,
-        scheduler,
-        epochs=EPOCHS,
-        device=DEVICE,
-        dtype=DTYPE,
-        start_epoch=start_epoch,
-        best_score=best_score
-    )
+        print(f" Start training model for {name} data...")
+        train(
+            train_loader,
+            val_loader,
+            model,
+            optimizer,
+            scheduler,
+            epochs=EPOCHS,
+            device=DEVICE,
+            dtype=DTYPE,
+            start_epoch=start_epoch,
+            best_score=best_score,
+            save_dir=f"checkpoints/{name}"
+        )

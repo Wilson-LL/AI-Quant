@@ -14,12 +14,12 @@ from model import LSTM_CondTransformer
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 X = 40
-MODEL_PATH = "checkpoints/best.pt"
+MODEL_PATH = "checkpoints/three_year/best.pt"
 
 TOP_K = 30
 MARKET_THRESHOLD = 0.52
 
-def load_valid_stocks(json_path="./checkpoints/stock_with_valid.json"):
+def load_valid_stocks(json_path="./stocks.json"):
     with open(json_path, "r", encoding="utf-8") as f:
         data = json.load(f)
 

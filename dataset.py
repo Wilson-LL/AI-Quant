@@ -150,7 +150,7 @@ def build_dataloader(stock_ids, batch_size=64, from_time=(2025, 1),
         else:
             stock["valid"] = False
 
-    with open("stock_with_valid.json", "w", encoding="utf-8") as f:
+    with open("stocks.json", "w", encoding="utf-8") as f:
         json.dump(stock_data, f, ensure_ascii=False, indent=4)
 
 
