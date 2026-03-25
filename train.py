@@ -132,12 +132,10 @@ def evaluate(loader, model, device, dtype):
 
     return avg_loss, acc, torch.cat(all_probs), torch.cat(all_labels)
 
-def backtest(probs, labels, tp=0.12, sl=0.06, top_k=30, calibrate=True):
+def backtest(probs, labels, tp=0.12, sl=0.06, top_k=30, alpha=1.0):
 
     probs = probs.clone()
-
-    if calibrate:
-        probs = probs ** 1.5
+    probs = probs ** alpha
 
     top_idx = torch.topk(probs, min(top_k, len(probs))).indices
     selected_probs = probs[top_idx]
@@ -155,16 +153,12 @@ def backtest(probs, labels, tp=0.12, sl=0.06, top_k=30, calibrate=True):
 
     winrate = (selected_labels == 1).sum().item() / trades if trades > 0 else 0
 
-    return {
-        "trades": trades,
-        "winrate": winrate,
-        "pnl": pnl,
-        "market_score": probs.mean().item()
-    }
+    return pnl, winrate, trades, probs.mean().item()
 
 def train(train_loader, val_loader, model, optimizer, scheduler, epochs,
           device="cuda", dtype=torch.float32,
           start_epoch=0, best_score=-float("inf"),
+          calibration_candidates=[1.0],
           save_dir="checkpoints"):
 
     os.makedirs(save_dir, exist_ok=True)
@@ -224,23 +218,40 @@ def train(train_loader, val_loader, model, optimizer, scheduler, epochs,
             val_loader, model, device, dtype
         )
 
-        bt = backtest(
-            val_probs,
-            val_labels,
-            tp=TAKE_PROFIT,
-            sl=STOP_LOSS,
-            top_k=30
-        )
+        best_alpha = None
+        best_winrate = None
+        best_trades = None
+        best_market_score = None
+        best_pnl = -float("inf")
+
+        for alpha in CALIBRATION_CANDIDATES:
+
+            pnl, winrate, trades, market_score = backtest(
+                val_probs,
+                val_labels,
+                tp=TAKE_PROFIT,
+                sl=STOP_LOSS,
+                top_k=30,
+                alpha=alpha
+            )
+
+            if pnl > best_pnl:
+                best_pnl = pnl
+                best_alpha = alpha
+                best_winrate = winrate
+                best_trades = trades
+                best_market_score = market_score
+
+        score = best_pnl
 
         print(f"VAL Loss: {val_loss:.4f} | Acc: {val_acc:.4f}")
         print(
-            f"Trades: {bt['trades']} | "
-            f"WinRate: {bt['winrate']:.2f} | "
-            f"PnL: {bt['pnl']:.4f} | "
-            f"Market: {bt['market_score']:.3f}"
+            f"Trades: {best_trades} | "
+            f"WinRate: {best_winrate:.2f} | "
+            f"PnL: {best_pnl:.4f} | "
+            f"Market: {best_market_score:.3f} | "
+            f"Best alpha: {best_alpha}"
         )
-
-        score = bt["pnl"]
 
         scheduler.step(val_loss)
 
@@ -304,6 +315,7 @@ if __name__ == "__main__":
         stocks = data["stocks"]
 
     STOCK_ID = [s["id"] for s in stocks]
+    CALIBRATION_CANDIDATES = [0.5, 0.7, 0.85, 1.0, 1.2, 1.5, 1.8]
 
     # start setup & train
     for horizon in HORIZONS:
@@ -353,5 +365,6 @@ if __name__ == "__main__":
             dtype=DTYPE,
             start_epoch=start_epoch,
             best_score=best_score,
+            calibration_candidates=CALIBRATION_CANDIDATES,
             save_dir=f"checkpoints/{name}"
         )
