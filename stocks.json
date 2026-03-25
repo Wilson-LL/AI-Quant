@@ -5,525 +5,525 @@
             "name": "力積電",
             "market": "上市",
             "group": "半導體業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "3481",
             "name": "群創",
             "market": "上市",
             "group": "光電業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "2344",
             "name": "華邦電",
             "market": "上市",
             "group": "半導體業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "2485",
             "name": "兆赫",
             "market": "上市",
             "group": "通信網路業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "2367",
             "name": "燿華",
             "market": "上市",
             "group": "電子零組件業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "2337",
             "name": "旺宏",
             "market": "上市",
             "group": "半導體業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "2409",
             "name": "友達",
             "market": "上市",
             "group": "光電業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "4989",
             "name": "榮科",
             "market": "上市",
             "group": "電子零組件業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "2408",
             "name": "南亞科",
             "market": "上市",
             "group": "半導體業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "2317",
             "name": "鴻海",
             "market": "上市",
             "group": "其他電子業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "3189",
             "name": "景碩",
             "market": "上市",
             "group": "半導體業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "2303",
             "name": "聯電",
             "market": "上市",
             "group": "半導體業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "2313",
             "name": "華通",
             "market": "上市",
             "group": "電子零組件業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "1785",
             "name": "光洋科",
             "market": "上櫃",
             "group": "其他電子業",
-            "valid": null
+            "valid": false
         },
         {
             "id": "3006",
             "name": "晶豪科",
             "market": "上市",
             "group": "半導體業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "6182",
             "name": "合晶",
             "market": "上櫃",
             "group": "半導體業",
-            "valid": null
+            "valid": false
         },
         {
             "id": "3576",
             "name": "聯合再生",
             "market": "上市",
             "group": "光電業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "3049",
             "name": "精金",
             "market": "上市",
             "group": "光電業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "3105",
             "name": "穩懋",
             "market": "上櫃",
             "group": "半導體業",
-            "valid": null
+            "valid": false
         },
         {
             "id": "2369",
             "name": "菱生",
             "market": "上市",
             "group": "半導體業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "1605",
             "name": "華新",
             "market": "上市",
             "group": "電器電纜",
-            "valid": null
+            "valid": true
         },
         {
             "id": "2399",
             "name": "映泰",
             "market": "上市",
             "group": "電腦及週邊設備業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "2329",
             "name": "華泰",
             "market": "上市",
             "group": "半導體業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "6147",
             "name": "頎邦",
             "market": "上櫃",
             "group": "半導體業",
-            "valid": null
+            "valid": false
         },
         {
             "id": "8096",
             "name": "擎亞",
             "market": "上櫃",
             "group": "電子通路業",
-            "valid": null
+            "valid": false
         },
         {
             "id": "2353",
             "name": "宏碁",
             "market": "上市",
             "group": "電腦及週邊設備業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "8021",
             "name": "尖點",
             "market": "上市",
             "group": "其他電子業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "2495",
             "name": "普安",
             "market": "上市",
             "group": "電腦及週邊設備業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "6443",
             "name": "元晶",
             "market": "上市",
             "group": "光電業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "4958",
             "name": "臻鼎-KY",
             "market": "上市",
             "group": "電子零組件業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "4967",
             "name": "十銓",
             "market": "上市",
             "group": "半導體業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "2338",
             "name": "光罩",
             "market": "上市",
             "group": "半導體業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "0052",
             "name": "富邦科技",
             "market": "上市",
             "group": "",
-            "valid": null
+            "valid": true
         },
         {
             "id": "2406",
             "name": "國碩",
             "market": "上市",
             "group": "光電業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "5498",
             "name": "凱崴",
             "market": "上櫃",
             "group": "電子零組件業",
-            "valid": null
+            "valid": false
         },
         {
             "id": "3231",
             "name": "緯創",
             "market": "上市",
             "group": "電腦及週邊設備業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "3702",
             "name": "大聯大",
             "market": "上市",
             "group": "電子通路業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "6282",
             "name": "康舒",
             "market": "上市",
             "group": "電子零組件業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "2455",
             "name": "全新",
             "market": "上市",
             "group": "通信網路業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "2327",
-            "name": "國巨*",
+            "name": "國巨",
             "market": "上市",
             "group": "電子零組件業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "6274",
             "name": "台燿",
             "market": "上櫃",
             "group": "電子零組件業",
-            "valid": null
+            "valid": false
         },
         {
             "id": "3714",
             "name": "富采",
             "market": "上市",
             "group": "光電業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "5483",
             "name": "中美晶",
             "market": "上櫃",
             "group": "半導體業",
-            "valid": null
+            "valid": false
         },
         {
             "id": "2489",
             "name": "瑞軒",
             "market": "上市",
             "group": "光電業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "4906",
             "name": "正文",
             "market": "上市",
             "group": "通信網路業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "4979",
             "name": "華星光",
             "market": "上櫃",
             "group": "通信網路業",
-            "valid": null
+            "valid": false
         },
         {
             "id": "6213",
             "name": "聯茂",
             "market": "上市",
             "group": "電子零組件業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "2330",
             "name": "台積電",
             "market": "上市",
             "group": "半導體業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "8112",
             "name": "至上",
             "market": "上市",
             "group": "電子通路業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "4919",
             "name": "新唐",
             "market": "上市",
             "group": "半導體業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "3701",
             "name": "大眾控",
             "market": "上市",
             "group": "電腦及週邊設備業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "0050",
             "name": "元大台灣50",
             "market": "上市",
             "group": "",
-            "valid": null
+            "valid": true
         },
         {
             "id": "2324",
             "name": "仁寶",
             "market": "上市",
             "group": "電腦及週邊設備業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "2301",
             "name": "光寶科",
             "market": "上市",
             "group": "電腦及週邊設備業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "3036",
             "name": "文曄",
             "market": "上市",
             "group": "電子通路業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "3702",
             "name": "大聯大",
             "market": "上市",
             "group": "電子通路業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "3008",
             "name": "大立光",
             "market": "上市",
             "group": "光電業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "2345",
             "name": "智邦",
             "market": "上市",
             "group": "通信網路業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "2357",
             "name": "華碩",
             "market": "上市",
             "group": "電腦及週邊設備業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "2454",
             "name": "聯發科",
             "market": "上市",
             "group": "半導體業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "1303",
             "name": "南亞",
             "market": "上市",
             "group": "塑膠工業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "1519",
             "name": "華城",
             "market": "上市",
             "group": "電機機械",
-            "valid": null
+            "valid": true
         },
         {
             "id": "2467",
             "name": "志聖",
             "market": "上市",
             "group": "電子零組件業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "8064",
             "name": "東捷",
             "market": "上櫃",
             "group": "光電業",
-            "valid": null
+            "valid": false
         },
         {
             "id": "5536",
             "name": "聖暉*",
             "market": "上櫃",
             "group": "其他電子業",
-            "valid": null
+            "valid": false
         },
         {
             "id": "6187",
             "name": "萬潤",
             "market": "上櫃",
-            "group": "半導體業",
-            "valid": null
+            "group": "其他電子業",
+            "valid": false
         },
         {
             "id": "2376",
             "name": "技嘉",
             "market": "上市",
             "group": "電腦及週邊設備業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "6150",
             "name": "撼訊",
             "market": "上櫃",
             "group": "電腦及週邊設備業",
-            "valid": null
+            "valid": false
         },
         {
             "id": "2377",
             "name": "微星",
             "market": "上市",
             "group": "電腦及週邊設備業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "3219",
             "name": "倚強科",
             "market": "上櫃",
             "group": "其他電子業",
-            "valid": null
+            "valid": false
         },
         {
             "id": "2425",
             "name": "承啟",
             "market": "上市",
             "group": "電腦及週邊設備業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "3661",
             "name": "世芯-KY",
             "market": "上市",
             "group": "半導體業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "3515",
             "name": "華擎",
             "market": "上市",
             "group": "電腦及週邊設備業",
-            "valid": null
+            "valid": true
         },
         {
             "id": "3540",
             "name": "曜越",
             "market": "上櫃",
             "group": "電腦及週邊設備業",
-            "valid": null
+            "valid": false
         },
         {
             "id": "5386",
             "name": "青雲",
             "market": "上櫃",
             "group": "電腦及週邊設備業",
-            "valid": null
+            "valid": false
         }
     ]
 }
