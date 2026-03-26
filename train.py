@@ -61,13 +61,14 @@ def build_dataloaders(stock_ids, batch_size, from_time, x, y, h, l):
 
     return train_loader, val_loader, test_loader
 
-def save_checkpoint(model, optimizer, scheduler, epoch, best_score, path):
+def save_checkpoint(model, optimizer, scheduler, epoch, best_score, best_alpha, path):
     torch.save({
         "epoch": epoch,
         "model_state_dict": model.state_dict(),
         "optimizer_state_dict": optimizer.state_dict(),
         "scheduler_state_dict": scheduler.state_dict(),
-        "best_score": best_score
+        "best_score": best_score,
+        "best_alpha": best_alpha,
     }, path)
 
 
@@ -224,7 +225,7 @@ def train(train_loader, val_loader, model, optimizer, scheduler, epochs,
         best_market_score = None
         best_pnl = -float("inf")
 
-        for alpha in CALIBRATION_CANDIDATES:
+        for alpha in calibration_candidates:
 
             pnl, winrate, trades, market_score = backtest(
                 val_probs,
@@ -257,7 +258,7 @@ def train(train_loader, val_loader, model, optimizer, scheduler, epochs,
 
         # save latest
         save_checkpoint(
-            model, optimizer, scheduler, epoch, best_score,
+            model, optimizer, scheduler, epoch, best_score, best_alpha,
             os.path.join(save_dir, "latest.pt")
         )
 
@@ -267,7 +268,7 @@ def train(train_loader, val_loader, model, optimizer, scheduler, epochs,
             no_improve = 0
 
             save_checkpoint(
-                model, optimizer, scheduler, epoch, best_score,
+                model, optimizer, scheduler, epoch, best_score, best_alpha,
                 os.path.join(save_dir, "best.pt")
             )
             print("🔥 Saved BEST model")
