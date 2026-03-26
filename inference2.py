@@ -214,12 +214,11 @@ if __name__ == "__main__":
     # Path location
     CHECKPOINT_PATH = "./checkpoints"
     HORIZON_MODELS = [
-        {"name": "three_year", "weight": 0.15},
-        {"name": "two_year",   "weight": 0.20},
-        {"name": "one_year",   "weight": 0.50},
-        {"name": "half_year",  "weight": 0.15},
+        {"name": "half_year",  "weight": 0.55},
+        {"name": "one_year",   "weight": 0.30},
+        {"name": "two_year",   "weight": 0.10},
+        {"name": "three_year", "weight": 0.05},
     ]
-
     # Strategy design
     LOOKBACK_WINDOW     = 40
     PREDICTION_HORIZON  = 20
@@ -250,3 +249,20 @@ if __name__ == "__main__":
 
     decision = trading_decision(results, top_k=TOP_K)
     
+    print(f"\nMarket Score: {decision['market_score']:.4f}")
+
+    if not decision["trade"]:
+        print("No Trade (below threshold)")
+    else:
+        print("✅ Trade Enabled")
+
+    print(f"\nTop {TOP_K}:")
+    print("Rank | Stock | Prob")
+
+    for t in decision["topk"]:
+        print(f"{t['rank']:>4} | {t['stock_id']} | {t['prob']:.4f}")
+
+    if decision["trade"]:
+        print("\n💰 Trading Signals:")
+        for t in decision["trades"]:
+            print(f"{t['stock_id']} | prob={t['prob']:.4f}")
