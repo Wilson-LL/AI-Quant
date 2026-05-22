@@ -311,7 +311,7 @@ if __name__ == "__main__":
         {"name": "one_year",   "time": timedelta(days=1 * 365)},
         {"name": "half_year",  "time": timedelta(days=183)},
     ]
-    with open("stocks.json", "r", encoding="utf-8") as f:
+    with open("./checkpoints/stocks.json", "r", encoding="utf-8") as f:
         data = json.load(f)
         stocks = data["stocks"]
 
@@ -327,7 +327,7 @@ if __name__ == "__main__":
         FROM_TIME = TODAY - horizon["time"]
         FROM_TIME = (FROM_TIME.year, FROM_TIME.month)
 
-        with open("stocks.json", "r", encoding="utf-8") as f:
+        with open("./checkpoints/stocks.json", "r", encoding="utf-8") as f:
             data = json.load(f)
             stocks = data["stocks"]
 

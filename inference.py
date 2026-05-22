@@ -173,10 +173,8 @@ def trading_decision(results, top_k=30, market_threshold=0.52):
 
     probs = np.array([r["prob"] for r in results])
 
-    # 排序
     sorted_idx = np.argsort(-probs)
 
-    # top-k ranking（永遠輸出）
     topk = []
     for rank, idx in enumerate(sorted_idx[:top_k], 1):
         topk.append({
@@ -187,7 +185,6 @@ def trading_decision(results, top_k=30, market_threshold=0.52):
 
     market_score = probs.mean()
 
-    # 是否交易
     if market_score < market_threshold:
         return {
             "market_score": market_score,
@@ -196,8 +193,7 @@ def trading_decision(results, top_k=30, market_threshold=0.52):
             "trades": []
         }
 
-    # 如果允許交易
-    trades = topk[:10]  # 真正下單用 top 10
+    trades = topk[:10]
 
     return {
         "market_score": market_score,

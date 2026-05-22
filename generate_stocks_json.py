@@ -1,3 +1,4 @@
+import os
 import json
 import twstock
 
@@ -38,11 +39,12 @@ if __name__ == "__main__":
                  "1303", "1519", "2467", "8064", "5536", "2308",
                  "6187", "2376", "6150", "2377", "3219", "2425",
                  "3661", "3515", "3540", "5386", "2481", "3491",
-                 "2360"]
+                 "2360", "2347", "3048"]
 
     data = build_stock_metadata(STOCK_IDS)
 
-    with open("stocks.json", "w", encoding="utf-8") as f:
+    os.makedirs("./checkpoints", exist_ok=True)
+    with open("./checkpoints/stocks.json", "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
     print("✅ stocks.json generated!")

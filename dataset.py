@@ -47,9 +47,7 @@ def build_samples(df, X=40, Y=20, H=0.12, L=0.06, add_time_feature=True):
     volatility = volatility[valid_start:]
     momentum = momentum[valid_start:]
 
-    # ===== 時間特徵 =====
     if add_time_feature:
-        # 先保證 df["date"] 是 datetime
         dates = pd.to_datetime(df["date"].iloc[valid_start:])
 
         month_feat = np.sin(2 * np.pi * dates.dt.month / 12).values
@@ -68,7 +66,7 @@ def build_samples(df, X=40, Y=20, H=0.12, L=0.06, add_time_feature=True):
         past_volatility = volatility[t-(X-1):t+1]
         past_momentum = momentum[t-(X-1):t+1]
 
-        # 時間特徵
+        # time feature
         past_month = month_feat[t-(X-1):t+1]
         past_weekday = weekday_feat[t-(X-1):t+1]
 
