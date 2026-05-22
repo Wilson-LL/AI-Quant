@@ -5,45 +5,109 @@
 
   A multi-timeframe deep learning system that ranks Taiwan Stock Exchange (TWSE)
   equities by their probability of achieving +12% price appreciation within a
-  20-day forward window. Combines ensemble modeling across time scales with a
-  market-level regime gate to determine whether conditions favor active trading.
+  20-day forward window. Combines an LSTM-Transformer ensemble across four time
+  horizons with a market-level regime gate to determine whether conditions favor
+  active trading.
 
 --------------------------------------------------------------------------------
   TABLE OF CONTENTS
 --------------------------------------------------------------------------------
 
   1. Overview
-  2. Requirements
-  3. Installation
-  4. Usage
-       4.1 Step 1 — Configure Stock Universe  (generate_stocks_json.py)
-       4.2 Step 2 — Train the Model           (train.py)
-       4.3 Step 3 — Run Inference             (inference.py)
-  5. Understanding the Output
-  6. Known Limitations
-  7. Author Notes & Strategy
-  8. License
+  2. Model Architecture
+  3. Requirements
+  4. Installation
+  5. Usage
+       5.1 Step 1 — Generate Stock Metadata   (generate_stocks_json.py)
+       5.2 Step 2 — Train the Model           (train.py)
+       5.3 Step 3 — Run Inference             (inference.py)
+  6. Understanding the Output
+  7. Risk Management & Strategy
+  8. Known Limitations
+  9. Closing Remarks
+  10. License
 
 --------------------------------------------------------------------------------
   1. OVERVIEW
 --------------------------------------------------------------------------------
 
-  AI-Quant fetches historical price data for a user-defined list of TWSE ticker
-  symbols, trains a GPU-accelerated deep learning model, and produces a ranked
-  list of stocks with associated "probability" scores.
+  AI-Quant fetches historical price and volume data for a user-defined list of
+  TWSE ticker symbols, trains a GPU-accelerated deep learning model across
+  multiple time horizons, and produces a ranked list of stocks with associated
+  scores reflecting their likelihood of a +12% price gain within 20 trading days.
 
   Key design decisions:
-    - Scores are produced by an ensemble of models trained at different time
-      scales; the final probability is a weighted combination and should NOT be
-      interpreted as a calibrated statistical probability.
-    - A global "Market Score" gates the output: if market conditions are deemed
-      unfavorable, trading signals are suppressed regardless of individual scores.
-    - The system is intentionally scoped to technology-sector equities listed on
-      TWSE. OTC ("上櫃") stocks are excluded due to data extraction issues
-      (see Section 6).
+
+    - Multi-horizon ensemble: Four separate models are trained on half-year,
+      one-year, two-year, and three-year historical windows. Their outputs are
+      combined via fixed weights (0.25 / 0.55 / 0.15 / 0.05) to produce a
+      single final score per stock.
+
+    - Alpha calibration: Each horizon model applies a calibration exponent
+      (alpha) tuned during validation via simulated backtesting. This sharpens
+      or softens the probability distribution to maximize risk-adjusted PnL on
+      the validation set.
+
+    - Market regime gate: A global "Market Score" (the mean probability across
+      all stocks) is compared against a threshold (default: 0.52). If the market
+      is deemed unfavorable, trading signals are suppressed entirely.
+
+    - Labeling logic: A sample is labeled positive (1) if the closing price
+      hits +12% above the entry price at any point within the 20-day window,
+      before hitting the -6% stop-loss. Otherwise it is labeled negative (0).
+
+    - Scoped universe: The default stock universe covers TWSE-listed technology
+      equities. OTC ("上櫃") stocks are excluded due to data extraction issues.
 
 --------------------------------------------------------------------------------
-  2. REQUIREMENTS
+  2. MODEL ARCHITECTURE
+--------------------------------------------------------------------------------
+
+  The core model is LSTM_CondTransformer, a hybrid sequence model defined in
+  model.py. It processes a fixed-length lookback window of 40 trading days and
+  outputs a single logit (binary classification).
+
+  Input Features (7 per timestep)
+  --------------------------------
+    1. Price (normalized to the last closing price in the window)
+    2. Log return
+    3. Volume Z-score  (rolling 20-day mean/std normalization)
+    4. Volatility      (rolling 20-day std of log returns)
+    5. Momentum        (10-day price rate of change)
+    6. Month feature   (sin encoding of calendar month)
+    7. Weekday feature (cos encoding of day of week)
+
+  Architecture
+  ------------
+    LSTM Encoder
+      Processes the input sequence and captures temporal dependencies.
+      Hidden size: 128  |  Layers: 1
+
+    Cross-Attention Layer
+      Queries from LSTM hidden states attend to a projection of the raw input
+      (Key/Value). This allows the model to re-weight raw features relative to
+      the learned LSTM representation.
+
+    Transformer Encoder
+      Two-layer encoder (4 attention heads, FF dim: 256) applied on top of the
+      cross-attended LSTM output, with learned positional embeddings.
+
+    Classification Head
+      Final hidden state → Linear(128→32) → ReLU → Dropout → Linear(32→1)
+      Output is a raw logit; sigmoid is applied at inference time.
+
+  Training Details
+  ----------------
+    - Loss: BCEWithLogitsLoss with pos_weight=2.0 to handle class imbalance
+    - Label smoothing: targets shifted from {0,1} to {0.05, 0.95}
+    - Optimizer: AdamW  (lr=3e-4)
+    - Scheduler: ReduceLROnPlateau (factor=0.9, patience=10, min_lr=1e-5)
+    - Gradient clipping: max norm 1.0
+    - Early stopping: patience of 50 epochs (based on validation PnL)
+    - Train / Val / Test split: 70% / 15% / 15%
+
+--------------------------------------------------------------------------------
+  3. REQUIREMENTS
 --------------------------------------------------------------------------------
 
   Software
@@ -62,14 +126,14 @@
 
   Hardware Note
   -------------
-    Training takes approximately 2–3 hours on a single RTX 4060 Ti.
-    If your GPU has less than 10 GB of VRAM, reduce the batch size
-    (see Section 4.2 for details). Note that reducing the batch size
-    without adding gradient accumulation may affect model quality
-    relative to the reference training environment.
+    Training runs four separate models (one per time horizon). Total training
+    time is approximately 2–3 hours on a single RTX 4060 Ti. If your GPU has
+    less than 10 GB of VRAM, reduce the batch size (see Section 5.2). Note that
+    doing so without adding gradient accumulation will alter training dynamics
+    and may affect results relative to the reference environment.
 
 --------------------------------------------------------------------------------
-  3. INSTALLATION
+  4. INSTALLATION
 --------------------------------------------------------------------------------
 
   Step 1 — Clone the repository
@@ -100,25 +164,27 @@
           --index-url https://download.pytorch.org/whl/nightly/cu132
 
     IMPORTANT: Install PyTorch BEFORE running pip install -r requirements.txt.
-    Installing them in the wrong order can result in a CPU-only PyTorch build
-    being pulled in as a dependency.
+    Installing in the wrong order can result in a CPU-only PyTorch build being
+    pulled in as a transitive dependency.
 
   Step 4 — Install remaining dependencies
 
     pip install -r requirements.txt
 
 --------------------------------------------------------------------------------
-  4. USAGE
+  5. USAGE
 --------------------------------------------------------------------------------
 
-  4.1  STEP 1 — Configure Stock Universe  (generate_stocks_json.py)
+  5.1  STEP 1 — Generate Stock Metadata  (generate_stocks_json.py)
   -----------------------------------------------------------------
 
-  Open generate_stocks_json.py and locate the STOCK_IDS list under the
-  `if __name__ == "__main__":` block. Add or remove TWSE ticker symbols
-  to define the universe of stocks the model will train and predict on.
+  This script validates the configured ticker symbols against the twstock
+  registry and writes a stocks.json metadata file to ./checkpoints/. This file
+  is consumed by both train.py and inference.py to determine which stocks to
+  include and which have been marked valid after data fetching.
 
-  Default configuration:
+  Open generate_stocks_json.py and modify the STOCK_IDS list to define your
+  target universe:
 
     STOCK_IDS = [
         "6770", "3481", "2344", "2485", "2367", "2337",
@@ -137,45 +203,83 @@
         "2360", "2347", "3048",
     ]
 
-  Then run the script to fetch and cache stock data:
+  Then run:
 
     python generate_stocks_json.py
 
+  This produces ./checkpoints/stocks.json. Any ticker not found in the twstock
+  registry is skipped with a warning. Stocks that fail data fetching during
+  training are automatically flagged as invalid (valid: false) in this file and
+  excluded from inference.
+
   Tuning tip:
-    Adding more tickers increases coverage but can reduce per-stock prediction
-    accuracy, as the model must generalize across a larger and more diverse
-    universe. Start with a focused list if accuracy is a priority.
+    Adding more tickers increases dataset size but requires the model to
+    generalize across a wider universe, which may reduce per-stock accuracy.
+    Start with a focused list if predictive precision is a priority.
 
 
-  4.2  STEP 2 — Train the Model  (train.py)
+  5.2  STEP 2 — Train the Model  (train.py)
   ------------------------------------------
 
-  Run the training script after generating the stock data:
+  Run the training script after generating the stock metadata:
 
     python train.py
 
-  Training configuration:
-    - Default batch size: BATCH = 64  (defined at line 288 in train.py)
-    - Estimated training time: 2–3 hours on RTX 4060 Ti
-    - Minimum recommended VRAM: 10–12 GB
+  The script trains four independent models, one for each time horizon:
+
+    Horizon     | History Used  | Ensemble Weight
+    ------------|---------------|----------------
+    half_year   | ~6 months     | 0.25
+    one_year    | ~12 months    | 0.55
+    two_year    | ~24 months    | 0.15
+    three_year  | ~36 months    | 0.05
+
+  Checkpoints are saved to ./checkpoints/<horizon>/. Both the latest and best
+  (highest validation PnL) checkpoints are preserved per horizon.
+
+  Key training parameters (configurable at the top of train.py):
+
+    BATCH_SIZE          = 64      # Reduce if GPU OOM (e.g., 32 or 16)
+    EPOCHS              = 1000    # Subject to early stopping (patience=50)
+    LOOKBACK_WINDOW     = 40      # Input sequence length (trading days)
+    PREDICTION_HORIZON  = 20      # Forward window for labeling (trading days)
+    TAKE_PROFIT         = 0.12    # +12% target used in labeling and backtest
+    STOP_LOSS           = 0.06    # -6% stop used in labeling and backtest
+    LEARNING_RATE       = 3e-4
+    RESUME              = False   # Set True to resume from latest checkpoint
 
   If you encounter out-of-memory (OOM) errors:
-    Reduce the BATCH variable in train.py (e.g., 32 or 16).
+    Reduce BATCH_SIZE in train.py. The default is 64.
 
   WARNING: The current implementation does not include gradient accumulation.
   Reducing the batch size will alter effective gradient updates and may produce
   results that differ from the reference training environment.
 
 
-  4.3  STEP 3 — Run Inference  (inference.py)
+  5.3  STEP 3 — Run Inference  (inference.py)
   --------------------------------------------
 
-  After training completes, generate predictions for the current date:
+  After all four horizon models have been trained, generate today's predictions:
 
     python inference.py
 
+  The script loads the best checkpoint for each horizon, fetches recent price
+  data for all valid stocks, constructs the feature sequence for today's date,
+  and runs the ensemble to produce final scores. Only stocks marked valid: true
+  in stocks.json are included.
+
+  Key inference parameters (configurable at the top of inference.py):
+
+    TOP_K              = 30     # Number of stocks to display in ranking
+    MARKET_THRESHOLD   = 0.52   # Minimum market score to enable trading signals
+    HORIZON_MODELS weights:
+      half_year  → 0.25
+      one_year   → 0.55
+      two_year   → 0.15
+      three_year → 0.05
+
 --------------------------------------------------------------------------------
-  5. UNDERSTANDING THE OUTPUT
+  6. UNDERSTANDING THE OUTPUT
 --------------------------------------------------------------------------------
 
   Example output:
@@ -199,88 +303,111 @@
   Field descriptions:
 
     Market Score
-      A composite regime indicator. When this score clears the internal
-      threshold, the system switches to "Trade Enabled" mode and emits
-      trading signals. Below the threshold, signals are suppressed.
+      The mean probability score across all valid stocks in the universe.
+      Acts as a macro regime indicator. When this value clears the threshold
+      (default: 0.52), the system switches to "Trade Enabled" and emits the
+      top 10 trading signals. Below the threshold, no signals are emitted.
 
-    Prob (Probability Score)
-      The model's estimate that a given stock will achieve a +12% price
-      increase within the next 20 trading days.
+    Prob (Score)
+      The ensemble score for a given stock — a weighted combination of the
+      four horizon models' sigmoid outputs, each raised to its calibrated
+      alpha exponent before weighting.
 
       IMPORTANT INTERPRETATION NOTE:
-      These scores are a weighted combination of outputs from multiple
-      models trained on different time horizons. They are NOT calibrated
-      statistical probabilities. A score of 0.97 does not mean a 97%
-      chance of the +12% outcome. Use these values as a relative ranking
-      tool, not as absolute probability estimates.
+      These are NOT calibrated statistical probabilities. A score of 0.97
+      does not imply a 97% chance of the +12% outcome. The alpha calibration
+      and ensemble weighting distort the raw probability scale. Treat these
+      values as a relative ranking signal only.
 
     Top 30
-      The 30 highest-ranked stocks from the configured universe.
+      The 30 highest-scoring stocks from the valid universe, regardless of
+      whether the market regime gate is open.
 
     Trading Signals
-      The subset of the Top 30 that clears the internal confidence
-      threshold under the current market regime.
+      The top 10 stocks from the Top 30, emitted only when Trade is Enabled.
+      These represent the model's highest-conviction candidates for the session.
 
 --------------------------------------------------------------------------------
-  6. KNOWN LIMITATIONS
+  7. RISK MANAGEMENT & STRATEGY
+--------------------------------------------------------------------------------
+
+  The labeling and backtesting logic encodes an explicit exit rule:
+
+    Take Profit : +12%  — exit when the position gains 12% from entry
+    Stop Loss   :  -6%  — exit when the position loses 6% from entry
+
+  This asymmetric 2:1 reward-to-risk ratio is baked into both the training
+  labels (which stock "won" the 20-day window) and the validation backtest
+  (which computes simulated PnL using these thresholds). Any live application
+  of the model's signals should apply the same exit rules to remain consistent
+  with the conditions under which the model was trained.
+
+  Author's personal approach:
+    All stocks in the default universe are technology-sector equities. When
+    the Market Score is sufficiently high and trading is enabled, the author's
+    preferred approach is to consider broader market positions in:
+
+      - 2330  (TSMC)
+      - 0050  (Yuanta/FTSE TWSE Taiwan 50 ETF)
+
+    These serve as diversified proxies for the technology sector rather than
+    concentrating exposure in individual signals.
+
+  This is not financial advice. Always conduct independent research and manage
+  risk appropriately before making any investment decisions.
+
+--------------------------------------------------------------------------------
+  8. KNOWN LIMITATIONS
 --------------------------------------------------------------------------------
 
   OTC ("上櫃") Stock Incompatibility
     Data extraction for OTC-listed stocks (traded on the Taipei Exchange,
     as opposed to TWSE) does not function correctly. The root cause has not
-    been identified. As a workaround, problematic tickers are filtered out
-    during dataset construction; some may still appear in STOCK_IDS but will
-    be excluded automatically at runtime.
+    been identified. Problematic tickers are filtered out automatically during
+    dataset construction via the valid flag in stocks.json; some OTC tickers
+    may still appear in STOCK_IDS but will be excluded at runtime.
 
   No Gradient Accumulation
-    The training loop does not implement gradient accumulation. Reducing
-    BATCH below 64 is a valid workaround for VRAM constraints, but it will
-    change training dynamics and may degrade model performance.
+    The training loop does not implement gradient accumulation. Reducing BATCH
+    below 64 is a valid workaround for VRAM constraints, but it changes training
+    dynamics and may degrade model performance compared to the reference setup.
 
-  No Probability Calibration
-    Scores should be treated as ordinal rankings, not calibrated probabilities
-    (see Section 5 for details).
+  Scores Are Not Calibrated Probabilities
+    Due to alpha exponentiation and ensemble weighting, output scores should be
+    treated as ordinal rankings only. See Section 6 for details.
 
   Static Universe
-    The model is trained on a fixed set of tickers. It does not generalize
-    to tickers not present in STOCK_IDS at training time without retraining.
+    Models are trained on a fixed set of tickers. The model does not generalize
+    to tickers absent from STOCK_IDS at training time without full retraining.
+
+  Single-Stock Input
+    The model evaluates each stock independently, with no cross-sectional
+    context. Correlations or sector-level dynamics between stocks are not
+    explicitly modeled.
 
 --------------------------------------------------------------------------------
-  7. AUTHOR NOTES & STRATEGY
---------------------------------------------------------------------------------
-
-  All stocks in the default universe are technology-sector equities.
-
-  Personal approach:
-    When the Market Score is sufficiently high and trading is enabled, the
-    author's preferred approach is to consider positions in:
-
-      - 2330  (TSMC)
-      - 0050  (Yuanta/FTSE TWSE Taiwan 50 ETF)
-
-    These are used as broad market proxies rather than relying solely on
-    individual stock signals from the model.
-
-  This is not financial advice. Always conduct independent research and
-  manage risk appropriately before making investment decisions.
-
---------------------------------------------------------------------------------
-  8. CLOSING REMARKS
+  9. CLOSING REMARKS
 --------------------------------------------------------------------------------
 
   This is an independent research project and should be treated as such.
-  Training results may vary across hardware, configurations, and data
-  availability — do not expect production-grade consistency out of the box.
+  Training results will vary across hardware, data availability, and market
+  conditions — production-grade consistency is not guaranteed.
 
   Experimentation is encouraged. Feel free to adjust any hyperparameters,
-  modify the training pipeline, or swap in alternative architectures to suit
-  your needs. If you have access to more powerful hardware, scaling up the
-  model capacity (deeper layers, wider embeddings, larger batch sizes with
-  gradient accumulation) is a reasonable starting point for improving
-  predictive performance.
+  modify the training pipeline, or swap in alternative architectures. Concrete
+  directions for scaling up if you have access to more powerful hardware:
+
+    - Increase LSTM_HIDDEN and TRANS_HIDDEN (e.g., 256 or 512)
+    - Add more LSTM_LAYERS or TRANS_LAYERS
+    - Increase TRANS_FF (e.g., 512 or 1024)
+    - Expand TRANS_HEADS (e.g., 8)
+    - Add gradient accumulation to support larger effective batch sizes
+    - Extend LOOKBACK_WINDOW for longer temporal context
+
+  Contributions, forks, and feedback are welcome.
 
 --------------------------------------------------------------------------------
-  9. LICENSE
+  10. LICENSE
 --------------------------------------------------------------------------------
 
   See LICENSE file in the repository root for full terms of use.
