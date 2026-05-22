@@ -1,9 +1,7 @@
-# =========================
-# inference.py (aligned with training)
-# =========================
 import torch
 import numpy as np
 import pandas as pd
+import os
 import json
 from datetime import datetime
 from tqdm import tqdm
@@ -11,15 +9,7 @@ from tqdm import tqdm
 from dataset import fetch_stock_history
 from model import LSTM_CondTransformer
 
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-
-X = 40
-MODEL_PATH = "checkpoints/three_year/best.pt"
-
-TOP_K = 30
-MARKET_THRESHOLD = 0.52
-
-def load_valid_stocks(json_path="./stocks.json"):
+def load_valid_stocks(json_path="./checkpoints/stocks.json"):
     with open(json_path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
@@ -28,21 +18,6 @@ def load_valid_stocks(json_path="./stocks.json"):
 
     return stocks
 
-def build_model():
-    model = LSTM_CondTransformer(
-        input_dim=7,
-        lstm_hidden=128,
-        lstm_layers=1,
-        trans_hidden=128,
-        trans_heads=4,
-        trans_layers=2,
-        trans_ff=256,
-        dropout=0.1,
-        seq_len=X
-    ).to(DEVICE)
-
-    return model
-
 def load_model(model, path):
     checkpoint = torch.load(path, map_location=DEVICE)
     model.load_state_dict(checkpoint["model_state_dict"])
@@ -50,6 +25,42 @@ def load_model(model, path):
 
     print(f"Loaded model from epoch {checkpoint['epoch']}")
     return model
+
+def load_all_models(horizon_models,
+                    features, lstm_hidden, lstm_layers,
+                    trans_hidden, trans_heads, trans_layers, trans_ff,
+                    seq_len, device):
+
+    models = []
+
+    for h in horizon_models:
+        path = f"checkpoints/{h['name']}/best.pt"
+        model = LSTM_CondTransformer(
+            input_dim=features,
+            lstm_hidden=lstm_hidden,
+            lstm_layers=lstm_layers,
+            trans_hidden=trans_hidden,
+            trans_heads=trans_heads,
+            trans_layers=trans_layers,
+            trans_ff=trans_ff,
+            dropout=0,
+            seq_len=seq_len
+        ).to(device)
+
+        checkpoint = torch.load(path, map_location=device)
+        model.load_state_dict(checkpoint["model_state_dict"])
+        model.eval()
+
+        print(f"Loaded {h['name']} (epoch {checkpoint['epoch']})")
+
+        models.append({
+            "model": model,
+            "weight": h["weight"],
+            "name": h["name"],
+            "best_alpha": checkpoint["best_alpha"]
+        })
+
+    return models
 
 def build_today_sample(df, X=40):
 
@@ -107,10 +118,10 @@ def build_today_sample(df, X=40):
 
     return x.astype(np.float32)
 
-def predict_stock(stock_id, model, X):
+def predict_stock(stock_id, models, lookback_window, device):
 
     today = datetime.today()
-    months_back = max(3, (X // 20) + 2)
+    months_back = max(3, (lookback_window // 20) + 2)
 
     from_month = today.month - months_back
     from_year = today.year
@@ -122,27 +133,37 @@ def predict_stock(stock_id, model, X):
     df = fetch_stock_history(stock_id, from_year, from_month)
 
     try:
-        x = build_today_sample(df, X)
+        x = build_today_sample(df, lookback_window)
     except:
         return None
 
-    x = torch.from_numpy(x).unsqueeze(0).to(DEVICE)
+    x = torch.from_numpy(x).unsqueeze(0).to(device)
+
+    final_prob = 0.0
+    total_weight = 0.0
 
     with torch.no_grad():
-        logit = model(x)
-        prob = torch.sigmoid(logit).item()
+        for m in models:
+            logit = m["model"](x)
+            prob = torch.sigmoid(logit).item()
+            prob = prob ** m["best_alpha"]
+
+            final_prob += prob * m["weight"]
+            total_weight += m["weight"]
+
+    final_prob /= total_weight
 
     return {
         "stock_id": stock_id,
-        "prob": prob
+        "prob": final_prob
     }
 
-def predict_market(stock_ids, model, X):
+def predict_market(stock_ids, models, lookback_window, device):
 
     results = []
 
     for stock_id in tqdm(stock_ids):
-        r = predict_stock(stock_id, model, X)
+        r = predict_stock(stock_id, models, lookback_window, device)
         if r is not None:
             results.append(r)
 
@@ -151,9 +172,6 @@ def predict_market(stock_ids, model, X):
 def trading_decision(results, top_k=30, market_threshold=0.52):
 
     probs = np.array([r["prob"] for r in results])
-
-    # calibration（保持一致）
-    probs = probs ** 0.7
 
     # 排序
     sorted_idx = np.argsort(-probs)
@@ -190,17 +208,47 @@ def trading_decision(results, top_k=30, market_threshold=0.52):
 
 if __name__ == "__main__":
 
+    DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+    DTYPE = torch.float32
+
+    # Path location
+    CHECKPOINT_PATH = "./checkpoints"
+    HORIZON_MODELS = [
+        {"name": "half_year",  "weight": 0.25},
+        {"name": "one_year",   "weight": 0.55},
+        {"name": "two_year",   "weight": 0.15},
+        {"name": "three_year", "weight": 0.05},
+    ]
+    # Strategy design
+    LOOKBACK_WINDOW     = 40
+    PREDICTION_HORIZON  = 20
+    TAKE_PROFIT         = 0.12
+    STOP_LOSS           = 0.06
+    TOP_K = 30
+    MARKET_THRESHOLD = 0.52
+
+    # Model structure
+    FEATURES        = 7
+    LSTM_HIDDEN     = 128
+    LSTM_LAYERS     = 1
+    TRANS_HIDDEN    = 128
+    TRANS_HEADS     = 4
+    TRANS_LAYERS    = 2
+    TRANS_FF        = 256
+
     print(" --- Inference Start --- ")
 
-    stock_ids = load_valid_stocks()
+    stock_ids = load_valid_stocks(os.path.join(CHECKPOINT_PATH, "stocks.json"))
 
-    model = build_model()
-    model = load_model(model, MODEL_PATH)
+    models = load_all_models(HORIZON_MODELS,
+                             FEATURES, LSTM_HIDDEN, LSTM_LAYERS,
+                             TRANS_HIDDEN, TRANS_HEADS, TRANS_LAYERS, TRANS_FF,
+                             LOOKBACK_WINDOW, DEVICE)
 
-    results = predict_market(stock_ids, model, X)
+    results = predict_market(stock_ids, models, LOOKBACK_WINDOW, DEVICE)
 
     decision = trading_decision(results, top_k=TOP_K)
-
+    
     print(f"\nMarket Score: {decision['market_score']:.4f}")
 
     if not decision["trade"]:
