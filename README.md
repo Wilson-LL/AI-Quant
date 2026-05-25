@@ -104,9 +104,17 @@ Input (B, 40, 7)
 
 ## 3. Requirements
 
+### Prerequisites
+
+Before getting started, make sure you have the following installed on your machine:
+
+- **Python 3.10+** — [Download here](https://www.python.org/downloads/). During installation on Windows, check **"Add Python to PATH"**.
+- **pip** — Comes bundled with Python 3.10+. Verify by running `pip --version` in your terminal.
+
+If you are new to Python and unsure whether these are set up correctly, [this guide](https://realpython.com/installing-python/) is a good starting point.
+
 ### Software
 
-- Python 3.10+
 - CUDA-compatible GPU — recommended VRAM: **10–12 GB minimum** *(tested on NVIDIA RTX 4060 Ti 16 GB)*
 - PyTorch (CUDA build — see [Installation](#4-installation))
 
@@ -245,6 +253,14 @@ RESUME             = False   # Set True to resume from latest checkpoint
 ```
 
 > **⚠️ Warning:** The current implementation does not include gradient accumulation. Reducing `BATCH_SIZE` below `64` will alter effective gradient updates and may produce results that differ from the reference training environment.
+
+> **🔁 Retraining recommendation:** If you want to generate predictions for a new trading day, it is strongly recommended to **delete the existing `checkpoints/` folder entirely and retrain from scratch**. Reusing old checkpoints may cause the model to reflect stale market conditions and produce unreliable signals.
+
+```bash
+# Before retraining, remove old checkpoints
+rm -rf checkpoints/   # macOS / Linux
+rd /s /q checkpoints  # Windows
+```
 
 ---
 
