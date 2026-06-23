@@ -160,6 +160,7 @@ def train(train_loader, val_loader, model, optimizer, scheduler, epochs,
           device="cuda", dtype=torch.float32,
           start_epoch=0, best_score=-float("inf"),
           calibration_candidates=[1.0],
+          patience=50,
           save_dir="checkpoints"):
 
     os.makedirs(save_dir, exist_ok=True)
@@ -170,7 +171,6 @@ def train(train_loader, val_loader, model, optimizer, scheduler, epochs,
         pos_weight=torch.tensor([2.0], device=device)
     )
 
-    patience = 50
     no_improve = 0
     for epoch in range(start_epoch, start_epoch + epochs):
 
@@ -302,6 +302,7 @@ if __name__ == "__main__":
     TRANS_FF        = 256
     DROPOUT         = 0.3
     LEARNING_RATE   = 3e-4
+    STOP_PATIENCE   = 100
 
 
     TODAY = datetime.today()
@@ -316,6 +317,8 @@ if __name__ == "__main__":
         stocks = data["stocks"]
 
     STOCK_ID = [s["id"] for s in stocks]
+    
+    # TODO: This need to be improved
     CALIBRATION_CANDIDATES = [0.5, 0.7, 0.85, 1.0, 1.2, 1.5, 1.8]
 
     # start setup & train
@@ -366,6 +369,7 @@ if __name__ == "__main__":
             dtype=DTYPE,
             start_epoch=start_epoch,
             best_score=best_score,
-            calibration_candidates=CALIBRATION_CANDIDATES,
+            # calibration_candidates=CALIBRATION_CANDIDATES,
+            patience=STOP_PATIENCE,
             save_dir=f"checkpoints/{name}"
         )
