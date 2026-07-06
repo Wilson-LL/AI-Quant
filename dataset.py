@@ -104,11 +104,21 @@ def build_samples(df, X=40, Y=20, H=0.12, L=0.06, add_time_feature=True):
 
     return samples
 
-def build_dataloader(stock_ids, batch_size=64, from_time=(2025, 1),
-                     X=40, Y=20, H=0.12, L=0.06):
+def build_grouped_samples(stock_ids, from_time=(2025, 1),
+                          X=40, Y=20, H=0.12, L=0.06):
+    """Fetch each stock and build its samples, keeping them grouped per stock
+    and in chronological order.
+
+    Returns a list of per-stock sample lists (each inner list is time-ordered).
+    Grouping and ordering are preserved so callers can split the data
+    chronologically without leaking future information into the past — see
+    ``chronological_split``.
+    """
 
     valid_stock_ids = []
-    all_samples = []
+    grouped = []
+    total = 0
+    positives = 0
     iterator = tqdm(stock_ids, desc="📊 Stocks", position=0)
     for stock_id in iterator:
         try:
@@ -116,9 +126,11 @@ def build_dataloader(stock_ids, batch_size=64, from_time=(2025, 1),
             samples = build_samples(df, X, Y, H, L)
 
             if len(samples) != 0:
-                all_samples.extend(samples)
+                grouped.append(samples)
                 valid_stock_ids.append(stock_id)
-                
+                total += len(samples)
+                positives += sum(y for _, y in samples)
+
                 tqdm.write(f"[{stock_id}] rows: {len(df)}")
                 tqdm.write(f"[{stock_id}] samples: {len(samples)}")
             else:
@@ -128,15 +140,14 @@ def build_dataloader(stock_ids, batch_size=64, from_time=(2025, 1),
             tqdm.write(f"skip {stock_id}: {e}")
 
     # validation
-    if len(all_samples) == 0:
+    if total == 0:
         raise ValueError("❌ No samples generated. Check data or filters.")
 
     # label distribution
-    labels = [y for _, y in all_samples]
-    pos_ratio = sum(labels) / len(labels)
+    pos_ratio = positives / total
 
     print("\n===== Dataset Summary =====")
-    print(f"Total samples: {len(all_samples)}")
+    print(f"Total samples: {total}")
     print(f"Positive ratio: {pos_ratio:.4f}")
 
     # store valid stock id
@@ -151,6 +162,49 @@ def build_dataloader(stock_ids, batch_size=64, from_time=(2025, 1),
     with open("./checkpoints/stocks.json", "w", encoding="utf-8") as f:
         json.dump(stock_data, f, ensure_ascii=False, indent=4)
 
+    return grouped
+
+
+def chronological_split(grouped, train_frac=0.7, val_frac=0.15, purge=0):
+    """Split per-stock, time-ordered samples into train/val/test chronologically.
+
+    Samples are overlapping sliding windows: consecutive samples share most of
+    their input days and their forward label horizons overlap. A random split
+    would therefore leak near-identical, look-ahead-correlated windows across
+    the sets and inflate validation metrics. Instead we split each stock's
+    samples by time and drop a ``purge`` gap of samples after each boundary so
+    that no training window (or its forward label period) overlaps a
+    validation/test window. Set ``purge`` to ``lookback + horizon``.
+
+    Returns ``(train, val, test)`` as flat lists of ``(x, label)`` samples.
+    """
+
+    train, val, test = [], [], []
+    for samples in grouped:
+        n = len(samples)
+        tr_end = int(n * train_frac)
+        va_end = tr_end + int(n * val_frac)
+
+        train.extend(samples[:tr_end])
+        val.extend(samples[tr_end + purge:va_end])
+        test.extend(samples[va_end + purge:])
+
+    if len(train) == 0 or len(val) == 0 or len(test) == 0:
+        raise ValueError(
+            "❌ Chronological split produced an empty set "
+            f"(train={len(train)}, val={len(val)}, test={len(test)}). "
+            "Not enough per-stock history for the requested purge gap."
+        )
+
+    return train, val, test
+
+
+def build_dataloader(stock_ids, batch_size=64, from_time=(2025, 1),
+                     X=40, Y=20, H=0.12, L=0.06):
+
+    grouped = build_grouped_samples(stock_ids, from_time=from_time,
+                                    X=X, Y=Y, H=H, L=L)
+    all_samples = [s for group in grouped for s in group]
 
     dataset = StockDataset(all_samples)
 

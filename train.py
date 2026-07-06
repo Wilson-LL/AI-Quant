@@ -4,7 +4,7 @@ from tqdm import tqdm
 from datetime import datetime, timedelta
 import json
 
-from dataset import build_dataloader
+from dataset import build_grouped_samples, chronological_split, StockDataset
 from model import LSTM_CondTransformer
 
 
@@ -37,23 +37,25 @@ def build_model(input_dim, lstm_hidden, lstm_layers,
 
 def build_dataloaders(stock_ids, batch_size, from_time, x, y, h, l):
 
-    full_loader = build_dataloader(
+    grouped = build_grouped_samples(
         stock_ids,
-        batch_size=batch_size,
         from_time=from_time,
         X=x, Y=y, H=h, L=l
     )
 
-    dataset = full_loader.dataset
-
-    n = len(dataset)
-    train_n = int(n * 0.7)
-    val_n = int(n * 0.15)
-    test_n = n - train_n - val_n
-
-    train_set, val_set, test_set = torch.utils.data.random_split(
-        dataset, [train_n, val_n, test_n]
+    # Chronological, per-stock split with an embargo gap so that no training
+    # window (or its forward label horizon) overlaps a validation/test window.
+    # Overlapping sliding windows make a random split leak future information
+    # and inflate validation PnL, which is what selects best.pt and drives
+    # early stopping — so the split must be temporal, not random.
+    purge = x + y
+    train_samples, val_samples, test_samples = chronological_split(
+        grouped, train_frac=0.7, val_frac=0.15, purge=purge
     )
+
+    train_set = StockDataset(train_samples)
+    val_set   = StockDataset(val_samples)
+    test_set  = StockDataset(test_samples)
 
     train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=True)
     val_loader   = torch.utils.data.DataLoader(val_set, batch_size=batch_size)
