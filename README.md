@@ -66,7 +66,7 @@ expectation as ~0.8–1.0**, not 1.27 (see findings/caveats).
 
 ## 3. Key research findings
 
-Full detail in `RESEARCH_LOG.md`. In short:
+Full detail in `docs/d1_1/RESEARCH_LOG.md`. In short:
 
 1. **The original ML/barrier target mostly captured volatility/beta, not alpha.**
    In the semis-only universe, the triple-barrier signal's edge was ~92% a
@@ -132,12 +132,12 @@ Full detail in `RESEARCH_LOG.md`. In short:
 
 | file | purpose |
 |---|---|
-| `OPERATION_MANUAL_D1_1.md` | How to run and interpret the prototype (operator's guide). |
-| `STRATEGY_CARD_D1_1.md` | One-page strategy card + robustness table. |
-| `SPRINT_5H_REPORT.md` | Final report of the 5-hour robustness sprint (12 cycles). |
-| `WALKFORWARD_D1_1.md`, `REVIEW_D1_1.md` | OOS validation write-up; pre-commit release review. |
-| `RESEARCH_LOG.md` | The full running research log (all experiments + cycles). |
-| `ROADMAP_A_D_C.md`, `PATH_ANALYSIS.md`, `ASSUMPTIONS_AUDIT.md` | The A→D→C plan, path comparison, and assumptions audit. |
+| `docs/d1_1/OPERATION_MANUAL_D1_1.md` | How to run and interpret the prototype (operator's guide). |
+| `docs/d1_1/STRATEGY_CARD_D1_1.md` | One-page strategy card + robustness table. |
+| `docs/d1_1/SPRINT_5H_REPORT.md` | Final report of the 5-hour robustness sprint (12 cycles). |
+| `docs/d1_1/WALKFORWARD_D1_1.md`, `docs/d1_1/REVIEW_D1_1.md` | OOS validation write-up; pre-commit release review. |
+| `docs/d1_1/RESEARCH_LOG.md` | The full running research log (all experiments + cycles). |
+| `docs/d1_1/ROADMAP_A_D_C.md`, `docs/d1_1/PATH_ANALYSIS.md`, `docs/d1_1/ASSUMPTIONS_AUDIT.md` | The A→D→C plan, path comparison, and assumptions audit. |
 
 **Original ML system (legacy, untouched):** `model.py`, `train.py`, `inference.py`,
 `dataset.py`, `generate_stocks_json.py` — see [§11](#11-the-original-ml-system-legacy).
@@ -196,7 +196,7 @@ Manual, human-in-the-loop — **not** an automated trader.
   timer without review; don't re-tune parameters to raise backtest Sharpe; don't
   treat the long-only book's return as skill (it's beta).
 
-Full detail: `OPERATION_MANUAL_D1_1.md`.
+Full detail: `docs/d1_1/OPERATION_MANUAL_D1_1.md`.
 
 ---
 
@@ -239,7 +239,7 @@ Full detail: `OPERATION_MANUAL_D1_1.md`.
 4. **For genuine alpha beyond the momentum premium → "Path B": orthogonal data**
    (fundamentals, earnings revisions, ownership/flows, alt-data). Price/volume signal
    is exhausted here, and a bigger neural net will not help (Experiment 4). This
-   requires data `twstock` does not provide. See `PATH_ANALYSIS.md`.
+   requires data `twstock` does not provide. See `docs/d1_1/PATH_ANALYSIS.md`.
 
 ---
 
