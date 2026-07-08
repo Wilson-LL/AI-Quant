@@ -1,0 +1,9 @@
+# Cached market data — regenerable via research/data.py (deterministic given the
+# same TWSE listing). NOTE: exact validated results depend on the 2026-07-06
+# survivorship snapshot; future refetches use the then-current listed universe and
+# may differ. Kept out of the repo to avoid committing bulk market data.
+research/data_cache/
+
+# Python build artifacts
+__pycache__/
+*.pyc
