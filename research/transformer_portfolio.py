@@ -81,7 +81,7 @@ def _leg_weights(day, names, weighting, vol_col="vol_20"):
 
 def backtest_scores(panel, holding=20, quintile=0.2, k=None, mode="long_short",
                     weighting="equal", cost_bps_list=(0, 60, 100, 150),
-                    no_trade_band=0.0, ret_col="fwd_h", min_names=30):
+                    no_trade_band=0.0, ret_col="fwd_h", min_names=60):
     """Backtest a score panel. Rebalance every `holding` panel dates.
 
     no_trade_band: keep an incumbent name if its rank percentile is within
