@@ -7,3 +7,16 @@ research/data_cache/
 # Python build artifacts
 __pycache__/
 *.pyc
+
+# Local virtualenv
+.venv/
+
+# Full-field incremental cache (bulk market data, regenerable)
+research/data_cache_full/
+
+# Model checkpoints (large, regenerable)
+checkpoints/
+
+# Bulk OOS score panels (regenerable from experiments; keep summary JSONs only)
+reports/transformer_gpu/panels/
+reports/transformer_gpu/logs/
