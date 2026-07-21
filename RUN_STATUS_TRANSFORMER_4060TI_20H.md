@@ -120,3 +120,20 @@ Branch: `research/transformer-4060ti-daily-retrain-20h` (created from
 - Files: docs/transformer_daily/RTX4060TI_DAILY_BUDGET.md, research/transformer_presets.py,
   research/transformer_robustness.py, research/transformer_daily_scratch.py, G8 outputs.
 - Next: daily-scratch supplement finishes (~1 h), final report, commits.
+
+## 2026-07-22 08:00 — Sprint complete (elapsed 7:18)
+
+- **Daily-scratch supplement**: 121 fresh daily fits over 2026 → OOS IC +0.190 vs
+  frozen champion +0.209 on the same window; 32.6 s/seed/day. Daily full retrain
+  buys nothing — cadence conclusion unchanged (monthly recommended).
+- **Bear-regime stress (OOS 2021→2026 incl. 2022 crash)**: transformer L/S 1.00,
+  D1.2 1.09, **50/50 blend 1.37**. Crash year 2022: **tf +0.58 vs D1.2 −1.55**.
+  The two signals are regime-complementary → blend recommendation upgraded from
+  "safe" to "positively justified".
+- Final report written: TRANSFORMER_4060TI_DAILY_RETRAIN_20H_REPORT.md.
+- All queue items complete: G0 ✓ G1 ✓ G2 ✓ G3(+scratch) ✓ G4 ✓ G5 ✓ G6 ✓ G7 ✓
+  G8 ✓ presets ✓ robustness ✓ diagnostics ✓ bear stress ✓ consolidation ✓
+  budget doc ✓. Queue finished early because measured GPU throughput was ~10×
+  the planning estimate.
+- No blockers. Nothing pushed; no protected branch touched; production files
+  untouched.

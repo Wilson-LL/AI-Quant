@@ -1,0 +1,121 @@
+{
+  "run_info": {
+    "target": "tgt_rank_20",
+    "horizon": 20,
+    "preset": "Bd",
+    "cadence": "refit",
+    "refit_every": 1,
+    "recency": null,
+    "seeds": [
+      0
+    ],
+    "oos_start": "2026-01-02",
+    "n_refits": 121,
+    "total_s": 3953.4,
+    "peak_vram_mb": 1960.7,
+    "mean_val_ic": 0.15495
+  },
+  "mean_fit_s": 32.6,
+  "n_fits": 121,
+  "mean_val_ic": 0.15495,
+  "perf": {
+    "long_short": {
+      "mode": "long_short",
+      "weighting": "equal",
+      "holding": 20,
+      "n_rebal": 5,
+      "rank_ic": 0.1895114154487879,
+      "ic_ir": 1.122206313661805,
+      "max_name_weight": 0.1,
+      "avg_turnover": 0.36473448708510164,
+      "net0": {
+        "sharpe": 3.637,
+        "ann_ret": 2.2398,
+        "max_dd": -0.0427,
+        "calmar": 52.49,
+        "hit": 0.8,
+        "n": 5
+      },
+      "net60": {
+        "sharpe": 3.48,
+        "ann_ret": 2.0808,
+        "max_dd": -0.0474,
+        "calmar": 43.88,
+        "hit": 0.8,
+        "n": 5
+      },
+      "net100": {
+        "sharpe": 3.375,
+        "ann_ret": 1.9788,
+        "max_dd": -0.0506,
+        "calmar": 39.11,
+        "hit": 0.8,
+        "n": 5
+      },
+      "net150": {
+        "sharpe": 3.242,
+        "ann_ret": 1.8557,
+        "max_dd": -0.0546,
+        "calmar": 34.02,
+        "hit": 0.8,
+        "n": 5
+      },
+      "yearly_net60": {
+        "2026": {
+          "sharpe": 3.48,
+          "mean_pct": 9.34,
+          "n": 5
+        }
+      }
+    },
+    "long_only": {
+      "mode": "long_only",
+      "weighting": "equal",
+      "holding": 20,
+      "n_rebal": 5,
+      "rank_ic": 0.1895114154487879,
+      "ic_ir": 1.122206313661805,
+      "max_name_weight": 0.1,
+      "avg_turnover": 0.3349841257742468,
+      "net0": {
+        "sharpe": 5.223,
+        "ann_ret": 3.1838,
+        "max_dd": 0.0,
+        "calmar": 3183805246971.79,
+        "hit": 1.0,
+        "n": 5
+      },
+      "net60": {
+        "sharpe": 5.152,
+        "ann_ret": 3.0902,
+        "max_dd": 0.0,
+        "calmar": 3090205987741.08,
+        "hit": 1.0,
+        "n": 5
+      },
+      "net100": {
+        "sharpe": 5.104,
+        "ann_ret": 3.0289,
+        "max_dd": 0.0,
+        "calmar": 3028881652150.64,
+        "hit": 1.0,
+        "n": 5
+      },
+      "net150": {
+        "sharpe": 5.044,
+        "ann_ret": 2.9534,
+        "max_dd": 0.0,
+        "calmar": 2953416732881.11,
+        "hit": 1.0,
+        "n": 5
+      },
+      "yearly_net60": {
+        "2026": {
+          "sharpe": 5.15,
+          "mean_pct": 11.83,
+          "n": 5
+        }
+      }
+    }
+  }
+}
