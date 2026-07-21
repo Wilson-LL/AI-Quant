@@ -1,0 +1,18 @@
+{
+  "asof": "2026-07-07",
+  "n_stocks_scored": 108,
+  "n_book": 22,
+  "max_name_weight": 0.1,
+  "train_manifest": {
+    "asof": "2026-07-07",
+    "feature_set": "close_only",
+    "target": "tgt_rank_20",
+    "horizon": 20,
+    "recency": null,
+    "mean_val_ic": 0.20869,
+    "total_s": 134.6
+  },
+  "inference_s": 1.76,
+  "device": "NVIDIA GeForce RTX 4060 Ti",
+  "seeds": 5
+}

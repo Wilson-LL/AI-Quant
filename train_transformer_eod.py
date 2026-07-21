@@ -286,12 +286,15 @@ def mode_smoke():
     print("smoke checkpoint saved")
 
 
-def mode_daily_retrain(feature_set="close_only", preset="A", target="tgt_rank_20",
+def mode_daily_retrain(feature_set="close_only", preset="B", target="tgt_rank_20",
                        horizon=20, recency=None, seeds=None):
     """Production daily retrain: train on all matured labels as of the latest
-    cached date, save the seed ensemble + a train log. Feeds inference_transformer_eod."""
+    cached date, save the seed ensemble + a train log. Feeds inference_transformer_eod.
+
+    Champion defaults per this sprint's G2/G5/G9: close-only features,
+    EQUAL-WEIGHT full history (recency weighting hurt OOS), preset B
+    (h64/seq60/5 seeds). Pass recency explicitly to override."""
     require_cuda()
-    recency = recency or {"halflife": 126, "window": 1260}
     t0 = time.time()
     data = build_dataset(feature_set, seq_len=PRESETS[preset]["seq_len"],
                          horizons=(horizon,))
@@ -341,7 +344,7 @@ if __name__ == "__main__":
     ap.add_argument("--mode", default="smoke",
                     choices=["smoke", "daily-retrain"])
     ap.add_argument("--feature-set", default="close_only")
-    ap.add_argument("--preset", default="A")
+    ap.add_argument("--preset", default="B")
     ap.add_argument("--target", default="tgt_rank_20")
     ap.add_argument("--horizon", type=int, default=20)
     args = ap.parse_args()

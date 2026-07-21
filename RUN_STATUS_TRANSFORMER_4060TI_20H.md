@@ -72,3 +72,51 @@ Branch: `research/transformer-4060ti-daily-retrain-20h` (created from
   IC positive every year 2023–2026; score rank autocorr 0.998.
 - G4 (targets) → G5 (features) → G3 (cadence) queued sequentially on GPU (~2.5 h).
 - Blockers: none. Next: results consolidation, presets A/B/C timing, champion run, G8 workflow.
+
+## 2026-07-22 02:50 — G4 done, G5 running (elapsed 2:08)
+
+- **G4 (targets, equal-all recency, close-only):** 20d rank best L/S (1.54, IC 0.071);
+  10d rank close behind (L/S 1.58, LO 1.82, IC 0.054, 84 rebalances); 5d rank weaker
+  (L/S 1.05); excess-vs-universe 1.19; excess-vs-sector 1.46 (LO 1.78); original
+  barrier target as diagnostic: IC 0.063 but worse books (DD −36%). Keep 20d rank
+  primary; 10d rank is a viable secondary.
+- G4 wall time: 23 min for 6 targets × 7 refits × 2 seeds.
+- G5 (7 feature sets) running; G3 (cadence) queued next.
+- Commits: b96fd1c (G1/G2/G6/G7 results + tooling). New: research/transformer_presets.py.
+
+## 2026-07-22 03:35 — G5 done, G3 in progress (elapsed 2:53)
+
+- **G5 (feature sets, all at equal-all recency): CLOSE-ONLY WINS.**
+  close_only L/S 1.54 / LO 1.75; close+D1.2-rank L/S 1.53 / **LO 1.84 (best LO)**;
+  ohlc_range −0.65; volume_block 1.23; sector_rel 0.97; curated_full 0.13;
+  full_d12 1.16. Full TWSE fields hurt even curated + regularized + GPU-trained —
+  prior sprint's "close-only beats full-field" conclusion CONFIRMED honestly.
+- **G3 partial (OOS 2024-07→2026-07):** frozen L/S 1.30 (IC 0.076); quarterly 1.16
+  (IC 0.060) — retraining more often is so far NOT better; monthly running,
+  weekly-warm and daily-warm queued (~1.5 h remaining).
+- Device: cuda; ~1.3–2 GB VRAM; all runs AMP.
+- Blockers: none. Next after G3: presets A/B/C, consolidation, champion daily
+  workflow (G8), final report.
+
+## 2026-07-22 05:30 — G3/G9/G8 done, consolidation + robustness done (elapsed 4:48)
+
+- **G3 (cadence, OOS 2024-07→2026-07): frozen 1.30 ≥ monthly 1.25 ≥ quarterly 1.19
+  ≫ daily-warm −1.33 / weekly-warm −2.60 (L/S net@60).** Daily/weekly warm-start
+  fine-tuning actively degrades the signal. Daily retrain does NOT beat frozen/monthly.
+  Daily-scratch sample over 2026 running as supplement.
+- **G9 (presets): B (h64/seq60/5 seeds) champion — L/S 1.91 / LO 1.93 net@60, net@100
+  1.77, IC 0.072, DD −15.0%. BEATS D1.2 (1.64/1.77) on all cost levels.** Val-IC
+  selection agrees (B val IC 0.074 highest) — honest pick. A: 1.48; C: 1.58 (DD −10.5%).
+- **G8 (daily workflow) end-to-end PASS**: refresh (dry-run) → daily-retrain 134.6 s
+  (5 seeds, val IC +0.209) → inference 1.8 s → decision book 22 names, max weight
+  exactly 10.0%, all outputs written. ~5–10 min/day vs 12 h budget.
+- **Cap bug found+fixed**: clip-and-redistribute ping-pong let single-name-sector
+  names stabilize at 11.1% > 10% cap; replaced with monotone water-fill; all
+  consolidated books now show maxW = 10.0% exactly.
+- **Consolidation (uniform min_names=60)**: CONSOLIDATED.md written; champion B
+  standalone 1.91/1.93; blend50 on 2-seed panel 1.75; D1.2 1.64/1.77.
+- **Robustness (champion)**: universe bootstrap (200 draws, drop 20%):
+  p5/p50/p95 = 1.57/1.83/2.05, 100% positive; drop-top-3-names → 1.60.
+- Files: docs/transformer_daily/RTX4060TI_DAILY_BUDGET.md, research/transformer_presets.py,
+  research/transformer_robustness.py, research/transformer_daily_scratch.py, G8 outputs.
+- Next: daily-scratch supplement finishes (~1 h), final report, commits.

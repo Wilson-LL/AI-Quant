@@ -24,44 +24,61 @@ SECTOR_CAP = 0.20
 CAP_TOL = 1e-6
 
 
+def _waterfill_name_cap(base, name_cap):
+    """Proportional weights under a HARD per-name cap. Saturated names are
+    frozen at the cap and the remaining mass is re-shared among unsaturated
+    names by base weight. Terminates in <= n passes (the saturated set only
+    grows). If n*cap < 1 the cap is infeasible -> equal weights (upstream
+    callers skip such thin books via min_names)."""
+    n = len(base)
+    if n * name_cap < 1.0 - 1e-12:
+        return np.full(n, 1.0 / n)
+    fixed = np.zeros(n, bool)
+    w = base / base.sum()
+    for _ in range(n + 1):
+        over = (w > name_cap + 1e-12) & ~fixed
+        if not over.any():
+            break
+        fixed |= over
+        rem = 1.0 - fixed.sum() * name_cap
+        w[fixed] = name_cap
+        fb = np.where(fixed, 0.0, base)
+        if fb.sum() <= 0:
+            break
+        w[~fixed] = rem * fb[~fixed] / fb.sum()
+    return w
+
+
 def cap_weights(w, sectors=None, name_cap=NAME_CAP, sector_cap=SECTOR_CAP,
-                iters=50):
-    """Iteratively enforce per-name (hard) and per-sector (soft) caps on a
-    positive weight vector summing to 1. Same scheme as D1.1: clip, then
-    redistribute the excess pro-rata to uncapped names. Sector cap is floored
-    at max(sector_cap, 1/n_sectors) — a sector-sparse book cannot go below
-    1/n_sectors per sector."""
-    w = np.asarray(w, np.float64).copy()
-    w = np.maximum(w, 0)
-    if w.sum() <= 0:
-        return w
-    w /= w.sum()
-    n_sec = len(set(sectors)) if sectors is not None else 1
+                iters=20):
+    """Enforce a HARD per-name cap and a SOFT per-sector cap on positive
+    weights summing to 1 (D1.1 convention). Sector cap is floored at
+    max(sector_cap, 1/n_sectors). The name cap always wins: the last pass is
+    a name-cap water-fill, so no name exceeds it whenever n*cap >= 1.
+    (The previous clip-and-redistribute loop could ping-pong: clipped names
+    received excess back and stabilised ~11% > cap.)"""
+    base = np.maximum(np.asarray(w, np.float64), 0)
+    if base.sum() <= 0:
+        return base
+    ww = _waterfill_name_cap(base, name_cap)
+    if sectors is None:
+        return ww
+    sec = list(sectors)
+    n_sec = len(set(sec))
     eff_sec_cap = max(sector_cap, 1.0 / max(n_sec, 1)) + 1e-9
     for _ in range(iters):
-        changed = False
-        over = w > name_cap
-        if over.any():
-            excess = (w[over] - name_cap).sum()
-            w[over] = name_cap
-            free = ~over
-            if free.any() and w[free].sum() > 0:
-                w[free] += excess * w[free] / w[free].sum()
-            changed = True
-        if sectors is not None:
-            s = pd.Series(w).groupby(list(sectors)).transform("sum").to_numpy()
-            oversec = s > eff_sec_cap
-            if oversec.any():
-                scale = np.where(oversec, eff_sec_cap / s, 1.0)
-                excess = (w * (1 - scale)).sum()
-                w = w * scale
-                free = ~oversec & (w < name_cap)
-                if free.any() and w[free].sum() > 0:
-                    w[free] += excess * w[free] / w[free].sum()
-                changed = True
-        if not changed:
+        s = pd.Series(ww).groupby(sec).transform("sum").to_numpy()
+        oversec = s > eff_sec_cap + 1e-9
+        if not oversec.any():
             break
-    return w / w.sum()
+        scale = np.where(oversec, eff_sec_cap / s, 1.0)
+        w2 = ww * scale
+        excess = 1.0 - w2.sum()
+        recv = ~oversec & (w2 < name_cap - 1e-12)
+        if recv.any() and w2[recv].sum() > 0:
+            w2[recv] += excess * w2[recv] / w2[recv].sum()
+        ww = _waterfill_name_cap(np.maximum(w2, 0), name_cap)
+    return ww
 
 
 def _leg_weights(day, names, weighting, vol_col="vol_20"):

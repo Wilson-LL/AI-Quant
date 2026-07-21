@@ -1,0 +1,18 @@
+{
+  "panel": "G9_presetB_equal_all",
+  "base_ls_net60": 1.911,
+  "bootstrap_200_drop20pct": {
+    "p5": 1.57,
+    "p50": 1.834,
+    "p95": 2.051,
+    "positive_frac": 1.0
+  },
+  "drop_top3_names": {
+    "names": [
+      "2408",
+      "2344",
+      "1519"
+    ],
+    "ls_net60": 1.595
+  }
+}
