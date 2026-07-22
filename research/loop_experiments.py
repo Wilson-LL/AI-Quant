@@ -115,6 +115,20 @@ def batch2():
     print("\nBATCH2 done")
 
 
+def wd1():
+    """3y-rolling-window member for the train-window-diversity ensemble
+    (WD1_preregistration.md)."""
+    require_cuda()
+    out = os.path.join(OUT, "WD1_results.json")
+    results = {}
+    data, Xg = get_data("close_only", 60)
+    run_config(data, Xg, "LOOP_WD_roll3y_2021", results, out, holding=20,
+               target="tgt_rank_20", horizon=20, preset="B",
+               refit_every=126, seeds=FULL_SEEDS, recency={"window": 756},
+               oos_start="2021-01-01")
+    print("\nWD1 done")
+
+
 if __name__ == "__main__":
-    {"A1": a1, "A1B": a1b, "A2": a2, "E1": e1,
+    {"A1": a1, "A1B": a1b, "A2": a2, "E1": e1, "WD1": wd1,
      "BATCH1": batch1, "BATCH2": batch2}[sys.argv[1] if len(sys.argv) > 1 else "A1"]()
