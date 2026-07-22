@@ -61,6 +61,9 @@ B3c/B4c on the 2015-backfilled cache are the standing references.
 | B3 | 07-23 05:50 | vol-adjusted 20d target beats rank-20 | **REJECT** | 1.44 / 1.72 net60, IC 0.057 — loses ~0.5 despite deeper training data | loses | loses | — |
 | B4 | 07-23 05:55 | avoid-bottom target as book or veto | **REJECT — instructive** | val IC **+0.146** but OOS IC **−0.069**; L/S −1.95; veto10/20 on champion LO: 1.45/0.93 vs 1.86 base. Textbook val/OOS inversion: learnable low-risk proxy anti-predicts returns | much worse | much worse | — |
 | A3 | 07-23 05:55 | champion regularization is at an optimum | **CONFIRMED** | dropout0.3 1.86 (val IC .048), wd5e-4 1.90 (val IC .051) ≈ champion; no val-IC case for change; deep cache leaves champion-window results intact (~1.90) | ≈ | — | — |
+| F3 | 07-23 06:15 | live daily cadence on fresh 2026-07-22 data | **PASS (tool)** | refresh→retrain(267s)→inference→books→decision book ≈ 11 min end-to-end | n/a | n/a | 677e864 |
+| C4 | 07-23 06:30 | sector-neutral scoring as risk control | **REJECT** | SN1/SN2 cost 0.4–1.1 Sharpe on both panels for ~10pp share cut — sector tilt is load-bearing | worse | worse | 677e864 |
+| WD1 | 07-23 07:40 | deep+3y-window ensemble recovers 2022 adaptivity | **REJECT — line closed** | roll3y member collapses on deep cache (L/S −0.03, IC .003); ens-blend 1.30 < 1.47 ref (footnote: its DD −13.3% / 2022 +0.05 were better — tradeoff persists, not worth −0.17 Sharpe) | worse | worse | — |
 
 <!-- new experiments appended below by the loop -->
 

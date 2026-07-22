@@ -1,0 +1,19 @@
+﻿[dataset] 108 stocks loaded, feature_set=close_only, seq_len=60, exec_lag=1
+[dataset] X (276031, 60, 10) (662 MB), 2813 dates 2015-01-05..2026-07-22
+
+===== LOOP_WD_roll3y_2021 =====
+[LOOP_WD_roll3y_2021] [wf 1/11] 2021-01-04 train 63844 val_ic +0.1109 (58s elapsed)
+[LOOP_WD_roll3y_2021] [wf 2/11] 2021-07-15 train 62560 val_ic +0.1546 (116s elapsed)
+[LOOP_WD_roll3y_2021] [wf 3/11] 2022-01-13 train 61489 val_ic -0.0079 (222s elapsed)
+[LOOP_WD_roll3y_2021] [wf 4/11] 2022-07-26 train 60210 val_ic -0.0826 (265s elapsed)
+[LOOP_WD_roll3y_2021] [wf 5/11] 2023-02-02 train 58906 val_ic -0.0120 (330s elapsed)
+[LOOP_WD_roll3y_2021] [wf 6/11] 2023-08-10 train 57656 val_ic +0.0547 (373s elapsed)
+[LOOP_WD_roll3y_2021] [wf 7/11] 2024-02-19 train 56377 val_ic +0.0417 (434s elapsed)
+[LOOP_WD_roll3y_2021] [wf 8/11] 2024-08-22 train 55143 val_ic +0.0147 (492s elapsed)
+[LOOP_WD_roll3y_2021] [wf 9/11] 2025-03-06 train 53939 val_ic +0.0196 (552s elapsed)
+[LOOP_WD_roll3y_2021] [wf 10/11] 2025-09-04 train 52682 val_ic +0.0219 (614s elapsed)
+[LOOP_WD_roll3y_2021] [wf 11/11] 2026-03-19 train 51519 val_ic +0.0955 (658s elapsed)
+LOOP_WD_roll3y_2021 [long_short]   IC +0.0035 | net60 Sharpe -0.03 ann  -0.56% dd -39.00% | net100 -0.23 | turn 0.42 | maxW 10.0% | n 67
+LOOP_WD_roll3y_2021 [long_only]    IC +0.0035 | net60 Sharpe  1.06 ann +29.82% dd -27.68% | net100  0.97 | turn 0.42 | maxW 10.0% | n 67
+
+WD1 done

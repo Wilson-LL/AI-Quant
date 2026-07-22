@@ -120,3 +120,12 @@ Branch: research/continuous-alpha-loop-4060ti · RTX 4060 Ti (CUDA OK, torch 2.1
 - Next: forward cache refresh (07-08→22), daily retrain + inference on fresh
   data, paper snapshot + blended decision book = live F3 cadence demo.
 - Blockers: none.
+
+### 2026-07-23 06:45 — live daily cycle done; C4 rejected; WD1 running (elapsed 10.1h)
+- F3 live cadence: refresh (+1,100 rows → 2026-07-22) → retrain 267s → inference
+  → paper books + decision book (22 names, 21 HOLD/1 BUY/1 SELL, maxW 10.0%).
+  Whole cycle ~11 min — deep cache doubles retrain time, still ~65× in budget.
+- C4 sector-neutral scoring: REJECT (costs 0.4–1.1 Sharpe both panels; sector
+  tilt is load-bearing alpha). Commit 677e864.
+- WD1 (3y-window member for train-window-diversity ensemble) on GPU (bjwbhwxx0).
+- Blockers: none.

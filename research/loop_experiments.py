@@ -129,6 +129,19 @@ def wd1():
     print("\nWD1 done")
 
 
+def ref23():
+    """Exact champion config on the deep cache, OOS 2023-01→ — the standing
+    champion-window reference for all future deep-cache comparisons."""
+    require_cuda()
+    out = os.path.join(OUT, "REF23_results.json")
+    results = {}
+    data, Xg = get_data("close_only", 60)
+    run_config(data, Xg, "LOOP_REF23_champion_deep", results, out, holding=20,
+               target="tgt_rank_20", horizon=20, preset="B",
+               refit_every=126, seeds=FULL_SEEDS, recency=None)
+    print("\nREF23 done")
+
+
 if __name__ == "__main__":
-    {"A1": a1, "A1B": a1b, "A2": a2, "E1": e1, "WD1": wd1,
+    {"A1": a1, "A1B": a1b, "A2": a2, "E1": e1, "WD1": wd1, "REF23": ref23,
      "BATCH1": batch1, "BATCH2": batch2}[sys.argv[1] if len(sys.argv) > 1 else "A1"]()
