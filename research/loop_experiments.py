@@ -65,5 +65,25 @@ def a2():
     print("\nA2 done")
 
 
+def e1():
+    """close+D1.2 feature set at full champion strength. Gates in
+    E1_preregistration.md (val-IC selection discipline)."""
+    require_cuda()
+    out = os.path.join(OUT, "E1_results.json")
+    results = {}
+    data, Xg = get_data("close_d12", 60)
+    run_config(data, Xg, "LOOP_E1_close_d12_presetB", results, out, holding=20,
+               target="tgt_rank_20", horizon=20, preset="B",
+               refit_every=126, seeds=FULL_SEEDS, recency=None)
+    print("\nE1 done")
+
+
+def batch1():
+    """A2 then E1 in one process (amortize startup)."""
+    a2()
+    e1()
+
+
 if __name__ == "__main__":
-    {"A1": a1, "A1B": a1b, "A2": a2}[sys.argv[1] if len(sys.argv) > 1 else "A1"]()
+    {"A1": a1, "A1B": a1b, "A2": a2, "E1": e1,
+     "BATCH1": batch1}[sys.argv[1] if len(sys.argv) > 1 else "A1"]()

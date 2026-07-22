@@ -55,3 +55,19 @@ Branch: research/continuous-alpha-loop-4060ti · RTX 4060 Ti (CUDA OK, torch 2.1
   D1.2 −1.55; IC positive every year except 2022; rank-ac 0.993.
 - Device: RTX 4060 Ti busy (A1B); CPU experiments continuing.
 - Blockers: none.
+
+### 2026-07-22 23:45 — cycles 7/9 verdicts, BATCH1 launched (elapsed 3.1h)
+- A1B landed (11 refits, 1286s train): rank-10 bear standalone 1.08/1.21; its
+  blend h10+band10 **0.92/0.96 — the bull-window LO 1.97 collapsed**. Rank-10
+  line CLOSED. Cross-window gates worked exactly as designed.
+- B2 bear verdicts: MH1 1.11/1.22, MH2 1.39/1.43 — both fail vs blend50+band10
+  (1.42/1.48). Multi-horizon ensembles REJECTED.
+- **blend50+band10 survives all challengers to date; remains the production
+  candidate.**
+- BATCH1 (A2 champion reproducibility + score_std test, then E1 close_d12 at
+  5 seeds) launched on GPU (bcbhdx7sd).
+- Runtime note: per-process dataset build ≈ 30 min dominates GPU jobs → batch
+  configs per process from now on (documented in METHODS.md).
+- Next after BATCH1: A2 confidence-filter evaluation (CPU); E1 gate check;
+  refresh_data --backfill-start design (2015–17 cache depth).
+- Blockers: none.

@@ -30,8 +30,8 @@ for *relative* comparisons on the same panel only.
 5. **Best drawdown reducer:** blend50+band10 (−12.3% champion window); preset C (−10.5% at Sharpe 1.58) still holds for standalone
 6. **Best 2022/bear performer:** Transformer standalone (+0.58 in 2022); blend50 −0.29 vs D1.2 −1.55
 7. **Best low-turnover candidate:** blend50+band10 (turn 0.30) pending A1 rank-10 result
-8. **Rejected overfit ideas:** recency weighting (all schemes), warm-start daily/weekly retrain, full-field features (naive), OHLC-range block, 1–1.5y rolling windows, **adaptive blend weights from trailing data (C1)**, **inverse-vol weighting on blend book (D1)**, **rank-10 standalone at champion strength (A1)**, **short holds h5/h10 for the 20d-target blend (D3)**, **exposure-scaling gates EX1/EX2 (C3)**
-9. **Promising but unproven:** rank-10 × D1.2 blend at h10+band10 (LO 1.97/net100 1.91 on 2023–26 — bear validation A1B running), excess-vs-sector target (LO 1.78 screen), EX3 own-equity DD gate (monitor), 7.5% name cap (Sharpe-neutral concentration cut)
+8. **Rejected overfit ideas:** recency weighting (all schemes), warm-start daily/weekly retrain, full-field features (naive), OHLC-range block, 1–1.5y rolling windows, **adaptive blend weights from trailing data (C1)**, **inverse-vol weighting on blend book (D1)**, **rank-10 target line — standalone AND all blends (A1/A1B: bull-window LO 1.97 collapsed to 0.96 on bear window)**, **multi-horizon r20+r10 ensembles (B2: fail bear gate)**, **short holds h5/h10 for the 20d-target blend (D3)**, **exposure-scaling gates EX1/EX2 (C3)**
+9. **Promising but unproven:** excess-vs-sector target (LO 1.78 screen), EX3 own-equity DD gate (monitor), 7.5% name cap (Sharpe-neutral concentration cut), close+D1.2 features at 5 seeds (E1 running)
 
 ## Experiment log (continuous loop)
 
@@ -48,6 +48,9 @@ for *relative* comparisons on the same panel only.
 | D3 | 07-22 21:55 | shorter holds / tighter cap on blend book | **REJECT h5/h10; ADOPT-OPTIONAL cap7.5** | h10 1.66–1.80 champ, 1.18 bear (< h20 1.95/1.42); IC decays at short horizons; cap 7.5%: 1.92/1.45 champ/bear ≈ free concentration cut | — | h20 stays | — |
 | R1 | 07-22 22:05 | blend50+band10 universe bootstrap (200×, drop 20%) | **PASS** | champ p5 1.52 / p50 1.75, bear p5 1.15 / p50 1.38, 100% positive; drop-top-3: 1.77 / 1.16 | robust | robust | — |
 | A1 | 07-22 22:10 | rank-10 target at full champion strength beats champion | **REJECT standalone; blend → A1B** | standalone L/S 1.51 / LO 1.78, DD −28.5% (vs champ 1.91/1.93); but blend h10+band10: L/S 1.93 / **LO 1.97, net100 1.91, turn 0.16** (2023–26 only) | loses | LO blend intriguing | — |
+| B2 | 07-22 22:55 | multi-horizon (r20+r10) ensemble beats blend50+band10 | **REJECT** (bear gate) | champion window MH1 LO 1.93 (+0.10) passed screen; bear window MH1 1.11/1.22, MH2 1.39/1.43 < blend 1.42/1.48 | ties LO champ window only | fails bear | — |
+| A1B | 07-22 23:40 | rank-10 blend LO 1.97 generalizes to bear window | **REJECT — rank-10 line closed** | bear: standalone 1.08/1.21; blend h10+band10 L/S 0.92 / LO 0.96 vs blend50+band10 1.42/1.48; 2022 −0.83 | worse | much worse | — |
+| V1 | 07-22 22:50 | Section-6 validation profile for blend50+band10 | **PASS** | no losing year either panel (worst 2022 −0.04, else ≥1.37); IC>0 every yr except 2022; rank-ac 0.993; avg max-sector share of longs 37% (p95 57%, book capped soft-20%) | — | — | 34f9bf6 |
 
 <!-- new experiments appended below by the loop -->
 
