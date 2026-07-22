@@ -90,10 +90,13 @@ def predict_idx(net, Xg, idx, batch=8192):
 
 def fit_one(Xg, yg, tr_idx, va_idx, va_dates, cfg, seed, weights=None,
             lr=3e-4, weight_decay=1e-4, batch=1024, warm_state=None,
-            max_epochs=None, min_epochs=2, verbose=False):
+            max_epochs=None, min_epochs=2, verbose=False,
+            loss="mse", date_ranks=None):
     """Train one model on GPU-resident tensors; early-stop on val rank IC.
 
     weights: per-sample weights aligned with tr_idx (recency weighting), or None.
+    loss: "mse" (default, unchanged path) or "pairwise" — same-date pairwise
+    logistic ranking loss; requires date_ranks (per-sample date rank array).
     Returns (net, best_val_ic, info).
     """
     torch.manual_seed(seed)
@@ -114,28 +117,72 @@ def fit_one(Xg, yg, tr_idx, va_idx, va_dates, cfg, seed, weights=None,
         # normalize so the mean train weight is 1 (keeps lr scale comparable)
         w_full[tr] /= w_full[tr].mean().clamp_min(1e-8)
 
+    # pairwise mode: pre-group train indices by date (same-date pairs only)
+    date_groups = None
+    if loss == "pairwise":
+        assert date_ranks is not None, "pairwise loss needs date_ranks"
+        drt = np.asarray(date_ranks)[np.asarray(tr_idx)]
+        order = np.argsort(drt, kind="stable")
+        tr_np = np.asarray(tr_idx)[order]
+        bounds = np.flatnonzero(np.diff(drt[order])) + 1
+        date_groups = [torch.as_tensor(g, device=Xg.device)
+                       for g in np.split(tr_np, bounds) if len(g) >= 10]
+
+    def _pairwise_loss(pred, y):
+        dp = pred.unsqueeze(0) - pred.unsqueeze(1)
+        dy = y.unsqueeze(0) - y.unsqueeze(1)
+        mask = dy.abs() > 0.1
+        if not mask.any():
+            return pred.sum() * 0.0
+        return torch.nn.functional.softplus(-dp * dy.sign())[mask].mean()
+
     best_ic, best_state, no_improve = -1e9, None, 0
     epochs = max_epochs or cfg["max_epochs"]
     t0 = time.time()
     hist = []
     for ep in range(epochs):
         net.train()
-        perm = tr[torch.randperm(len(tr), device=Xg.device)]
         tot, ns = 0.0, 0
-        for i in range(0, len(perm), batch):
-            b = perm[i:i + batch]
-            opt.zero_grad(set_to_none=True)
-            with torch.amp.autocast("cuda", enabled=Xg.is_cuda):
-                pred = net(Xg[b])
-                per = (pred - yg[b]) ** 2
-                loss = (per * w_full[b]).mean() if w_full is not None else per.mean()
-            scaler.scale(loss).backward()
-            scaler.unscale_(opt)
-            torch.nn.utils.clip_grad_norm_(net.parameters(), 1.0)
-            scaler.step(opt)
-            scaler.update()
-            tot += loss.item() * len(b)
-            ns += len(b)
+        if date_groups is not None:
+            gperm = np.random.permutation(len(date_groups))
+            i = 0
+            while i < len(gperm):
+                chunk = []
+                while i < len(gperm) and sum(len(c) for c in chunk) < batch:
+                    chunk.append(date_groups[gperm[i]])
+                    i += 1
+                opt.zero_grad(set_to_none=True)
+                with torch.amp.autocast("cuda", enabled=Xg.is_cuda):
+                    b_all = torch.cat(chunk)
+                    pred = net(Xg[b_all])
+                    parts, off = [], 0
+                    for c in chunk:
+                        parts.append(_pairwise_loss(pred[off:off + len(c)], yg[c]))
+                        off += len(c)
+                    loss_t = torch.stack(parts).mean()
+                scaler.scale(loss_t).backward()
+                scaler.unscale_(opt)
+                torch.nn.utils.clip_grad_norm_(net.parameters(), 1.0)
+                scaler.step(opt)
+                scaler.update()
+                tot += loss_t.item() * len(b_all)
+                ns += len(b_all)
+        else:
+            perm = tr[torch.randperm(len(tr), device=Xg.device)]
+            for i in range(0, len(perm), batch):
+                b = perm[i:i + batch]
+                opt.zero_grad(set_to_none=True)
+                with torch.amp.autocast("cuda", enabled=Xg.is_cuda):
+                    pred = net(Xg[b])
+                    per = (pred - yg[b]) ** 2
+                    loss_t = (per * w_full[b]).mean() if w_full is not None else per.mean()
+                scaler.scale(loss_t).backward()
+                scaler.unscale_(opt)
+                torch.nn.utils.clip_grad_norm_(net.parameters(), 1.0)
+                scaler.step(opt)
+                scaler.update()
+                tot += loss_t.item() * len(b)
+                ns += len(b)
         vs = predict_idx(net, Xg, va).cpu().numpy()
         vic, _ = _rank_ic(vs, yg[va].cpu().numpy(), va_dates)
         hist.append({"epoch": ep, "train_loss": round(tot / max(ns, 1), 5),
@@ -167,7 +214,7 @@ def to_gpu(data):
 def walkforward(data, Xg, target="tgt_rank_20", horizon=20, preset="A",
                 oos_start="2023-01-01", refit_every=126, seeds=None,
                 recency=None, cadence="refit", warm_epochs=2, lr=3e-4,
-                weight_decay=1e-4, verbose=True, log_prefix=""):
+                weight_decay=1e-4, verbose=True, log_prefix="", loss="mse"):
     """Walk-forward OOS scores with a given retrain cadence.
 
     cadence="refit": full retrain (fresh init) every `refit_every` trading days.
@@ -215,7 +262,8 @@ def walkforward(data, Xg, target="tgt_rank_20", horizon=20, preset="A",
                                      weights=w if recency else None,
                                      lr=lr if warm is None else lr * 0.3,
                                      weight_decay=weight_decay,
-                                     warm_state=warm, max_epochs=max_ep)
+                                     warm_state=warm, max_epochs=max_ep,
+                                     loss=loss, date_ranks=data["date_rank"])
             nets.append(net)
             fit_infos.append({"refit_date": str(dates[r0])[:10], "seed": s,
                               "val_ic": info["best_val_ic"],
@@ -252,7 +300,7 @@ def walkforward(data, Xg, target="tgt_rank_20", horizon=20, preset="A",
     run_info = {
         "target": target, "horizon": horizon, "preset": preset,
         "cadence": cadence, "refit_every": refit_every,
-        "recency": recency, "seeds": list(seeds),
+        "recency": recency, "seeds": list(seeds), "loss": loss,
         "oos_start": str(dates[oos0])[:10],
         "n_refits": len(refit_ranks),
         "total_s": round(time.time() - t_start, 1),

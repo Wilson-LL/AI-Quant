@@ -68,25 +68,25 @@ B3c/B4c on the 2015-backfilled cache are the standing references.
 | WD1 | 07-23 07:40 | deep+3y-window ensemble recovers 2022 adaptivity | **REJECT — line closed** | roll3y member collapses on deep cache (L/S −0.03, IC .003); ens-blend 1.30 < 1.47 ref (footnote: its DD −13.3% / 2022 +0.05 were better — tradeoff persists, not worth −0.17 Sharpe) | worse | worse | — |
 | REF | 07-23 09:50 | deep-cache champion-window references | **SET** | standalone 1.91/1.91 (= shallow — champion window depth-insensitive); blend50+band10 **2.06 / −10.7% L/S, 1.95 LO** (B4d) | = | new ref | 0f292c8 |
 | B5 | 07-23 10:10 | preset-C architecture-diversity blend beats refs | **REJECT — line closed** | C-deep standalone 1.82/1.88 (2023), 1.13/1.28 (2021, DD −14.0% best-in-class); 3-way blend 2.05/−9.75% ties champion window but loses bear (1.37 vs 1.47, 2022 −0.51); BC50 worse everywhere | ties one window | fails dual gate | — |
+| ES | 07-23 11:45 | excess-vs-sector target at 5 seeds (screen LO 1.78) | **REJECT — promising list emptied** | standalone 1.66/1.76 (2023), 1.17/1.29 (2021), 2022 −0.86; blend 1.54/1.17 ≪ refs 2.06/1.47 | loses | loses | — |
 
 <!-- new experiments appended below by the loop -->
 
-## Hypothesis queue v2 (regenerated 2026-07-23 01:10 after queue v1 exhausted)
+## Hypothesis queue v3 (regenerated 2026-07-23 11:50; v2 fully executed)
 
-Champion weak spots driving the new queue: (1) 2022 only ~flat; (2) LO book carries
-−27–31% DD market beta; (3) bear-panel evidence used shallow 2018–20 early training;
-(4) single-target (rank-20) signal, IC-IR 0.33–0.40.
+Closed lines (do not reopen without new information): adaptive weights, return-level
+blending, invvol, exposure gates EX1/EX2, sector-neutral scoring, short holds,
+rank-10 / voladj / avoid-bottom / excess-sector targets, close_d12 & full-field
+features, confidence filtering, window-diversity ensembles, architecture-diversity
+blends, recency weighting, warm-start retrains.
 
-1. **BEAR-DEEP** — rerun bear-window champion + blend with the 2015-backfilled cache
-   (early refits get full-depth training). Validates the promoted candidate's weakest
-   evidence. GPU ~40 min after backfill lands. [Track C/validation]
-2. **B3 vol-adjusted target** — fwd20 / realized vol20 target at champion strength;
-   different alpha axis, may lift 2022. GPU ~20 min batched. [Track B]
-3. **B4 avoid-bottom-quintile target** — asymmetric bad-tail avoidance; candidate
-   drawdown reducer for the LO book. Needs new target column (additive) + GPU. [Track B]
-4. **A3 regularization one-knob check** — dropout 0.3 & wd 5e-4 at champion config
-   (5 seeds): is the champion under/over-regularized? GPU ~30 min batched. [Track A]
-5. **F3 paper-trading cadence** — daily snapshot + weekly evaluate; realized-vs-backtest
-   IC tracking for blend50+band10. CPU, ongoing. [Track F]
-6. **E2 true full-fields revisit** — blocked until data_cache_full accumulates
-   (~6 months); keep collecting via --full-fields. [Track E, deferred]
+1. **RL1 pairwise ranking loss** — champion trains MSE on rank targets; pairwise
+   logistic loss on same-date pairs is the last allowed, untested Track-A lever.
+   Needs fit_one loss option (Edit 2) + dual-window run. GPU ~1.5h. [Track A]
+2. **F3 daily cadence (operational)** — refresh → retrain(monthly)/inference →
+   books → ledger each TWSE close; realized-vs-backtest IC after 20d maturity.
+   [Track F, time-gated]
+3. **E2 true full-fields revisit** — when data_cache_full has ~6 months of real
+   turnover/transaction. [Track E, calendar-gated ~2027-01]
+4. **Monitors:** EX3 own-equity DD gate (attach if bear regime emerges); 7.5% cap
+   (concentration-sensitive deployments); preset C standalone (DD-priority use).

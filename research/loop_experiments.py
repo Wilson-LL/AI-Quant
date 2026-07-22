@@ -176,7 +176,25 @@ def batch4():
     print("\nBATCH4 done")
 
 
+def batch5():
+    """RL1 pairwise ranking loss at champion config, both windows
+    (RL1_preregistration.md)."""
+    require_cuda()
+    out = os.path.join(OUT, "BATCH5_results.json")
+    results = {}
+    data, Xg = get_data("close_only", 60)
+    run_config(data, Xg, "LOOP_RL1_pairwise_2023", results, out, holding=20,
+               target="tgt_rank_20", horizon=20, preset="B",
+               refit_every=126, seeds=FULL_SEEDS, recency=None,
+               loss="pairwise")
+    run_config(data, Xg, "LOOP_RL1_pairwise_2021", results, out, holding=20,
+               target="tgt_rank_20", horizon=20, preset="B",
+               refit_every=126, seeds=FULL_SEEDS, recency=None,
+               oos_start="2021-01-01", loss="pairwise")
+    print("\nBATCH5 done")
+
+
 if __name__ == "__main__":
     {"A1": a1, "A1B": a1b, "A2": a2, "E1": e1, "WD1": wd1, "REF23": ref23,
      "BATCH1": batch1, "BATCH2": batch2, "BATCH3": batch3,
-     "BATCH4": batch4}[sys.argv[1] if len(sys.argv) > 1 else "A1"]()
+     "BATCH4": batch4, "BATCH5": batch5}[sys.argv[1] if len(sys.argv) > 1 else "A1"]()

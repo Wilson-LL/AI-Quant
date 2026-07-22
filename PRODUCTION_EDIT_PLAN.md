@@ -35,3 +35,21 @@ reason, expected benefit, rollback, and tests — per sprint rules.
   multi-seed run → column present, mean/score unchanged vs pre-edit run
   (assert scores identical since mean path untouched).
 - Production model.py / train.py / inference.py / dataset.py remain untouched.
+
+## Edit 2 — 2026-07-23 (continuous loop, cycle 19): `train_transformer_eod.py`
+
+- **Change:** optional `loss="pairwise"` mode in `fit_one()` (+ `loss` and
+  `date_ranks` plumbing through `walkforward()`). Pairwise mode batches by DATE
+  (same-date pairs are the only meaningful ranking pairs) and minimizes
+  softplus(−(pᵢ−pⱼ)·sign(yᵢ−yⱼ)) over same-date pairs with |Δy| > 0.1.
+  Default `loss="mse"` keeps the exact existing path — zero behavior change
+  for all current callers.
+- **Reason:** RL1 (queue v3 #1) — last untested allowed Track-A lever; the
+  champion optimizes MSE on a rank target, which is not the ranking metric
+  (val IC) it is selected on.
+- **Expected benefit:** possible IC/IC-IR lift; if none, the line closes with
+  evidence.
+- **Rollback:** omit the parameter (default path byte-identical); revert diff.
+- **Tests:** (1) default-path regression — a 2-epoch MSE fit before/after the
+  edit produces identical val IC for the same seed; (2) pairwise smoke run
+  (1 seed, 3 epochs) shows finite loss, nonzero grad flow, val IC computed.
