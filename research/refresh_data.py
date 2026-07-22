@@ -100,11 +100,63 @@ def refresh_stock(sid, today, full_fields=False, dry_run=False, throttle_s=1.5):
     return len(add)
 
 
+def backfill_stock(sid, start, dry_run=False, throttle_s=1.5):
+    """Prepend history from `start` (YYYY-MM) up to the first cached month.
+    Existing cached rows are never modified (keep='last' on the cached side)."""
+    df = load_cached(sid)
+    if df is None or df.empty:
+        print(f"[{sid}] no cache — skipped")
+        return 0
+    df = df.sort_values("date").drop_duplicates("date", keep="last")
+    first = df["date"].min()
+    start_ts = pd.Timestamp(f"{start}-01")
+    end_ts = (first - pd.offsets.MonthBegin(1))
+    if start_ts > end_ts:
+        return 0
+    need = months_between(start_ts, end_ts)
+    if dry_run:
+        print(f"[{sid}] would backfill {len(need)} month(s) "
+              f"{need[0][0]}-{need[0][1]:02d}..{need[-1][0]}-{need[-1][1]:02d}")
+        return 0
+
+    import twstock
+    stock = twstock.Stock(sid)
+    new_rows = []
+    for (y, m) in need:
+        try:
+            data = stock.fetch(y, m)
+        except Exception as e:  # noqa: BLE001
+            print(f"[{sid}] {y}-{m:02d} fetch failed: {type(e).__name__}")
+            time.sleep(throttle_s)
+            continue
+        for d in data:
+            if d.close is None:
+                continue
+            new_rows.append({"date": pd.Timestamp(d.date), "open": d.open,
+                             "high": d.high, "low": d.low, "close": d.close,
+                             "volume": d.capacity})
+        time.sleep(throttle_s)
+    if not new_rows:
+        return 0
+    add = pd.DataFrame(new_rows)
+    add = add[add["date"] < first]
+    if add.empty:
+        return 0
+    out = (pd.concat([add, df], ignore_index=True)
+             .sort_values("date").drop_duplicates("date", keep="last"))
+    out.to_csv(cache_path(sid), index=False)
+    print(f"[{sid}] backfilled +{len(add)} rows (first now {out['date'].min().date()})")
+    return len(add)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--full-fields", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--universe", nargs="*", default=None)
+    ap.add_argument("--backfill-start", default=None, metavar="YYYY-MM",
+                    help="prepend history from this month to the first cached "
+                         "date (e.g. 2015-01); skips the forward refresh")
     args = ap.parse_args()
 
     ids = args.universe or sorted(SECTOR_MAP)
@@ -112,7 +164,10 @@ def main():
     t0 = time.time()
     total = 0
     for sid in ids:
-        total += refresh_stock(sid, today, args.full_fields, args.dry_run)
+        if args.backfill_start:
+            total += backfill_stock(sid, args.backfill_start, args.dry_run)
+        else:
+            total += refresh_stock(sid, today, args.full_fields, args.dry_run)
     print(f"\nRefresh done: +{total} rows across {len(ids)} stocks "
           f"in {time.time() - t0:.0f}s")
 
