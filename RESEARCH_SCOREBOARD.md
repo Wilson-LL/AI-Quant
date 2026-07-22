@@ -66,6 +66,8 @@ B3c/B4c on the 2015-backfilled cache are the standing references.
 | F3 | 07-23 06:15 | live daily cadence on fresh 2026-07-22 data | **PASS (tool)** | refresh→retrain(267s)→inference→books→decision book ≈ 11 min end-to-end | n/a | n/a | 677e864 |
 | C4 | 07-23 06:30 | sector-neutral scoring as risk control | **REJECT** | SN1/SN2 cost 0.4–1.1 Sharpe on both panels for ~10pp share cut — sector tilt is load-bearing | worse | worse | 677e864 |
 | WD1 | 07-23 07:40 | deep+3y-window ensemble recovers 2022 adaptivity | **REJECT — line closed** | roll3y member collapses on deep cache (L/S −0.03, IC .003); ens-blend 1.30 < 1.47 ref (footnote: its DD −13.3% / 2022 +0.05 were better — tradeoff persists, not worth −0.17 Sharpe) | worse | worse | — |
+| REF | 07-23 09:50 | deep-cache champion-window references | **SET** | standalone 1.91/1.91 (= shallow — champion window depth-insensitive); blend50+band10 **2.06 / −10.7% L/S, 1.95 LO** (B4d) | = | new ref | 0f292c8 |
+| B5 | 07-23 10:10 | preset-C architecture-diversity blend beats refs | **REJECT — line closed** | C-deep standalone 1.82/1.88 (2023), 1.13/1.28 (2021, DD −14.0% best-in-class); 3-way blend 2.05/−9.75% ties champion window but loses bear (1.37 vs 1.47, 2022 −0.51); BC50 worse everywhere | ties one window | fails dual gate | — |
 
 <!-- new experiments appended below by the loop -->
 

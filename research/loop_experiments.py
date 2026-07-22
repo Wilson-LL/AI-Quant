@@ -159,7 +159,24 @@ def batch3():
     print("\nBATCH3 done")
 
 
+def batch4():
+    """tgt_exc_sec_20 at champion strength, both windows
+    (BATCH4_preregistration.md)."""
+    require_cuda()
+    out = os.path.join(OUT, "BATCH4_results.json")
+    results = {}
+    data, Xg = get_data("close_only", 60)
+    run_config(data, Xg, "LOOP_ES_excsec_2023", results, out, holding=20,
+               target="tgt_exc_sec_20", horizon=20, preset="B",
+               refit_every=126, seeds=FULL_SEEDS, recency=None)
+    run_config(data, Xg, "LOOP_ES_excsec_2021", results, out, holding=20,
+               target="tgt_exc_sec_20", horizon=20, preset="B",
+               refit_every=126, seeds=FULL_SEEDS, recency=None,
+               oos_start="2021-01-01")
+    print("\nBATCH4 done")
+
+
 if __name__ == "__main__":
     {"A1": a1, "A1B": a1b, "A2": a2, "E1": e1, "WD1": wd1, "REF23": ref23,
-     "BATCH1": batch1, "BATCH2": batch2,
-     "BATCH3": batch3}[sys.argv[1] if len(sys.argv) > 1 else "A1"]()
+     "BATCH1": batch1, "BATCH2": batch2, "BATCH3": batch3,
+     "BATCH4": batch4}[sys.argv[1] if len(sys.argv) > 1 else "A1"]()

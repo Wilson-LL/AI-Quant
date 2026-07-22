@@ -129,3 +129,12 @@ Branch: research/continuous-alpha-loop-4060ti · RTX 4060 Ti (CUDA OK, torch 2.1
   tilt is load-bearing alpha). Commit 677e864.
 - WD1 (3y-window member for train-window-diversity ensemble) on GPU (bjwbhwxx0).
 - Blockers: none.
+
+### 2026-07-23 08:50 — WD1 rejected; REF23 references set; BATCH3 running (elapsed 12.2h)
+- WD1: roll-3y member collapses on deep cache → all window-diversity ensembles
+  rejected (best 1.30 < 1.47 ref). Line closed. Commit 5f624a4.
+- REF23: deep-cache champion 2023–26 = 1.91/1.91 standalone (training-depth
+  insensitive); **blend50+band10 = 2.06 L/S / DD −10.7% / LO 1.95 (B4d, new
+  standing reference)**. Commit 0f292c8.
+- BATCH3 (preset C both windows → architecture-diversity blend gates) on GPU.
+- Blockers: none.
