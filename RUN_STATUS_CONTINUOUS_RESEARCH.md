@@ -71,3 +71,28 @@ Branch: research/continuous-alpha-loop-4060ti · RTX 4060 Ti (CUDA OK, torch 2.1
 - Next after BATCH1: A2 confidence-filter evaluation (CPU); E1 gate check;
   refresh_data --backfill-start design (2015–17 cache depth).
 - Blockers: none.
+
+### 2026-07-23 00:15 — backfill tool built; data-hygiene incident handled (elapsed 3.6h)
+- refresh_data.py gained --backfill-start (commit 24f63c7); 2330 verified
+  (+734 rows to 2015-01-05).
+- INCIDENT: full-universe backfill was launched while BATCH1 (GPU) was mid-run —
+  E1's dataset rebuild would have read a partially-backfilled cache. Backfill
+  STOPPED after 0 additional stocks (only 2330 from the manual test). Verified
+  harmless: dataset builder nulls targets on dates with <30 names, so 2330's
+  solo 2015–16 rows contribute zero training samples. Full backfill deferred
+  until BATCH1 completes. Lesson recorded: never mutate data_cache while a GPU
+  experiment process may rebuild datasets.
+- BATCH1: A2 wf1/7 val_ic +0.0706 (champion ref 0.074 — tracking).
+- Blockers: none.
+
+### 2026-07-23 01:15 — BATCH1 verdicts; queue v2; backfill running (elapsed 4.6h)
+- A2a reproducibility: **PASS exact** (1.91/1.93/0.0716 = original). score_std
+  Edit 1 validated → committing production edit.
+- E1 close_d12 @5 seeds: **REJECT** (1.37/1.50 vs 1.91/1.93). Close-only stands.
+- A2b confidence filtering: **REJECT** — drop-uncertain halves Sharpe; seed
+  disagreement marks high-signal names, not bad ones.
+- Queue v1 exhausted → queue v2 generated (BEAR-DEEP, vol-adj target,
+  avoid-bottom target, regularization check, paper cadence).
+- Full-universe 2015 backfill running in background (bfnnbkslw, ~2.2h).
+- GPU idle until backfill completes (BEAR-DEEP requires consistent cache).
+- Blockers: none.

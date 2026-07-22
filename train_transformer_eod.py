@@ -228,13 +228,16 @@ def walkforward(data, Xg, target="tgt_rank_20", horizon=20, preset="A",
         # score every sample in the OOS block (ensemble mean)
         in_block = np.nonzero((dr >= r0) & (dr <= block_end))[0]
         if len(in_block):
-            preds = torch.stack([predict_idx(n, Xg, in_block) for n in nets]).mean(0)
-            preds = preds.cpu().numpy()
+            pstack = torch.stack([predict_idx(n, Xg, in_block) for n in nets])
+            preds = pstack.mean(0).cpu().numpy()
+            pstd = (pstack.std(0, unbiased=False) if len(nets) > 1
+                    else torch.zeros_like(pstack[0])).cpu().numpy()
             stocks = np.asarray(data["stocks"])[data["stock_idx"][in_block]]
             rows.append(pd.DataFrame({
                 "date": dates[dr[in_block]],
                 "stock": stocks,
                 "score": preds,
+                "score_std": pstd,
                 "target": data["targets"][target][in_block],
                 "fwd_h": data["targets"][f"fwd_{horizon}"][in_block],
                 "fwd_20": data["targets"].get("fwd_20", data["targets"][f"fwd_{horizon}"])[in_block],

@@ -1,0 +1,30 @@
+﻿[dataset] 108 stocks loaded, feature_set=close_only, seq_len=60, exec_lag=1
+[dataset] X (198621, 60, 10) (477 MB), 2164 dates 2017-01-03..2026-07-07
+
+===== LOOP_A2_champion_std =====
+[LOOP_A2_champion_std] [wf 1/7] 2023-01-03 train 93110 val_ic +0.0706 (144s elapsed)
+[LOOP_A2_champion_std] [wf 2/7] 2023-07-20 train 105110 val_ic +0.1306 (238s elapsed)
+[LOOP_A2_champion_std] [wf 3/7] 2024-01-19 train 117112 val_ic +0.0350 (341s elapsed)
+[LOOP_A2_champion_std] [wf 4/7] 2024-08-02 train 129126 val_ic +0.0606 (436s elapsed)
+[LOOP_A2_champion_std] [wf 5/7] 2025-02-13 train 141243 val_ic +0.0432 (553s elapsed)
+[LOOP_A2_champion_std] [wf 6/7] 2025-08-15 train 153200 val_ic +0.0113 (667s elapsed)
+[LOOP_A2_champion_std] [wf 7/7] 2026-02-26 train 165394 val_ic +0.1643 (843s elapsed)
+LOOP_A2_champion_std [long_short]  IC +0.0716 | net60 Sharpe  1.91 ann +57.23% dd -14.97% | net100  1.77 | turn 0.32 | maxW 10.0% | n 42
+LOOP_A2_champion_std [long_only]   IC +0.0716 | net60 Sharpe  1.93 ann +73.09% dd -29.13% | net100  1.87 | turn 0.31 | maxW 10.0% | n 42
+
+A2 done
+[dataset] 108 stocks loaded, feature_set=close_d12, seq_len=60, exec_lag=1
+[dataset] X (199355, 60, 11) (526 MB), 2803 dates 2015-01-05..2026-07-07
+
+===== LOOP_E1_close_d12_presetB =====
+[LOOP_E1_close_d12_presetB] [wf 1/7] 2023-01-03 train 91722 val_ic +0.0482 (158s elapsed)
+[LOOP_E1_close_d12_presetB] [wf 2/7] 2023-07-20 train 103707 val_ic +0.0902 (296s elapsed)
+[LOOP_E1_close_d12_presetB] [wf 3/7] 2024-01-19 train 115721 val_ic +0.0431 (415s elapsed)
+[LOOP_E1_close_d12_presetB] [wf 4/7] 2024-08-02 train 127711 val_ic +0.0924 (496s elapsed)
+[LOOP_E1_close_d12_presetB] [wf 5/7] 2025-02-13 train 139843 val_ic +0.0645 (592s elapsed)
+[LOOP_E1_close_d12_presetB] [wf 6/7] 2025-08-15 train 151813 val_ic +0.0269 (754s elapsed)
+[LOOP_E1_close_d12_presetB] [wf 7/7] 2026-02-26 train 163979 val_ic +0.1666 (919s elapsed)
+LOOP_E1_close_d12_presetB [long_short] IC +0.0570 | net60 Sharpe  1.37 ann +29.52% dd -17.22% | net100  1.19 | turn 0.35 | maxW 10.0% | n 42
+LOOP_E1_close_d12_presetB [long_only] IC +0.0570 | net60 Sharpe  1.50 ann +46.52% dd -28.83% | net100  1.43 | turn 0.36 | maxW 10.0% | n 42
+
+E1 done

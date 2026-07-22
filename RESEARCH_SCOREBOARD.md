@@ -51,21 +51,28 @@ for *relative* comparisons on the same panel only.
 | B2 | 07-22 22:55 | multi-horizon (r20+r10) ensemble beats blend50+band10 | **REJECT** (bear gate) | champion window MH1 LO 1.93 (+0.10) passed screen; bear window MH1 1.11/1.22, MH2 1.39/1.43 < blend 1.42/1.48 | ties LO champ window only | fails bear | — |
 | A1B | 07-22 23:40 | rank-10 blend LO 1.97 generalizes to bear window | **REJECT — rank-10 line closed** | bear: standalone 1.08/1.21; blend h10+band10 L/S 0.92 / LO 0.96 vs blend50+band10 1.42/1.48; 2022 −0.83 | worse | much worse | — |
 | V1 | 07-22 22:50 | Section-6 validation profile for blend50+band10 | **PASS** | no losing year either panel (worst 2022 −0.04, else ≥1.37); IC>0 every yr except 2022; rank-ac 0.993; avg max-sector share of longs 37% (p95 57%, book capped soft-20%) | — | — | 34f9bf6 |
+| A2a | 07-23 00:55 | champion reproducibility (score_std edit runtime test) | **PASS — exact** | rerun L/S 1.91 / LO 1.93 / IC 0.0716 = original to 2 decimals; production Edit 1 validated | = | = | — |
+| E1 | 07-23 00:55 | close+D1.2 features win at 5 seeds (screen said LO 1.82) | **REJECT** | L/S 1.37 / LO 1.50, IC 0.057 ≪ close-only 1.91/1.93/0.072; close-only reconfirmed; 2-seed screens again shown unreliable | loses | loses | — |
+| A2b | 07-23 01:05 | seed-disagreement confidence filtering improves books | **REJECT** | CF1/CF2 drop-uncertain: Sharpe halves (blend 1.95→~1.0), IC 0.072→0.032–0.053, turnover ~doubles — high-std names ARE the high-signal names; CF3 shrinkage ≤ base everywhere | worse | worse | — |
 
 <!-- new experiments appended below by the loop -->
 
-## Hypothesis queue (ranked by expected value)
+## Hypothesis queue v2 (regenerated 2026-07-23 01:10 after queue v1 exhausted)
 
-1. **C1 adaptive blend** — walk-forward adaptive TF/D1.2 blend weight (rolling sleeve
-   Sharpe / IC / market-drawdown regime switch) beats static 50/50 on 2021–26 without
-   losing on 2023–26. Cost: CPU-only on cached panels. [Track C]
-2. **C2 static blend grid on bear window** — 30/70…70/30 score-level + return-level
-   sleeves on the 2021 bear panel; establishes blend frontier. [Track C]
-3. **D1 construction transfer** — no-trade band + inverse-vol + 10d hold on the blend
-   book (band already helped standalone). [Track D]
-4. **A1 rank-10 target champion rerun** — 10d-rank target at full 5-seed preset B
-   (screen said 1.59 with 2 seeds; champion effect was +0.4). GPU ~2h. [Track A/B]
-5. **C3 vol-regime switch** — market vol / drawdown detector gates D1.2 weight. [Track C]
-6. **F1 paper-trading scaffold** — daily shadow book tracker for D1.2 / TF / blends. [Track F]
-7. **A2 confidence filtering** — ensemble seed-disagreement as uncertainty veto. [Track A]
-8. **B1 vol-adjusted target** — volatility-adjusted 20d forward return target. [Track B]
+Champion weak spots driving the new queue: (1) 2022 only ~flat; (2) LO book carries
+−27–31% DD market beta; (3) bear-panel evidence used shallow 2018–20 early training;
+(4) single-target (rank-20) signal, IC-IR 0.33–0.40.
+
+1. **BEAR-DEEP** — rerun bear-window champion + blend with the 2015-backfilled cache
+   (early refits get full-depth training). Validates the promoted candidate's weakest
+   evidence. GPU ~40 min after backfill lands. [Track C/validation]
+2. **B3 vol-adjusted target** — fwd20 / realized vol20 target at champion strength;
+   different alpha axis, may lift 2022. GPU ~20 min batched. [Track B]
+3. **B4 avoid-bottom-quintile target** — asymmetric bad-tail avoidance; candidate
+   drawdown reducer for the LO book. Needs new target column (additive) + GPU. [Track B]
+4. **A3 regularization one-knob check** — dropout 0.3 & wd 5e-4 at champion config
+   (5 seeds): is the champion under/over-regularized? GPU ~30 min batched. [Track A]
+5. **F3 paper-trading cadence** — daily snapshot + weekly evaluate; realized-vs-backtest
+   IC tracking for blend50+band10. CPU, ongoing. [Track F]
+6. **E2 true full-fields revisit** — blocked until data_cache_full accumulates
+   (~6 months); keep collecting via --full-fields. [Track E, deferred]
