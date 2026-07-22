@@ -23,3 +23,19 @@ Branch: research/continuous-alpha-loop-4060ti · RTX 4060 Ti (CUDA OK, torch 2.1
 - GPU: A1 (rank-10 target, preset B, 5 seeds) training in background since 20:53.
 - Next: A1 readout → cycle 3; then F1 paper-trading scaffold.
 - Blockers: none.
+
+### 2026-07-22 21:42 — cycles 3–5 done (elapsed 1.0h)
+- Cycle 3 (F1): paper-trading scaffold built (`research/paper_trading.py`,
+  backfill/snapshot/evaluate). 76 books backfilled 2025-01→2026-07; ledger shows
+  17 matured rebalances/strategy: tf 2.28, d12 2.07, blend50 2.04, band10 2.02
+  (gross LO ann Sharpe), band10 lowest turnover (0.20 vs 0.30).
+- Cycle 4 (C3): exposure scaling — REJECT overall vs pre-registered gates;
+  EX3 own-equity DD gate on L/S = MONITOR (bear: 1.46/−19.5% vs 1.42/−26.4%;
+  champion cost −0.05).
+- Cycle 4b (D1b): blend60/70+band10 fail gate (below blend50+band10 both panels).
+- Cycle 5 (F2): blended decision-book generator built
+  (`research/blended_decision_book.py`); 2026-07-07 book: 22 names, maxW 10.0%,
+  21 HOLD / 1 BUY / 1 SELL / 9 WATCH.
+- GPU: A1 still training (~50 min, GPU 83–95%; 10d target converging slower).
+- Next: A1 readout; D3 holding/cap sweep on blend book; A2 needs score_std panels.
+- Blockers: none.
