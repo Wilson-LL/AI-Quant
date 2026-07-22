@@ -84,6 +84,37 @@ def batch1():
     e1()
 
 
+def batch2():
+    """Post-backfill batch (deep 2015+ cache): BEAR-DEEP champion rerun,
+    B3 vol-adjusted target, B4 avoid-bottom target, A3 regularization checks.
+    One close_only/seq60 dataset build serves all five configs.
+    Pre-registrations: BATCH2_preregistration.md."""
+    require_cuda()
+    from train_transformer_eod import PRESETS
+    PRESETS["B_do3"] = dict(PRESETS["B"], dropout=0.3)
+    out = os.path.join(OUT, "BATCH2_results.json")
+    results = {}
+    data, Xg = get_data("close_only", 60)
+    run_config(data, Xg, "LOOP_BEARDEEP_rank20_2021", results, out, holding=20,
+               target="tgt_rank_20", horizon=20, preset="B",
+               refit_every=126, seeds=FULL_SEEDS, recency=None,
+               oos_start="2021-01-01")
+    run_config(data, Xg, "LOOP_B3_voladj20", results, out, holding=20,
+               target="tgt_voladj_20", horizon=20, preset="B",
+               refit_every=126, seeds=FULL_SEEDS, recency=None)
+    run_config(data, Xg, "LOOP_B4_avoidbot20", results, out, holding=20,
+               target="tgt_avoid_bot_20", horizon=20, preset="B",
+               refit_every=126, seeds=FULL_SEEDS, recency=None)
+    run_config(data, Xg, "LOOP_A3_dropout30", results, out, holding=20,
+               target="tgt_rank_20", horizon=20, preset="B_do3",
+               refit_every=126, seeds=FULL_SEEDS, recency=None)
+    run_config(data, Xg, "LOOP_A3_wd5e4", results, out, holding=20,
+               target="tgt_rank_20", horizon=20, preset="B",
+               refit_every=126, seeds=FULL_SEEDS, recency=None,
+               weight_decay=5e-4)
+    print("\nBATCH2 done")
+
+
 if __name__ == "__main__":
     {"A1": a1, "A1B": a1b, "A2": a2, "E1": e1,
-     "BATCH1": batch1}[sys.argv[1] if len(sys.argv) > 1 else "A1"]()
+     "BATCH1": batch1, "BATCH2": batch2}[sys.argv[1] if len(sys.argv) > 1 else "A1"]()

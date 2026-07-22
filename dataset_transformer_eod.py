@@ -208,6 +208,9 @@ def build_dataset(feature_set="close_only", seq_len=40, horizons=(5, 10, 20),
         blk["n_stock"] = len(df)
         for Y in horizons:
             blk[f"fwd_{Y}"] = _fwd_ret(c, Y, exec_lag)
+        # realized 20d vol at t (annualization-free; used by tgt_voladj_20)
+        lr = np.log(c[1:] / c[:-1])
+        blk["_vol20_t"] = pd.Series(np.concatenate([[np.nan], lr])).rolling(20).std().to_numpy()
         if include_barrier:
             blk["tgt_barrier"] = _barrier(c, 20, exec_lag)
         blocks.append(blk)
@@ -232,6 +235,18 @@ def build_dataset(feature_set="close_only", seq_len=40, horizons=(5, 10, 20),
         sec_mean = panel.groupby(["date", "sector"])["fwd_20"].transform("mean")
         n_sec = panel.groupby(["date", "sector"])["fwd_20"].transform("count")
         panel["tgt_exc_sec_20"] = panel["fwd_20"] - sec_mean.where(n_sec >= 3, uni_mean)
+        # vol-adjusted 20d forward return, cross-sectionally ranked to [-1, 1]
+        raw_va = panel["fwd_20"] / panel["_vol20_t"].clip(lower=1e-4)
+        pct_va = raw_va.groupby(panel["date"]).rank(pct=True)
+        tva = 2.0 * (pct_va - 0.5)
+        tva[date_count < min_names_per_date] = np.nan
+        panel["tgt_voladj_20"] = tva.where(raw_va.notna())
+        # avoid-bottom-quintile: discriminate only within the bottom 30% of the
+        # 20d cross-section; everything above saturates at +1
+        pct20 = panel.groupby("date")["fwd_20"].rank(pct=True)
+        tab = (pct20.clip(upper=0.3) / 0.3) * 2.0 - 1.0
+        tab[date_count < min_names_per_date] = np.nan
+        panel["tgt_avoid_bot_20"] = tab.where(panel["fwd_20"].notna())
 
     # ---- global trading calendar ranks
     all_dates = np.array(sorted(panel["date"].unique()))
@@ -245,7 +260,8 @@ def build_dataset(feature_set="close_only", seq_len=40, horizons=(5, 10, 20),
 
     target_names = [f"tgt_rank_{Y}" for Y in horizons]
     if 20 in horizons:
-        target_names += ["tgt_exc_uni_20", "tgt_exc_sec_20", "fwd_20"]
+        target_names += ["tgt_exc_uni_20", "tgt_exc_sec_20", "fwd_20",
+                         "tgt_voladj_20", "tgt_avoid_bot_20"]
     for Y in horizons:
         if f"fwd_{Y}" not in target_names:
             target_names.append(f"fwd_{Y}")
