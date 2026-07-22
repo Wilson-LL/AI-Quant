@@ -69,8 +69,19 @@ B3c/B4c on the 2015-backfilled cache are the standing references.
 | REF | 07-23 09:50 | deep-cache champion-window references | **SET** | standalone 1.91/1.91 (= shallow — champion window depth-insensitive); blend50+band10 **2.06 / −10.7% L/S, 1.95 LO** (B4d) | = | new ref | 0f292c8 |
 | B5 | 07-23 10:10 | preset-C architecture-diversity blend beats refs | **REJECT — line closed** | C-deep standalone 1.82/1.88 (2023), 1.13/1.28 (2021, DD −14.0% best-in-class); 3-way blend 2.05/−9.75% ties champion window but loses bear (1.37 vs 1.47, 2022 −0.51); BC50 worse everywhere | ties one window | fails dual gate | — |
 | ES | 07-23 11:45 | excess-vs-sector target at 5 seeds (screen LO 1.78) | **REJECT — promising list emptied** | standalone 1.66/1.76 (2023), 1.17/1.29 (2021), 2022 −0.86; blend 1.54/1.17 ≪ refs 2.06/1.47 | loses | loses | — |
+| RL1 | 07-23 14:30 | pairwise ranking loss beats MSE-on-rank | **REJECT — line closed by val-IC gate** | val IC 0.036 < champion 0.050 (selection metric decides); OOS confirms: 1.80/0.99 standalone, blends 1.80/1.24 ≪ 2.06/1.47; smoke promise didn't scale | loses | loses | — |
 
 <!-- new experiments appended below by the loop -->
+
+## Loop state (2026-07-23 14:40)
+
+All experimental levers in Tracks A–E have been tested under pre-registered
+dual-window gates; **13 challengers rejected, zero survived against
+blend50+band10**. The loop is in OPERATIONAL CADENCE: daily refresh → (monthly
+retrain) → inference → blended decision book → paper ledger; monitors armed
+(EX3 bear gate, 7.5% cap option, preset C DD-alternative). Experimental work
+reopens on: new market regimes in the paper ledger, true full-field data
+(~2027-01), or new external information.
 
 ## Hypothesis queue v3 (regenerated 2026-07-23 11:50; v2 fully executed)
 

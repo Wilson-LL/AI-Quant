@@ -138,3 +138,16 @@ Branch: research/continuous-alpha-loop-4060ti · RTX 4060 Ti (CUDA OK, torch 2.1
   standing reference)**. Commit 0f292c8.
 - BATCH3 (preset C both windows → architecture-diversity blend gates) on GPU.
 - Blockers: none.
+
+### 2026-07-23 14:45 — queue v3 experimental items complete (elapsed 18.1h)
+- BATCH3 preset-C blend: REJECT (ties champ window, loses bear). BATCH4
+  excess-sector: REJECT (promising list emptied). RL1 pairwise loss: REJECT by
+  val-IC gate (0.036 < 0.050; OOS confirms). Commits 5e50dcc→this.
+- 12h checkpoint written (830bee1). Edit 2 (pairwise loss) stays in the
+  codebase, default MSE path verified identical.
+- **Loop state: OPERATIONAL CADENCE.** All Track A–E levers tested; 13
+  challengers rejected against blend50+band10 (refs 2.06/−10.7% and
+  1.47/−18.7%). Daily cycle validated at ~11 min. Next experimental triggers:
+  new regime evidence in the paper ledger, full-field data (~2027-01), or
+  user direction.
+- Blockers: none (idle pending next TWSE close for the daily cycle).
