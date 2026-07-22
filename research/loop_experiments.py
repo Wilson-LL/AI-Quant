@@ -52,5 +52,18 @@ def a1b():
     print("\nA1B done")
 
 
+def a2():
+    """Champion-config rerun emitting score_std (reproducibility + confidence
+    data for A2 filtering). Gates in A2_preregistration.md."""
+    require_cuda()
+    out = os.path.join(OUT, "A2_results.json")
+    results = {}
+    data, Xg = get_data("close_only", 60)
+    run_config(data, Xg, "LOOP_A2_champion_std", results, out, holding=20,
+               target="tgt_rank_20", horizon=20, preset="B",
+               refit_every=126, seeds=FULL_SEEDS, recency=None)
+    print("\nA2 done")
+
+
 if __name__ == "__main__":
-    {"A1": a1, "A1B": a1b}[sys.argv[1] if len(sys.argv) > 1 else "A1"]()
+    {"A1": a1, "A1B": a1b, "A2": a2}[sys.argv[1] if len(sys.argv) > 1 else "A1"]()

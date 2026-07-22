@@ -1,0 +1,386 @@
+{
+  "MH1_tfmulti_long_short": {
+    "mode": "long_short",
+    "weighting": "equal",
+    "holding": 20,
+    "n_rebal": 42,
+    "rank_ic": 0.07183133814770712,
+    "ic_ir": 0.33386424193694664,
+    "max_name_weight": 0.1,
+    "avg_turnover": 0.3446647924017689,
+    "net0": {
+      "sharpe": 2.145,
+      "ann_ret": 0.5622,
+      "max_dd": -0.1229,
+      "calmar": 4.58,
+      "hit": 0.714,
+      "n": 42
+    },
+    "net60": {
+      "sharpe": 1.888,
+      "ann_ret": 0.4854,
+      "max_dd": -0.1292,
+      "calmar": 3.76,
+      "hit": 0.643,
+      "n": 42
+    },
+    "net100": {
+      "sharpe": 1.718,
+      "ann_ret": 0.4362,
+      "max_dd": -0.1547,
+      "calmar": 2.82,
+      "hit": 0.619,
+      "n": 42
+    },
+    "net150": {
+      "sharpe": 1.506,
+      "ann_ret": 0.3767,
+      "max_dd": -0.1883,
+      "calmar": 2.0,
+      "hit": 0.595,
+      "n": 42
+    },
+    "yearly_net60": {
+      "2023": {
+        "sharpe": 1.83,
+        "mean_pct": 2.11,
+        "n": 12
+      },
+      "2024": {
+        "sharpe": 1.44,
+        "mean_pct": 2.05,
+        "n": 13
+      },
+      "2025": {
+        "sharpe": 1.43,
+        "mean_pct": 3.24,
+        "n": 12
+      },
+      "2026": {
+        "sharpe": 6.27,
+        "mean_pct": 8.64,
+        "n": 5
+      }
+    }
+  },
+  "MH1_tfmulti_long_only": {
+    "mode": "long_only",
+    "weighting": "equal",
+    "holding": 20,
+    "n_rebal": 42,
+    "rank_ic": 0.07183133814770712,
+    "ic_ir": 0.33386424193694664,
+    "max_name_weight": 0.1,
+    "avg_turnover": 0.29716523469797623,
+    "net0": {
+      "sharpe": 2.022,
+      "ann_ret": 0.6884,
+      "max_dd": -0.2333,
+      "calmar": 2.95,
+      "hit": 0.738,
+      "n": 42
+    },
+    "net60": {
+      "sharpe": 1.931,
+      "ann_ret": 0.6524,
+      "max_dd": -0.2446,
+      "calmar": 2.67,
+      "hit": 0.738,
+      "n": 42
+    },
+    "net100": {
+      "sharpe": 1.871,
+      "ann_ret": 0.6288,
+      "max_dd": -0.252,
+      "calmar": 2.5,
+      "hit": 0.738,
+      "n": 42
+    },
+    "net150": {
+      "sharpe": 1.796,
+      "ann_ret": 0.5997,
+      "max_dd": -0.2612,
+      "calmar": 2.3,
+      "hit": 0.738,
+      "n": 42
+    },
+    "yearly_net60": {
+      "2023": {
+        "sharpe": 2.25,
+        "mean_pct": 3.69,
+        "n": 12
+      },
+      "2024": {
+        "sharpe": 1.39,
+        "mean_pct": 2.22,
+        "n": 13
+      },
+      "2025": {
+        "sharpe": 1.39,
+        "mean_pct": 3.78,
+        "n": 12
+      },
+      "2026": {
+        "sharpe": 4.66,
+        "mean_pct": 10.47,
+        "n": 5
+      }
+    }
+  },
+  "MH2_3way_50mom_long_short": {
+    "mode": "long_short",
+    "weighting": "equal",
+    "holding": 20,
+    "n_rebal": 42,
+    "rank_ic": 0.07689866527347382,
+    "ic_ir": 0.39914119560397876,
+    "max_name_weight": 0.1,
+    "avg_turnover": 0.3048524890099586,
+    "net0": {
+      "sharpe": 2.123,
+      "ann_ret": 0.5861,
+      "max_dd": -0.1205,
+      "calmar": 4.86,
+      "hit": 0.738,
+      "n": 42
+    },
+    "net60": {
+      "sharpe": 1.911,
+      "ann_ret": 0.517,
+      "max_dd": -0.1252,
+      "calmar": 4.13,
+      "hit": 0.69,
+      "n": 42
+    },
+    "net100": {
+      "sharpe": 1.77,
+      "ann_ret": 0.4725,
+      "max_dd": -0.1376,
+      "calmar": 3.43,
+      "hit": 0.667,
+      "n": 42
+    },
+    "net150": {
+      "sharpe": 1.594,
+      "ann_ret": 0.4186,
+      "max_dd": -0.1682,
+      "calmar": 2.49,
+      "hit": 0.643,
+      "n": 42
+    },
+    "yearly_net60": {
+      "2023": {
+        "sharpe": 1.64,
+        "mean_pct": 2.32,
+        "n": 12
+      },
+      "2024": {
+        "sharpe": 1.44,
+        "mean_pct": 2.14,
+        "n": 13
+      },
+      "2025": {
+        "sharpe": 1.5,
+        "mean_pct": 3.4,
+        "n": 12
+      },
+      "2026": {
+        "sharpe": 6.71,
+        "mean_pct": 8.96,
+        "n": 5
+      }
+    }
+  },
+  "MH2_3way_50mom_long_only": {
+    "mode": "long_only",
+    "weighting": "equal",
+    "holding": 20,
+    "n_rebal": 42,
+    "rank_ic": 0.07689866527347382,
+    "ic_ir": 0.39914119560397876,
+    "max_name_weight": 0.1,
+    "avg_turnover": 0.253947143028402,
+    "net0": {
+      "sharpe": 1.952,
+      "ann_ret": 0.7195,
+      "max_dd": -0.2582,
+      "calmar": 2.79,
+      "hit": 0.762,
+      "n": 42
+    },
+    "net60": {
+      "sharpe": 1.883,
+      "ann_ret": 0.6881,
+      "max_dd": -0.272,
+      "calmar": 2.53,
+      "hit": 0.69,
+      "n": 42
+    },
+    "net100": {
+      "sharpe": 1.837,
+      "ann_ret": 0.6675,
+      "max_dd": -0.2811,
+      "calmar": 2.37,
+      "hit": 0.69,
+      "n": 42
+    },
+    "net150": {
+      "sharpe": 1.779,
+      "ann_ret": 0.6421,
+      "max_dd": -0.2923,
+      "calmar": 2.2,
+      "hit": 0.69,
+      "n": 42
+    },
+    "yearly_net60": {
+      "2023": {
+        "sharpe": 2.35,
+        "mean_pct": 4.13,
+        "n": 12
+      },
+      "2024": {
+        "sharpe": 0.85,
+        "mean_pct": 1.5,
+        "n": 13
+      },
+      "2025": {
+        "sharpe": 1.46,
+        "mean_pct": 4.12,
+        "n": 12
+      },
+      "2026": {
+        "sharpe": 5.64,
+        "mean_pct": 11.92,
+        "n": 5
+      }
+    }
+  },
+  "MH3_3way_eq_long_short": {
+    "mode": "long_short",
+    "weighting": "equal",
+    "holding": 20,
+    "n_rebal": 42,
+    "rank_ic": 0.077905001207495,
+    "ic_ir": 0.3879880535329638,
+    "max_name_weight": 0.1,
+    "avg_turnover": 0.30460702089382025,
+    "net0": {
+      "sharpe": 2.058,
+      "ann_ret": 0.5751,
+      "max_dd": -0.1665,
+      "calmar": 3.45,
+      "hit": 0.69,
+      "n": 42
+    },
+    "net60": {
+      "sharpe": 1.85,
+      "ann_ret": 0.5065,
+      "max_dd": -0.1742,
+      "calmar": 2.91,
+      "hit": 0.643,
+      "n": 42
+    },
+    "net100": {
+      "sharpe": 1.712,
+      "ann_ret": 0.4623,
+      "max_dd": -0.1793,
+      "calmar": 2.58,
+      "hit": 0.643,
+      "n": 42
+    },
+    "net150": {
+      "sharpe": 1.539,
+      "ann_ret": 0.4088,
+      "max_dd": -0.1874,
+      "calmar": 2.18,
+      "hit": 0.643,
+      "n": 42
+    },
+    "yearly_net60": {
+      "2023": {
+        "sharpe": 1.75,
+        "mean_pct": 2.15,
+        "n": 12
+      },
+      "2024": {
+        "sharpe": 1.64,
+        "mean_pct": 2.36,
+        "n": 13
+      },
+      "2025": {
+        "sharpe": 1.31,
+        "mean_pct": 3.21,
+        "n": 12
+      },
+      "2026": {
+        "sharpe": 5.84,
+        "mean_pct": 8.76,
+        "n": 5
+      }
+    }
+  },
+  "MH3_3way_eq_long_only": {
+    "mode": "long_only",
+    "weighting": "equal",
+    "holding": 20,
+    "n_rebal": 42,
+    "rank_ic": 0.077905001207495,
+    "ic_ir": 0.3879880535329638,
+    "max_name_weight": 0.1,
+    "avg_turnover": 0.2567425890215572,
+    "net0": {
+      "sharpe": 1.932,
+      "ann_ret": 0.7089,
+      "max_dd": -0.2774,
+      "calmar": 2.56,
+      "hit": 0.738,
+      "n": 42
+    },
+    "net60": {
+      "sharpe": 1.861,
+      "ann_ret": 0.6774,
+      "max_dd": -0.2867,
+      "calmar": 2.36,
+      "hit": 0.714,
+      "n": 42
+    },
+    "net100": {
+      "sharpe": 1.814,
+      "ann_ret": 0.6567,
+      "max_dd": -0.2928,
+      "calmar": 2.24,
+      "hit": 0.714,
+      "n": 42
+    },
+    "net150": {
+      "sharpe": 1.755,
+      "ann_ret": 0.6312,
+      "max_dd": -0.3004,
+      "calmar": 2.1,
+      "hit": 0.714,
+      "n": 42
+    },
+    "yearly_net60": {
+      "2023": {
+        "sharpe": 2.38,
+        "mean_pct": 3.97,
+        "n": 12
+      },
+      "2024": {
+        "sharpe": 0.92,
+        "mean_pct": 1.56,
+        "n": 13
+      },
+      "2025": {
+        "sharpe": 1.42,
+        "mean_pct": 4.01,
+        "n": 12
+      },
+      "2026": {
+        "sharpe": 4.96,
+        "mean_pct": 12.0,
+        "n": 5
+      }
+    }
+  }
+}

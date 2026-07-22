@@ -39,3 +39,19 @@ Branch: research/continuous-alpha-loop-4060ti · RTX 4060 Ti (CUDA OK, torch 2.1
 - GPU: A1 still training (~50 min, GPU 83–95%; 10d target converging slower).
 - Next: A1 readout; D3 holding/cap sweep on blend book; A2 needs score_std panels.
 - Blockers: none.
+
+### 2026-07-22 22:45 — cycles 6–8 in flight (elapsed 2.1h)
+- Cycle 6 (D3): h5/h10 rejected for blend book (h20 best both panels); 7.5% name
+  cap Sharpe-neutral (adopt-optional). Commit de6a4e7.
+- Cycle 6b (R1): blend50+band10 universe bootstrap PASS (100% positive; p5 1.52
+  champ / 1.15 bear; drop-top-3 1.77/1.16).
+- Cycle 7 (A1): rank-10 standalone REJECTED (1.51 vs 1.91). Rank-10×D1.2 blend
+  h10+band10 LO 1.97 → bear validation A1B running on GPU (2/11 refits).
+- Cycle 8 prep (A2): PRODUCTION_EDIT_PLAN Edit 1 documented; train_transformer_eod
+  walkforward now emits score_std (additive column; mean path untouched); champion
+  reproducibility rerun queued after A1B.
+- Validation: full Section-6 profile for blend50+band10 written
+  (VALIDATION_blend50_band10.json): no losing year either panel; 2022 −0.04 vs
+  D1.2 −1.55; IC positive every year except 2022; rank-ac 0.993.
+- Device: RTX 4060 Ti busy (A1B); CPU experiments continuing.
+- Blockers: none.
