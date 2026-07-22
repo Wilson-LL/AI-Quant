@@ -1,0 +1,63 @@
+﻿[dataset] 108 stocks loaded, feature_set=close_only, seq_len=60, exec_lag=1
+[dataset] X (274951, 60, 10) (660 MB), 2803 dates 2015-01-05..2026-07-07
+
+===== LOOP_BEARDEEP_rank20_2021 =====
+[LOOP_BEARDEEP_rank20_2021] [wf 1/11] 2021-01-04 train 115852 val_ic +0.1346 (163s elapsed)
+[LOOP_BEARDEEP_rank20_2021] [wf 2/11] 2021-07-15 train 127692 val_ic +0.1481 (270s elapsed)
+[LOOP_BEARDEEP_rank20_2021] [wf 3/11] 2022-01-13 train 139724 val_ic -0.0051 (430s elapsed)
+[LOOP_BEARDEEP_rank20_2021] [wf 4/11] 2022-07-26 train 151622 val_ic -0.0719 (522s elapsed)
+[LOOP_BEARDEEP_rank20_2021] [wf 5/11] 2023-02-02 train 163490 val_ic +0.0296 (780s elapsed)
+[LOOP_BEARDEEP_rank20_2021] [wf 6/11] 2023-08-10 train 175464 val_ic +0.1120 (967s elapsed)
+[LOOP_BEARDEEP_rank20_2021] [wf 7/11] 2024-02-19 train 187409 val_ic +0.0603 (1107s elapsed)
+[LOOP_BEARDEEP_rank20_2021] [wf 8/11] 2024-08-22 train 199512 val_ic +0.0455 (1228s elapsed)
+[LOOP_BEARDEEP_rank20_2021] [wf 9/11] 2025-03-06 train 211533 val_ic +0.0082 (1350s elapsed)
+[LOOP_BEARDEEP_rank20_2021] [wf 10/11] 2025-09-04 train 223500 val_ic +0.0165 (1493s elapsed)
+[LOOP_BEARDEEP_rank20_2021] [wf 11/11] 2026-03-19 train 235621 val_ic +0.1012 (1681s elapsed)
+LOOP_BEARDEEP_rank20_2021 [long_short] IC +0.0293 | net60 Sharpe  1.14 ann +27.55% dd -17.07% | net100  0.97 | turn 0.36 | maxW 10.0% | n 66
+LOOP_BEARDEEP_rank20_2021 [long_only] IC +0.0293 | net60 Sharpe  1.32 ann +43.21% dd -28.40% | net100  1.26 | turn 0.33 | maxW 10.0% | n 66
+
+===== LOOP_B3_voladj20 =====
+[LOOP_B3_voladj20] [wf 1/7] 2023-01-03 train 162233 val_ic -0.0149 (216s elapsed)
+[LOOP_B3_voladj20] [wf 2/7] 2023-07-20 train 174099 val_ic +0.0446 (469s elapsed)
+[LOOP_B3_voladj20] [wf 3/7] 2024-01-19 train 186137 val_ic +0.0318 (619s elapsed)
+[LOOP_B3_voladj20] [wf 4/7] 2024-08-02 train 198124 val_ic +0.0395 (791s elapsed)
+[LOOP_B3_voladj20] [wf 5/7] 2025-02-13 train 210142 val_ic +0.0573 (947s elapsed)
+[LOOP_B3_voladj20] [wf 6/7] 2025-08-15 train 222235 val_ic +0.0450 (1174s elapsed)
+[LOOP_B3_voladj20] [wf 7/7] 2026-02-26 train 234230 val_ic +0.0764 (1383s elapsed)
+LOOP_B3_voladj20 [long_short]      IC +0.0569 | net60 Sharpe  1.44 ann +30.32% dd -28.21% | net100  1.17 | turn 0.47 | maxW 10.0% | n 42
+LOOP_B3_voladj20 [long_only]       IC +0.0569 | net60 Sharpe  1.72 ann +57.80% dd -28.50% | net100  1.64 | turn 0.44 | maxW 10.0% | n 42
+
+===== LOOP_B4_avoidbot20 =====
+[LOOP_B4_avoidbot20] [wf 1/7] 2023-01-03 train 162233 val_ic +0.1573 (131s elapsed)
+[LOOP_B4_avoidbot20] [wf 2/7] 2023-07-20 train 174099 val_ic +0.0808 (239s elapsed)
+[LOOP_B4_avoidbot20] [wf 3/7] 2024-01-19 train 186137 val_ic +0.1692 (366s elapsed)
+[LOOP_B4_avoidbot20] [wf 4/7] 2024-08-02 train 198124 val_ic +0.2091 (587s elapsed)
+[LOOP_B4_avoidbot20] [wf 5/7] 2025-02-13 train 210142 val_ic +0.1885 (900s elapsed)
+[LOOP_B4_avoidbot20] [wf 6/7] 2025-08-15 train 222235 val_ic +0.1398 (1216s elapsed)
+[LOOP_B4_avoidbot20] [wf 7/7] 2026-02-26 train 234230 val_ic +0.0739 (1623s elapsed)
+LOOP_B4_avoidbot20 [long_short]    IC -0.0685 | net60 Sharpe -1.95 ann -44.93% dd -87.76% | net100 -2.05 | turn 0.30 | maxW 10.0% | n 42
+LOOP_B4_avoidbot20 [long_only]     IC -0.0685 | net60 Sharpe -0.09 ann  -0.81% dd -18.41% | net100 -0.26 | turn 0.28 | maxW 10.0% | n 42
+
+===== LOOP_A3_dropout30 =====
+[LOOP_A3_dropout30] [wf 1/7] 2023-01-03 train 162233 val_ic +0.0228 (277s elapsed)
+[LOOP_A3_dropout30] [wf 2/7] 2023-07-20 train 174099 val_ic +0.0802 (490s elapsed)
+[LOOP_A3_dropout30] [wf 3/7] 2024-01-19 train 186137 val_ic +0.0538 (625s elapsed)
+[LOOP_A3_dropout30] [wf 4/7] 2024-08-02 train 198124 val_ic +0.0381 (746s elapsed)
+[LOOP_A3_dropout30] [wf 5/7] 2025-02-13 train 210142 val_ic +0.0369 (887s elapsed)
+[LOOP_A3_dropout30] [wf 6/7] 2025-08-15 train 222235 val_ic +0.0242 (1041s elapsed)
+[LOOP_A3_dropout30] [wf 7/7] 2026-02-26 train 234230 val_ic +0.0821 (1275s elapsed)
+LOOP_A3_dropout30 [long_short]     IC +0.0747 | net60 Sharpe  1.86 ann +49.68% dd -16.53% | net100  1.70 | turn 0.36 | maxW 10.0% | n 42
+LOOP_A3_dropout30 [long_only]      IC +0.0747 | net60 Sharpe  1.81 ann +66.49% dd -28.63% | net100  1.75 | turn 0.33 | maxW 10.0% | n 42
+
+===== LOOP_A3_wd5e4 =====
+[LOOP_A3_wd5e4] [wf 1/7] 2023-01-03 train 162233 val_ic +0.0373 (256s elapsed)
+[LOOP_A3_wd5e4] [wf 2/7] 2023-07-20 train 174099 val_ic +0.0995 (482s elapsed)
+[LOOP_A3_wd5e4] [wf 3/7] 2024-01-19 train 186137 val_ic +0.0521 (614s elapsed)
+[LOOP_A3_wd5e4] [wf 4/7] 2024-08-02 train 198124 val_ic +0.0338 (749s elapsed)
+[LOOP_A3_wd5e4] [wf 5/7] 2025-02-13 train 210142 val_ic +0.0302 (892s elapsed)
+[LOOP_A3_wd5e4] [wf 6/7] 2025-08-15 train 222235 val_ic +0.0242 (1037s elapsed)
+[LOOP_A3_wd5e4] [wf 7/7] 2026-02-26 train 234230 val_ic +0.0786 (1232s elapsed)
+LOOP_A3_wd5e4 [long_short]         IC +0.0738 | net60 Sharpe  1.90 ann +50.83% dd -18.79% | net100  1.72 | turn 0.39 | maxW 10.0% | n 42
+LOOP_A3_wd5e4 [long_only]          IC +0.0738 | net60 Sharpe  1.87 ann +67.84% dd -29.09% | net100  1.81 | turn 0.35 | maxW 10.0% | n 42
+
+BATCH2 done

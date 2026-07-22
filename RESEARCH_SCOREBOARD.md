@@ -15,11 +15,13 @@ quintile books, hard 10% name cap, min_names=60. Panels cached under
 | B4 | 50/50 blend (score-level z) | 2023-01→2026-07 | 1.75 | 1.61 | −14.9% | 1.87 | CHAMP_blend50_tf_d12 |
 | B5 | equal-weight universe | 2023-01→2026-07 | ~1.0 gross | — | −33% | — | benchmark |
 | B1b | D1.2 | 2021-01→2026-07 (bear window) | 1.09 | — | — | — | 2022: −1.55 |
-| B3b | Transformer | 2021-01→2026-07 | 1.00 | — | — | — | 2022: +0.58 |
+| B3b | Transformer | 2021-01→2026-07 | 1.00 | — | — | — | 2022: +0.58 (shallow) |
 | B4b | 50/50 blend | 2021-01→2026-07 | **1.37** | — | — | — | 2022: −0.29 |
+| B3c | Transformer, deep 2015+ cache | 2021-01→2026-07 | 1.14 | 0.97 | −17.1% | — | 2022: −0.05; NEW reference |
+| B4c | **blend50+band10, deep cache** | 2021-01→2026-07 | **1.47** | 1.32 | **−18.7%** | — | 2022: −0.15; 2023+: 2.02; NEW reference |
 
-Bear-window caveat: early refits train on 2018–20 only → absolute levels lower; use
-for *relative* comparisons on the same panel only.
+Bear-window caveat (superseded 07-23): rows B1b–B4b used the shallow 2018+ cache;
+B3c/B4c on the 2015-backfilled cache are the standing references.
 
 ## Leaderboard (updated 2026-07-22 21:05)
 
@@ -54,6 +56,11 @@ for *relative* comparisons on the same panel only.
 | A2a | 07-23 00:55 | champion reproducibility (score_std edit runtime test) | **PASS — exact** | rerun L/S 1.91 / LO 1.93 / IC 0.0716 = original to 2 decimals; production Edit 1 validated | = | = | — |
 | E1 | 07-23 00:55 | close+D1.2 features win at 5 seeds (screen said LO 1.82) | **REJECT** | L/S 1.37 / LO 1.50, IC 0.057 ≪ close-only 1.91/1.93/0.072; close-only reconfirmed; 2-seed screens again shown unreliable | loses | loses | — |
 | A2b | 07-23 01:05 | seed-disagreement confidence filtering improves books | **REJECT** | CF1/CF2 drop-uncertain: Sharpe halves (blend 1.95→~1.0), IC 0.072→0.032–0.053, turnover ~doubles — high-std names ARE the high-signal names; CF3 shrinkage ≤ base everywhere | worse | worse | — |
+| BF | 07-23 03:25 | 2015-backfill of cache | **DONE (tool)** | 106 stocks +77k rows, 0 failures; cache 2015-01→2026-07 | n/a | n/a | bb28a5b |
+| BD | 07-23 05:50 | deep training improves bear window; blend survives | **PASS — new bear reference** | deep tf 1.14 (was 1.00); **blend50+band10 1.47 / DD −18.7% (was 1.42/−26.4%), 2023+ 2.02**; 2022 tf −0.05 (deep loses some crash-adaptivity vs +0.58 shallow) but blend −0.15 ≈ flat | blend > tf | improved | — |
+| B3 | 07-23 05:50 | vol-adjusted 20d target beats rank-20 | **REJECT** | 1.44 / 1.72 net60, IC 0.057 — loses ~0.5 despite deeper training data | loses | loses | — |
+| B4 | 07-23 05:55 | avoid-bottom target as book or veto | **REJECT — instructive** | val IC **+0.146** but OOS IC **−0.069**; L/S −1.95; veto10/20 on champion LO: 1.45/0.93 vs 1.86 base. Textbook val/OOS inversion: learnable low-risk proxy anti-predicts returns | much worse | much worse | — |
+| A3 | 07-23 05:55 | champion regularization is at an optimum | **CONFIRMED** | dropout0.3 1.86 (val IC .048), wd5e-4 1.90 (val IC .051) ≈ champion; no val-IC case for change; deep cache leaves champion-window results intact (~1.90) | ≈ | — | — |
 
 <!-- new experiments appended below by the loop -->
 

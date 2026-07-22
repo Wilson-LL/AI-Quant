@@ -96,3 +96,27 @@ Branch: research/continuous-alpha-loop-4060ti · RTX 4060 Ti (CUDA OK, torch 2.1
 - Full-universe 2015 backfill running in background (bfnnbkslw, ~2.2h).
 - GPU idle until backfill completes (BEAR-DEEP requires consistent cache).
 - Blockers: none.
+
+### 2026-07-23 03:30 — backfill done; BATCH2 launched (elapsed 6.9h)
+- Backfill complete: 106 stocks, +77,064 rows, 0 fetch failures; cache now
+  2015-01→2026-07 for the full universe. 6h checkpoint report committed (6f0a486).
+- BATCH2 launched (bbj2i28zf): BEARDEEP rank-20 2021→, B3 voladj, B4 avoid-bot,
+  A3 dropout-0.3, A3 wd-5e-4 — 5 configs, one dataset build, ~2–3h.
+- Comparability note for readout: B3/B4/A3 train on the deep cache; the 1.91
+  champion reference is shallow-cache. Fair deep-cache 2023–26 reference =
+  BEARDEEP panel's 2023+ subwindow (refit-grid offset caveat).
+- Forward cache refresh (2026-07-08→22) deferred until BATCH2 completes —
+  cache-mutation discipline.
+- Blockers: none.
+
+### 2026-07-23 06:00 — BATCH2 verdicts (elapsed 9.4h)
+- BEARDEEP: deep cache lifts bear-window blend50+band10 to **1.47 / DD −18.7%**
+  (new standing reference, was 1.42/−26.4%); tf standalone 1.14. Deep training
+  trades some 2022 crash-adaptivity (tf −0.05 vs +0.58) for higher overall level;
+  blend stays ≈ flat in 2022.
+- B3 voladj target: REJECT (1.44/1.72). B4 avoid-bottom: REJECT — val IC +0.146
+  vs OOS IC −0.069 inversion; veto variants also fail (1.45/0.93 vs 1.86).
+- A3: champion regularization confirmed at plateau (1.86/1.90, no val-IC case).
+- Next: forward cache refresh (07-08→22), daily retrain + inference on fresh
+  data, paper snapshot + blended decision book = live F3 cadence demo.
+- Blockers: none.
