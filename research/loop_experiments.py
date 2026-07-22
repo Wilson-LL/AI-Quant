@@ -38,5 +38,19 @@ def a1():
     print("\nA1 done")
 
 
+def a1b():
+    """rank-10 preset B on the bear window (OOS 2021-01→) to validate the
+    h10 blend finding out-of-window. Gates in A1B_preregistration.md."""
+    require_cuda()
+    out = os.path.join(OUT, "A1B_results.json")
+    results = {}
+    data, Xg = get_data("close_only", 60)
+    run_config(data, Xg, "LOOP_A1B_rank10_bear2021", results, out, holding=10,
+               target="tgt_rank_10", horizon=10, preset="B",
+               refit_every=126, seeds=FULL_SEEDS, recency=None,
+               oos_start="2021-01-01")
+    print("\nA1B done")
+
+
 if __name__ == "__main__":
-    {"A1": a1}[sys.argv[1] if len(sys.argv) > 1 else "A1"]()
+    {"A1": a1, "A1B": a1b}[sys.argv[1] if len(sys.argv) > 1 else "A1"]()

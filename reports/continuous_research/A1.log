@@ -1,0 +1,15 @@
+﻿[dataset] 108 stocks loaded, feature_set=close_only, seq_len=60, exec_lag=1
+[dataset] X (198621, 60, 10) (477 MB), 2164 dates 2017-01-03..2026-07-07
+
+===== LOOP_A1_rank10_presetB =====
+[LOOP_A1_rank10_presetB] [wf 1/7] 2023-01-03 train 95124 val_ic +0.0027 (122s elapsed)
+[LOOP_A1_rank10_presetB] [wf 2/7] 2023-07-20 train 107143 val_ic +0.0825 (227s elapsed)
+[LOOP_A1_rank10_presetB] [wf 3/7] 2024-01-19 train 119119 val_ic +0.0246 (361s elapsed)
+[LOOP_A1_rank10_presetB] [wf 4/7] 2024-08-02 train 131143 val_ic +0.0359 (470s elapsed)
+[LOOP_A1_rank10_presetB] [wf 5/7] 2025-02-13 train 143256 val_ic +0.0410 (574s elapsed)
+[LOOP_A1_rank10_presetB] [wf 6/7] 2025-08-15 train 155232 val_ic +0.0059 (690s elapsed)
+[LOOP_A1_rank10_presetB] [wf 7/7] 2026-02-26 train 167410 val_ic +0.1138 (864s elapsed)
+LOOP_A1_rank10_presetB [long_short] IC +0.0518 | net60 Sharpe  1.51 ann +41.43% dd -28.46% | net100  1.26 | turn 0.28 | maxW 10.0% | n 84
+LOOP_A1_rank10_presetB [long_only] IC +0.0518 | net60 Sharpe  1.78 ann +61.86% dd -29.11% | net100  1.68 | turn 0.25 | maxW 10.0% | n 84
+
+A1 done
