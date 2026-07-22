@@ -1,0 +1,15 @@
+﻿[dataset] 108 stocks loaded, feature_set=close_only, seq_len=60, exec_lag=1
+[dataset] X (276031, 60, 10) (662 MB), 2813 dates 2015-01-05..2026-07-22
+
+===== LOOP_REF23_champion_deep =====
+[LOOP_REF23_champion_deep] [wf 1/7] 2023-01-03 train 162233 val_ic +0.0349 (272s elapsed)
+[LOOP_REF23_champion_deep] [wf 2/7] 2023-07-20 train 174099 val_ic +0.0885 (457s elapsed)
+[LOOP_REF23_champion_deep] [wf 3/7] 2024-01-19 train 186137 val_ic +0.0540 (586s elapsed)
+[LOOP_REF23_champion_deep] [wf 4/7] 2024-08-02 train 198124 val_ic +0.0440 (706s elapsed)
+[LOOP_REF23_champion_deep] [wf 5/7] 2025-02-13 train 210142 val_ic +0.0329 (839s elapsed)
+[LOOP_REF23_champion_deep] [wf 6/7] 2025-08-15 train 222235 val_ic +0.0183 (974s elapsed)
+[LOOP_REF23_champion_deep] [wf 7/7] 2026-02-26 train 234230 val_ic +0.0786 (1169s elapsed)
+LOOP_REF23_champion_deep [long_short] IC +0.0664 | net60 Sharpe  1.91 ann +51.14% dd -17.40% | net100  1.74 | turn 0.37 | maxW 10.0% | n 42
+LOOP_REF23_champion_deep [long_only] IC +0.0664 | net60 Sharpe  1.91 ann +70.11% dd -27.48% | net100  1.85 | turn 0.33 | maxW 10.0% | n 42
+
+REF23 done

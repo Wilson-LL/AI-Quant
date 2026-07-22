@@ -19,6 +19,8 @@ quintile books, hard 10% name cap, min_names=60. Panels cached under
 | B4b | 50/50 blend | 2021-01→2026-07 | **1.37** | — | — | — | 2022: −0.29 |
 | B3c | Transformer, deep 2015+ cache | 2021-01→2026-07 | 1.14 | 0.97 | −17.1% | — | 2022: −0.05; NEW reference |
 | B4c | **blend50+band10, deep cache** | 2021-01→2026-07 | **1.47** | 1.32 | **−18.7%** | — | 2022: −0.15; 2023+: 2.02; NEW reference |
+| B3d | Transformer, deep cache (REF23) | 2023-01→2026-07-22 | 1.91 | 1.74 | −17.4% | 1.91 | champion window, deep = shallow |
+| B4d | **blend50+band10, deep (REF23)** | 2023-01→2026-07-22 | **2.06** | 1.92 | **−10.7%** | 1.95 | standing champion-window reference |
 
 Bear-window caveat (superseded 07-23): rows B1b–B4b used the shallow 2018+ cache;
 B3c/B4c on the 2015-backfilled cache are the standing references.

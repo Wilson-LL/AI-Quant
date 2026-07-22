@@ -142,6 +142,24 @@ def ref23():
     print("\nREF23 done")
 
 
+def batch3():
+    """Preset C (h128) on both windows for the architecture-diversity blend
+    test (BATCH3_preregistration.md)."""
+    require_cuda()
+    out = os.path.join(OUT, "BATCH3_results.json")
+    results = {}
+    data, Xg = get_data("close_only", 60)
+    run_config(data, Xg, "LOOP_C_deep_2023", results, out, holding=20,
+               target="tgt_rank_20", horizon=20, preset="C",
+               refit_every=126, seeds=[0, 1, 2], recency=None)
+    run_config(data, Xg, "LOOP_C_deep_2021", results, out, holding=20,
+               target="tgt_rank_20", horizon=20, preset="C",
+               refit_every=126, seeds=[0, 1, 2], recency=None,
+               oos_start="2021-01-01")
+    print("\nBATCH3 done")
+
+
 if __name__ == "__main__":
     {"A1": a1, "A1B": a1b, "A2": a2, "E1": e1, "WD1": wd1, "REF23": ref23,
-     "BATCH1": batch1, "BATCH2": batch2}[sys.argv[1] if len(sys.argv) > 1 else "A1"]()
+     "BATCH1": batch1, "BATCH2": batch2,
+     "BATCH3": batch3}[sys.argv[1] if len(sys.argv) > 1 else "A1"]()
