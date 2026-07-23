@@ -84,7 +84,8 @@ def _stock_features(df, feature_set):
         f["illiq_z"] = (illiq - illiq.rolling(252).mean()) / (illiq.rolling(252).std() + 1e-9)
 
     fs = feature_set
-    if fs in ("close_only", "close_d12", "curated_full", "full_d12", "sector_rel"):
+    if fs in ("close_only", "close_d12", "curated_full", "full_d12",
+              "sector_rel", "close_regime"):
         close_block()
     if fs in ("ohlc_range", "curated_full", "full_d12"):
         range_block()
@@ -113,6 +114,23 @@ def _panel_xs(panel, feature_set):
     for src, dst in _XS_SPECS.get(feature_set, []):
         panel[dst] = panel.groupby("date")[src].rank(pct=True) - 0.5
 
+    if feature_set == "close_regime":
+        # market-state conditioning columns (per-date, causal, broadcast to all
+        # names): equal-weight index drawdown, market vol, market momentum,
+        # breadth. Warmup NaNs are excluded by the all-finite window rule.
+        dm = panel.groupby("date")["log_ret_1"].mean().sort_index()
+        ex = np.exp(dm.cumsum())
+        mkt_dd = ex / ex.rolling(252, min_periods=60).max() - 1.0
+        mkt_vol = dm.rolling(20).std()
+        mkt_mom = ex.pct_change(20)
+        breadth = (panel.assign(above=(panel["px_over_ma20"] > 0))
+                        .groupby("date")["above"].mean() - 0.5)
+        for name, ser in [("mkt_dd", mkt_dd), ("mkt_vol20", mkt_vol),
+                          ("mkt_mom20", mkt_mom), ("breadth", breadth)]:
+            panel[name] = panel["date"].map(ser)
+        return FEATURE_COLS["close_only"] + ["mkt_dd", "mkt_vol20",
+                                             "mkt_mom20", "breadth"]
+
     if feature_set in ("sector_rel", "curated_full", "full_d12"):
         g = panel.groupby(["date", "sector"])
         gu = panel.groupby("date")
@@ -137,6 +155,10 @@ FEATURE_COLS = {
     "close_d12": ["log_ret_1", "mom_5", "mom_20", "mom_60", "mom_126_5",
                   "vol_20", "vol_60", "dist_hi_60", "dist_lo_60", "px_over_ma20",
                   "xs_d12_rank"],
+    "close_regime": ["log_ret_1", "mom_5", "mom_20", "mom_60", "mom_126_5",
+                     "vol_20", "vol_60", "dist_hi_60", "dist_lo_60",
+                     "px_over_ma20", "mkt_dd", "mkt_vol20", "mkt_mom20",
+                     "breadth"],
     "ohlc_range": ["log_ret_1", "hl_range", "true_range", "atr_ratio", "close_loc",
                    "oc_ret", "overnight_gap", "range_z"],
     "volume_block": ["log_ret_1", "vol_z", "turn_z", "vol_ma_ratio", "log_vol_chg",
