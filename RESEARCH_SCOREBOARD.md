@@ -70,6 +70,7 @@ B3c/B4c on the 2015-backfilled cache are the standing references.
 | B5 | 07-23 10:10 | preset-C architecture-diversity blend beats refs | **REJECT — line closed** | C-deep standalone 1.82/1.88 (2023), 1.13/1.28 (2021, DD −14.0% best-in-class); 3-way blend 2.05/−9.75% ties champion window but loses bear (1.37 vs 1.47, 2022 −0.51); BC50 worse everywhere | ties one window | fails dual gate | — |
 | ES | 07-23 11:45 | excess-vs-sector target at 5 seeds (screen LO 1.78) | **REJECT — promising list emptied** | standalone 1.66/1.76 (2023), 1.17/1.29 (2021), 2022 −0.86; blend 1.54/1.17 ≪ refs 2.06/1.47 | loses | loses | — |
 | RL1 | 07-23 14:30 | pairwise ranking loss beats MSE-on-rank | **REJECT — line closed by val-IC gate** | val IC 0.036 < champion 0.050 (selection metric decides); OOS confirms: 1.80/0.99 standalone, blends 1.80/1.24 ≪ 2.06/1.47; smoke promise didn't scale | loses | loses | — |
+| E3 | 07-23 17:35 | market-regime features fix 2022 (queue v4) | **REJECT — regime-feature line closed; A4/B6 cancelled** | standalone 1.26/0.96, IC diluted (0.060/0.017); blend 1.89/1.27 < refs; **2022 −0.30 worse than −0.15** — opposite of the target effect. Note: val IC marginally favored E3 (0.052 vs 0.050) — marginal val-IC edges are not decision-grade | loses | loses | — |
 
 <!-- new experiments appended below by the loop -->
 

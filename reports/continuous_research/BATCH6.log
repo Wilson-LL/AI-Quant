@@ -1,0 +1,30 @@
+﻿[dataset] 108 stocks loaded, feature_set=close_regime, seq_len=60, exec_lag=1
+[dataset] X (276031, 60, 14) (927 MB), 2813 dates 2015-01-05..2026-07-22
+
+===== LOOP_E3_regime_2023 =====
+[LOOP_E3_regime_2023] [wf 1/7] 2023-01-03 train 162233 val_ic +0.0295 (253s elapsed)
+[LOOP_E3_regime_2023] [wf 2/7] 2023-07-20 train 174099 val_ic +0.1115 (510s elapsed)
+[LOOP_E3_regime_2023] [wf 3/7] 2024-01-19 train 186137 val_ic +0.0596 (676s elapsed)
+[LOOP_E3_regime_2023] [wf 4/7] 2024-08-02 train 198124 val_ic +0.0341 (798s elapsed)
+[LOOP_E3_regime_2023] [wf 5/7] 2025-02-13 train 210142 val_ic +0.0350 (947s elapsed)
+[LOOP_E3_regime_2023] [wf 6/7] 2025-08-15 train 222235 val_ic +0.0165 (1104s elapsed)
+[LOOP_E3_regime_2023] [wf 7/7] 2026-02-26 train 234230 val_ic +0.0780 (1332s elapsed)
+LOOP_E3_regime_2023 [long_short]   IC +0.0604 | net60 Sharpe  1.26 ann +34.65% dd -22.77% | net100  1.09 | turn 0.39 | maxW 10.0% | n 42
+LOOP_E3_regime_2023 [long_only]    IC +0.0604 | net60 Sharpe  1.64 ann +57.41% dd -29.09% | net100  1.57 | turn 0.37 | maxW 10.0% | n 42
+
+===== LOOP_E3_regime_2021 =====
+[LOOP_E3_regime_2021] [wf 1/11] 2021-01-04 train 115852 val_ic +0.1420 (152s elapsed)
+[LOOP_E3_regime_2021] [wf 2/11] 2021-07-15 train 127692 val_ic +0.1532 (238s elapsed)
+[LOOP_E3_regime_2021] [wf 3/11] 2022-01-13 train 139724 val_ic +0.0120 (404s elapsed)
+[LOOP_E3_regime_2021] [wf 4/11] 2022-07-26 train 151622 val_ic -0.0702 (497s elapsed)
+[LOOP_E3_regime_2021] [wf 5/11] 2023-02-02 train 163490 val_ic +0.0165 (805s elapsed)
+[LOOP_E3_regime_2021] [wf 6/11] 2023-08-10 train 175464 val_ic +0.1351 (1022s elapsed)
+[LOOP_E3_regime_2021] [wf 7/11] 2024-02-19 train 187409 val_ic +0.0646 (1146s elapsed)
+[LOOP_E3_regime_2021] [wf 8/11] 2024-08-22 train 199512 val_ic +0.0428 (1259s elapsed)
+[LOOP_E3_regime_2021] [wf 9/11] 2025-03-06 train 211533 val_ic +0.0097 (1380s elapsed)
+[LOOP_E3_regime_2021] [wf 10/11] 2025-09-04 train 223500 val_ic +0.0252 (1552s elapsed)
+[LOOP_E3_regime_2021] [wf 11/11] 2026-03-19 train 235621 val_ic +0.1034 (1733s elapsed)
+LOOP_E3_regime_2021 [long_short]   IC +0.0171 | net60 Sharpe  0.96 ann +23.09% dd -18.18% | net100  0.80 | turn 0.35 | maxW 10.0% | n 67
+LOOP_E3_regime_2021 [long_only]    IC +0.0171 | net60 Sharpe  1.25 ann +39.37% dd -29.57% | net100  1.18 | turn 0.35 | maxW 10.0% | n 67
+
+BATCH6 done

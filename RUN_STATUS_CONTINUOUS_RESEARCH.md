@@ -151,3 +151,25 @@ Branch: research/continuous-alpha-loop-4060ti · RTX 4060 Ti (CUDA OK, torch 2.1
   new regime evidence in the paper ledger, full-field data (~2027-01), or
   user direction.
 - Blockers: none (idle pending next TWSE close for the daily cycle).
+
+### 2026-07-23 15:40 — loop continued on user instruction; queue v4 (elapsed 19h)
+- Daily refresh: +0 rows (TWSE 2026-07-23 not yet published; retry after E3).
+- Queue v4: (1) **E3 close+market-regime features** — the one untested Track-E
+  set, targets the 2022 weakness at feature level (distinct from rejected
+  portfolio-level C1/C3); (2) daily cycle when 07-23 data lands; (3) B6
+  drawdown-adjusted target only if E3 shows the regime axis carries signal.
+- close_regime implemented (4 causal market columns; smoke-tested) — commit
+  4e19cf3. E3 dual-window on GPU (b3782mpks).
+- Blockers: none.
+
+### 2026-07-23 17:45 — E3 rejected; queue v4 experimental items closed (elapsed 21.1h)
+- E3 market-regime features: REJECT — IC diluted, 2022 worsened (−0.30 vs
+  −0.15), blends below both refs. A4 (head-level) and B6 (conditional) cancelled
+  per pre-registration. Lesson logged: marginal val-IC edges (±0.005) are not
+  decision-grade; dual-window OOS gates decided correctly.
+- Daily refresh retried ×2: +0 rows — TWSE 2026-07-23 EOD not yet published.
+- **Loop state: operational cadence.** 14 challengers rejected across queues
+  v1–v4; blend50+band10 unbeaten (refs 2.06/−10.7% and 1.47/−18.7%). Next
+  triggers: TWSE data publication (daily cycle), paper-ledger regime evidence,
+  full-field data (~2027-01), user direction.
+- Blockers: none.
