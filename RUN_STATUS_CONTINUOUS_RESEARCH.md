@@ -173,3 +173,19 @@ Branch: research/continuous-alpha-loop-4060ti · RTX 4060 Ti (CUDA OK, torch 2.1
   triggers: TWSE data publication (daily cycle), paper-ledger regime evidence,
   full-field data (~2027-01), user direction.
 - Blockers: none.
+
+### 2026-07-24 — GPU RESEARCH MODE (user-directed); queue v5 running
+- GPU check: RTX 4060 Ti, 13.1/16.4 GB free; **FFXIV + Discord + browsers hold
+  ~3 GB (user warned; proceeding — VRAM ample; max_concurrent stays 1 while
+  the game runs).** Hourly watcher stopped (scheduler owns daily ops, runs
+  them only at queue completion — no cache-mutation races).
+- Built: gpu_research_scheduler.py (crash-safe queue, OOM half-seed retry,
+  val-IC auto-promotion, bear auto-spawn, JSONL logging); 2 new targets
+  (spread, dd-adjusted); 2 curated feature sets (close_range, close_liq);
+  listwise loss (Edit 3). Commit 146022c.
+- Queue v5: smoke + 12 screens + 7-seed full + auto-promotions. Scheduler
+  running (bh3mp3q9n): smoke mid-walkforward, GPU 90%, 5.8 GB.
+- CPU cells done meanwhile: D5 varpar REJECT, D6 topN REJECT, D7
+  band15+cap7.5 = documented conservative option (1.98/−10.6% & 1.46/−16.1%).
+- Next: scheduler completion → screen verdicts, promotion readouts, checkpoint.
+- Blockers: none.

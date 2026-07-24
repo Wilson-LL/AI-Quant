@@ -71,6 +71,9 @@ B3c/B4c on the 2015-backfilled cache are the standing references.
 | ES | 07-23 11:45 | excess-vs-sector target at 5 seeds (screen LO 1.78) | **REJECT — promising list emptied** | standalone 1.66/1.76 (2023), 1.17/1.29 (2021), 2022 −0.86; blend 1.54/1.17 ≪ refs 2.06/1.47 | loses | loses | — |
 | RL1 | 07-23 14:30 | pairwise ranking loss beats MSE-on-rank | **REJECT — line closed by val-IC gate** | val IC 0.036 < champion 0.050 (selection metric decides); OOS confirms: 1.80/0.99 standalone, blends 1.80/1.24 ≪ 2.06/1.47; smoke promise didn't scale | loses | loses | — |
 | E3 | 07-23 17:35 | market-regime features fix 2022 (queue v4) | **REJECT — regime-feature line closed; A4/B6 cancelled** | standalone 1.26/0.96, IC diluted (0.060/0.017); blend 1.89/1.27 < refs; **2022 −0.30 worse than −0.15** — opposite of the target effect. Note: val IC marginally favored E3 (0.052 vs 0.050) — marginal val-IC edges are not decision-grade | loses | loses | — |
+| D5 | 07-24 | variance-parity leg weighting (queue v5 CPU) | **REJECT** | 1.87/1.28 L/S vs refs 2.06/1.47 — risk-based weighting loses again (invvol precedent) | — | worse | — |
+| D6 | 07-24 | concentrated top-10/15 LO books | **REJECT** | top10 LO 1.94/−35% (champ), 1.32/−43% (bear); Sharpe ≈ quintile at far worse DD | — | worse risk | — |
+| D7 | 07-24 | conservative spec band15+cap7.5 | **DOCUMENTED OPTION (near-gate)** | 1.98/−10.6% champ (−0.08 vs ref, misses 0.05 tol), 1.46/−16.1% bear (+2.6pp DD, turn 0.28/0.22) — the conservative production variant | — | ≈, safer | — |
 
 <!-- new experiments appended below by the loop -->
 
