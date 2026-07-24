@@ -1,0 +1,16 @@
+{
+  "SCHED_A8_seeds7_full": {
+    "base": 2.147,
+    "p5": 1.607,
+    "p50": 1.916,
+    "p95": 2.169,
+    "positive_frac": 1.0
+  },
+  "SCHED_BEAR_A8_seeds7_full": {
+    "base": 1.443,
+    "p5": 1.14,
+    "p50": 1.372,
+    "p95": 1.542,
+    "positive_frac": 1.0
+  }
+}

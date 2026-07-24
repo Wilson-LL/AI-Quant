@@ -83,7 +83,8 @@ B3c/B4c on the 2015-backfilled cache are the standing references.
 | S120 | 07-24 18:00 | seq120 at 5 seeds | **REJECT — sequence axis closed** | blend 1.659/1.747 vs 2.147/1.99; decision-grade ordering 40 < 60 > 90 > 120 | loses | loses | 89c586e |
 | D7b | 07-24 18:10 | conservative spec on 7-seed panels | **ADOPT as recommended deployment spec** | band15+cap7.5 on 7-seed signal: **2.15 champ (= ref), 1.44 bear (= ref), bear DD −15.2% (+2.8pp), 2022 −0.08, turn 0.29/0.23, maxW 7.5%** (bull DD −11.2%, 0.6pp worse — noted). Shadow books stay band10 until quarter boundary | = , safer | = , safer | 4341476 |
 | A9 | 07-24 20:00 | 9-seed: does the seed curve saturate? | **SATURATION — keep 7** | 2023 blend 2.173 (+0.026, within tol); bear 1.437 (tie) with DD −20.4% (2.4pp worse) and 2022 −0.32 (worse). Curve 5→2.06, 7→2.147, 9→2.173/flat-bear; 9 costs +28% retrain for no dual-window gain. (Redundant auto-spawned BEAR_A9_seeds9_2023 failed on a None-wd bug — fixed; its window was already covered by A9_seeds9_2021, marked redundant, not hidden) | — | keep 7 | — |
-| E4p | 07-24 20:10 | production Edit 4: daily retrain 5→7 seeds | **DONE — tested** | 7 checkpoints in 304 s, val ICs +0.131…+0.156, inference consumed unchanged; 07-24 books regenerated on adopted spec (22 held, maxW 10.0%) | — | — | — |
+| E4p | 07-24 20:10 | production Edit 4: daily retrain 5→7 seeds | **DONE — tested** | 7 checkpoints in 304 s, val ICs +0.131…+0.156, inference consumed unchanged; 07-24 books regenerated on adopted spec (22 held, maxW 10.0%) | — | — | 83afcb8 |
+| R2 | 07-24 21:00 | 7-seed blend universe bootstrap (200×, drop 20%) | **PASS** | champ p5 1.61 / p50 1.92 / p95 2.17; bear p5 1.14 / p50 1.37; 100% positive both. Note: base ≈ p95 on both — point estimates are name-composition-optimistic; bootstrap medians (1.92/1.37) are the conservative planning numbers | robust | robust | — |
 
 <!-- new experiments appended below by the loop -->
 

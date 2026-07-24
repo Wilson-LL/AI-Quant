@@ -1,0 +1,13 @@
+﻿[panel] SCHED_A8_seeds7_full.csv.gz: 91168 rows, 2023-01-03..2026-07-23
+SCHED_A8_seeds7_full 50 /200
+SCHED_A8_seeds7_full 100 /200
+SCHED_A8_seeds7_full 150 /200
+SCHED_A8_seeds7_full 200 /200
+SCHED_A8_seeds7_full {'base': 2.147, 'p5': 1.607, 'p50': 1.916, 'p95': 2.169, 'positive_frac': 1.0}
+[panel] SCHED_BEAR_A8_seeds7_full.csv.gz: 142775 rows, 2021-01-04..2026-07-23
+SCHED_BEAR_A8_seeds7_full 50 /200
+SCHED_BEAR_A8_seeds7_full 100 /200
+SCHED_BEAR_A8_seeds7_full 150 /200
+SCHED_BEAR_A8_seeds7_full 200 /200
+SCHED_BEAR_A8_seeds7_full {'base': 1.443, 'p5': 1.14, 'p50': 1.372, 'p95': 1.542, 'positive_frac': 1.0}
+bootstrap done
