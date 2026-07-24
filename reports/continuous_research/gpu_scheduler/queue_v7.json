@@ -1,0 +1,97 @@
+[
+  {
+    "id": "SR1_disjoint_seeds_2023",
+    "phase": "promoted",
+    "order": 1,
+    "status": "running",
+    "hypothesis": "7-seed blend result is seed-set independent: disjoint seeds 10-16 reproduce 2.147/-10.6% within noise",
+    "feature_set": "close_only",
+    "target": "tgt_rank_20",
+    "seq_len": 60,
+    "preset_base": "B",
+    "seeds": [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+    ],
+    "eval_blend": true,
+    "gate": "blend L/S net60 within +-0.15 of 2.147 -> PASS (robust); larger gap -> seed-sensitivity flag on B4e",
+    "expected_runtime_min": 60
+  },
+  {
+    "id": "SR2_disjoint_seeds_2021",
+    "phase": "bear",
+    "order": 2,
+    "status": "pending",
+    "hypothesis": "same for the bear window: seeds 10-16 vs 1.443/-18.0%",
+    "feature_set": "close_only",
+    "target": "tgt_rank_20",
+    "seq_len": 60,
+    "preset_base": "B",
+    "seeds": [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+    ],
+    "oos_start": "2021-01-01",
+    "eval_blend": true,
+    "gate": "within +-0.15 of 1.443 -> PASS",
+    "expected_runtime_min": 60
+  },
+  {
+    "id": "RF1_refit63_2023",
+    "phase": "promoted",
+    "order": 3,
+    "status": "pending",
+    "hypothesis": "reference is not an artifact of the 126d refit grid: quarterly refits (63d) reproduce the champion-window blend",
+    "feature_set": "close_only",
+    "target": "tgt_rank_20",
+    "seq_len": 60,
+    "preset_base": "B",
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "refit_every": 63,
+    "eval_blend": true,
+    "gate": "blend within +-0.15 of 2.147 -> protocol-robust; report cost (2x refits)",
+    "expected_runtime_min": 80
+  },
+  {
+    "id": "W22_oos2022_start",
+    "phase": "bear",
+    "order": 4,
+    "status": "pending",
+    "hypothesis": "third-window read: OOS starting 2022-01 (crash-first) for the adopted 7-seed spec",
+    "feature_set": "close_only",
+    "target": "tgt_rank_20",
+    "seq_len": 60,
+    "preset_base": "B",
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "oos_start": "2022-01-01",
+    "eval_blend": true,
+    "gate": "descriptive: blend full-window + 2022 yearly reported as the crash-first reference (no pass/fail - new window)",
+    "expected_runtime_min": 70
+  }
+]

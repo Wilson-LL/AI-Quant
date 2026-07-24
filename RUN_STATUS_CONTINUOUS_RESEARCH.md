@@ -189,3 +189,17 @@ Branch: research/continuous-alpha-loop-4060ti · RTX 4060 Ti (CUDA OK, torch 2.1
   band15+cap7.5 = documented conservative option (1.98/−10.6% & 1.46/−16.1%).
 - Next: scheduler completion → screen verdicts, promotion readouts, checkpoint.
 - Blockers: none.
+
+### 2026-07-24 20:30 — GPU-mode day summary (elapsed since mode start ~9h)
+- Queue v5: 19 GPU configs, 0 unresolved failures → **7-seed spec ADOPTED**
+  (2.147/−10.6% & 1.443/−18.0%, refs B4e/B4f); seq axis closed (40<60>90>120);
+  ranking-loss family closed; E4/E5 features rejected; B6 inversion #2.
+- Queue v6: 9-seed = saturation (keep 7). Edit 4 wires 7 seeds into daily
+  retrain (tested live: 7 ckpts / 304 s); 07-24 books on adopted spec.
+- D7b: conservative construction (band15+cap7.5) = recommended deployment spec
+  on the 7-seed signal (Sharpe-identical, bear DD +2.8pp, 2022 −0.08).
+- Queue v7 running (GPU): disjoint-seed replication ×2 windows, refit-63
+  sensitivity, crash-first 2022 window. CPU: 7-seed bootstrap running.
+- GPU utilization: near-continuous training since mode start; VRAM ~2.2–2.9 GB
+  alongside FFXIV (~3 GB); 0 OOM.
+- Blockers: none.
