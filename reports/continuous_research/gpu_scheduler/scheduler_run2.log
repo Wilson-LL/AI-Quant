@@ -2,3 +2,111 @@
 ===== BEAR_A8_seeds7_full (bear) — bear-window validation of 7-seed ensemble (champion-window blend 2.147/-10.6% be
 [dataset] 108 stocks loaded, feature_set=close_only, seq_len=60, exec_lag=1
 [dataset] X (276139, 60, 10) (663 MB), 2814 dates 2015-01-05..2026-07-23
+[BEAR_A8_seeds7_full] [wf 1/11] 2021-01-04 train 115852 val_ic +0.1405 (206s elapsed)
+[BEAR_A8_seeds7_full] [wf 2/11] 2021-07-15 train 127692 val_ic +0.1483 (359s elapsed)
+[BEAR_A8_seeds7_full] [wf 3/11] 2022-01-13 train 139724 val_ic +0.0008 (611s elapsed)
+[BEAR_A8_seeds7_full] [wf 4/11] 2022-07-26 train 151622 val_ic -0.0828 (746s elapsed)
+[BEAR_A8_seeds7_full] [wf 5/11] 2023-02-02 train 163490 val_ic +0.0056 (1050s elapsed)
+[BEAR_A8_seeds7_full] [wf 6/11] 2023-08-10 train 175464 val_ic +0.1057 (1346s elapsed)
+[BEAR_A8_seeds7_full] [wf 7/11] 2024-02-19 train 187409 val_ic +0.0609 (1551s elapsed)
+[BEAR_A8_seeds7_full] [wf 8/11] 2024-08-22 train 199512 val_ic +0.0435 (1729s elapsed)
+[BEAR_A8_seeds7_full] [wf 9/11] 2025-03-06 train 211533 val_ic +0.0065 (1910s elapsed)
+[BEAR_A8_seeds7_full] [wf 10/11] 2025-09-04 train 223500 val_ic +0.0153 (2142s elapsed)
+[BEAR_A8_seeds7_full] [wf 11/11] 2026-03-19 train 235621 val_ic +0.1029 (2424s elapsed)
+  [lo band10]                      IC +0.0289 | net60 Sharpe  0.96 ann +21.67% dd -20.40% | net100  0.80 | turn 0.34 | maxW 10.0% | n 67
+  [lo band10]                      IC +0.0289 | net60 Sharpe  1.19 ann +36.35% dd -30.29% | net100  1.14 | turn 0.29 | maxW 10.0% | n 67
+  [lo band10]                      IC +0.0357 | net60 Sharpe  1.44 ann +34.86% dd -18.03% | net100  1.30 | turn 0.30 | maxW 10.0% | n 67
+  [lo band10]                      IC +0.0357 | net60 Sharpe  1.46 ann +44.55% dd -26.04% | net100  1.41 | turn 0.26 | maxW 10.0% | n 67
+
+===== P5_A5_L1_screen (promoted) — 5-seed confirmation of A5_L1 (within-family val IC 0.0477; cross-target val ICs 
+[P5_A5_L1_screen] [wf 1/7] 2023-01-03 train 162233 val_ic +0.0238 (185s elapsed)
+[P5_A5_L1_screen] [wf 2/7] 2023-07-20 train 174099 val_ic +0.1134 (357s elapsed)
+[P5_A5_L1_screen] [wf 3/7] 2024-01-19 train 186137 val_ic +0.0473 (449s elapsed)
+[P5_A5_L1_screen] [wf 4/7] 2024-08-02 train 198124 val_ic +0.0282 (538s elapsed)
+[P5_A5_L1_screen] [wf 5/7] 2025-02-13 train 210142 val_ic +0.0283 (637s elapsed)
+[P5_A5_L1_screen] [wf 6/7] 2025-08-15 train 222235 val_ic +0.0183 (747s elapsed)
+[P5_A5_L1_screen] [wf 7/7] 2026-02-26 train 234230 val_ic +0.0798 (883s elapsed)
+  [lo band10]                      IC +0.0632 | net60 Sharpe  1.58 ann +40.88% dd -18.36% | net100  1.40 | turn 0.38 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0632 | net60 Sharpe  1.75 ann +59.83% dd -26.80% | net100  1.68 | turn 0.33 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0741 | net60 Sharpe  1.86 ann +44.66% dd  -9.90% | net100  1.71 | turn 0.31 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0741 | net60 Sharpe  1.75 ann +57.98% dd -24.13% | net100  1.70 | turn 0.27 | maxW 10.0% | n 42
+
+===== A7_seq90_screen (screen) — seq 90 (longer context) beats seq 60
+[dataset] 108 stocks loaded, feature_set=close_only, seq_len=90, exec_lag=1
+[dataset] X (272899, 90, 10) (982 MB), 2814 dates 2015-01-05..2026-07-23
+[A7_seq90_screen] [wf 1/7] 2023-01-03 train 159365 val_ic +0.0222 (256s elapsed)
+[A7_seq90_screen] [wf 2/7] 2023-07-20 train 171234 val_ic +0.1036 (501s elapsed)
+[A7_seq90_screen] [wf 3/7] 2024-01-19 train 183245 val_ic +0.0543 (659s elapsed)
+[A7_seq90_screen] [wf 4/7] 2024-08-02 train 195235 val_ic +0.0500 (805s elapsed)
+[A7_seq90_screen] [wf 5/7] 2025-02-13 train 207253 val_ic +0.0348 (948s elapsed)
+[A7_seq90_screen] [wf 6/7] 2025-08-15 train 219343 val_ic +0.0133 (1136s elapsed)
+[A7_seq90_screen] [wf 7/7] 2026-02-26 train 231320 val_ic +0.0852 (1413s elapsed)
+  [lo band10]                      IC +0.0738 | net60 Sharpe  1.53 ann +37.26% dd -13.26% | net100  1.37 | turn 0.33 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0738 | net60 Sharpe  1.68 ann +56.03% dd -26.01% | net100  1.62 | turn 0.29 | maxW 10.0% | n 42
+
+===== A7_seq120_screen (screen) — seq 120 (half-year context) beats seq 60
+[dataset] 108 stocks loaded, feature_set=close_only, seq_len=120, exec_lag=1
+[dataset] X (269659, 120, 10) (1294 MB), 2814 dates 2015-01-05..2026-07-23
+[A7_seq120_screen] [wf 1/7] 2023-01-03 train 156500 val_ic +0.0153 (205s elapsed)
+[A7_seq120_screen] [wf 2/7] 2023-07-20 train 168369 val_ic +0.1177 (721s elapsed)
+[A7_seq120_screen] [wf 3/7] 2024-01-19 train 180353 val_ic +0.0520 (929s elapsed)
+[A7_seq120_screen] [wf 4/7] 2024-08-02 train 192346 val_ic +0.0532 (1122s elapsed)
+[A7_seq120_screen] [wf 5/7] 2025-02-13 train 204364 val_ic +0.0180 (1326s elapsed)
+[A7_seq120_screen] [wf 6/7] 2025-08-15 train 216450 val_ic +0.0134 (1591s elapsed)
+[A7_seq120_screen] [wf 7/7] 2026-02-26 train 228428 val_ic +0.0899 (1821s elapsed)
+  [lo band10]                      IC +0.0687 | net60 Sharpe  1.71 ann +47.56% dd -16.47% | net100  1.60 | turn 0.24 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0687 | net60 Sharpe  1.65 ann +55.43% dd -30.45% | net100  1.61 | turn 0.21 | maxW 10.0% | n 42
+[promote] queued P5_B6_ddadj_screen
+[promote] queued P5_A7_seq90_screen
+
+===== P5_B6_ddadj_screen (promoted) — 5-seed confirmation of screen winner B6_ddadj_screen (val IC 0.1578)
+[dataset] 108 stocks loaded, feature_set=close_only, seq_len=60, exec_lag=1
+[dataset] X (276139, 60, 10) (663 MB), 2814 dates 2015-01-05..2026-07-23
+[P5_B6_ddadj_screen] [wf 1/7] 2023-01-03 train 162233 val_ic +0.2003 (132s elapsed)
+[P5_B6_ddadj_screen] [wf 2/7] 2023-07-20 train 174099 val_ic +0.0662 (242s elapsed)
+[P5_B6_ddadj_screen] [wf 3/7] 2024-01-19 train 186137 val_ic +0.1484 (376s elapsed)
+[P5_B6_ddadj_screen] [wf 4/7] 2024-08-02 train 198124 val_ic +0.2199 (551s elapsed)
+[P5_B6_ddadj_screen] [wf 5/7] 2025-02-13 train 210142 val_ic +0.2328 (728s elapsed)
+[P5_B6_ddadj_screen] [wf 6/7] 2025-08-15 train 222235 val_ic +0.1658 (930s elapsed)
+[P5_B6_ddadj_screen] [wf 7/7] 2026-02-26 train 234230 val_ic +0.0815 (1259s elapsed)
+  [lo band10]                      IC -0.0601 | net60 Sharpe -1.94 ann -43.43% dd -86.44% | net100 -2.03 | turn 0.24 | maxW 10.0% | n 42
+  [lo band10]                      IC -0.0601 | net60 Sharpe  0.02 ann  +0.18% dd -18.76% | net100 -0.09 | turn 0.20 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0128 | net60 Sharpe -0.46 ann  -8.49% dd -37.91% | net100 -0.64 | turn 0.33 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0128 | net60 Sharpe  1.06 ann +15.45% dd -19.57% | net100  0.96 | turn 0.28 | maxW 10.0% | n 42
+
+===== P5_A7_seq90_screen (promoted) — 5-seed confirmation of screen winner A7_seq90_screen (val IC 0.05191)
+[dataset] 108 stocks loaded, feature_set=close_only, seq_len=90, exec_lag=1
+[dataset] X (272899, 90, 10) (982 MB), 2814 dates 2015-01-05..2026-07-23
+[P5_A7_seq90_screen] [wf 1/7] 2023-01-03 train 159365 val_ic +0.0386 (511s elapsed)
+[P5_A7_seq90_screen] [wf 2/7] 2023-07-20 train 171234 val_ic +0.1058 (935s elapsed)
+[P5_A7_seq90_screen] [wf 3/7] 2024-01-19 train 183245 val_ic +0.0518 (1184s elapsed)
+[P5_A7_seq90_screen] [wf 4/7] 2024-08-02 train 195235 val_ic +0.0487 (1406s elapsed)
+[P5_A7_seq90_screen] [wf 5/7] 2025-02-13 train 207253 val_ic +0.0321 (1631s elapsed)
+[P5_A7_seq90_screen] [wf 6/7] 2025-08-15 train 219343 val_ic +0.0134 (1927s elapsed)
+[P5_A7_seq90_screen] [wf 7/7] 2026-02-26 train 231320 val_ic +0.0853 (2427s elapsed)
+  [lo band10]                      IC +0.0708 | net60 Sharpe  1.66 ann +40.41% dd -14.85% | net100  1.50 | turn 0.33 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0708 | net60 Sharpe  1.78 ann +60.78% dd -27.27% | net100  1.73 | turn 0.29 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0764 | net60 Sharpe  1.81 ann +46.19% dd -12.36% | net100  1.68 | turn 0.29 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0764 | net60 Sharpe  1.75 ann +60.49% dd -28.43% | net100  1.70 | turn 0.26 | maxW 10.0% | n 42
+
+[scheduler] queue complete: 18 done, 0 failed
+.venv\Scripts\python.exe : Exception in thread Thread-1 (_readerthread):
+At line:1 char:302
++ ... tch {} } }; .venv\Scripts\python.exe -u research\gpu_research_schedul ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Exception in th..._readerthread)::String) [], RemoteExcepti 
+   on
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Traceback (most recent call last):
+  File "C:\Users\wilso\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1073, in 
+_bootstrap_inner
+    self.run()
+  File "C:\Users\wilso\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1010, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\wilso\AppData\Local\Programs\Python\Python312\Lib\subprocess.py", line 1599, in 
+_readerthread
+    buffer.append(fh.read())
+                  ^^^^^^^^^
+UnicodeDecodeError: 'cp950' codec can't decode byte 0xe2 in position 2752: illegal multibyte sequence
+[daily] 

@@ -20,7 +20,9 @@ quintile books, hard 10% name cap, min_names=60. Panels cached under
 | B3c | Transformer, deep 2015+ cache | 2021-01→2026-07 | 1.14 | 0.97 | −17.1% | — | 2022: −0.05; NEW reference |
 | B4c | **blend50+band10, deep cache** | 2021-01→2026-07 | **1.47** | 1.32 | **−18.7%** | — | 2022: −0.15; 2023+: 2.02; NEW reference |
 | B3d | Transformer, deep cache (REF23) | 2023-01→2026-07-22 | 1.91 | 1.74 | −17.4% | 1.91 | champion window, deep = shallow |
-| B4d | **blend50+band10, deep (REF23)** | 2023-01→2026-07-22 | **2.06** | 1.92 | **−10.7%** | 1.95 | standing champion-window reference |
+| B4d | blend50+band10, deep (REF23) | 2023-01→2026-07-22 | 2.06 | 1.92 | −10.7% | 1.95 | superseded by B4e |
+| B4e | **blend50+band10, 7-seed (A8)** | 2023-01→2026-07-23 | **2.147** | 2.00 | **−10.6%** | 1.99 | STANDING champion-window reference |
+| B4f | **blend50+band10, 7-seed bear** | 2021-01→2026-07-23 | **1.443** | 1.32 | **−18.0%** | 1.46 | STANDING bear reference; 2022 −0.15 |
 
 Bear-window caveat (superseded 07-23): rows B1b–B4b used the shallow 2018+ cache;
 B3c/B4c on the 2015-backfilled cache are the standing references.
@@ -76,7 +78,8 @@ B3c/B4c on the 2015-backfilled cache are the standing references.
 | D7 | 07-24 | conservative spec band15+cap7.5 | **DOCUMENTED OPTION (near-gate)** | 1.98/−10.6% champ (−0.08 vs ref, misses 0.05 tol), 1.46/−16.1% bear (+2.6pp DD, turn 0.28/0.22) — the conservative production variant | — | ≈, safer | — |
 | V5s | 07-24 | queue v5 screens (3-seed, scheduler run 1) | **screens read** | family val ICs: wd1e3 .0485 > L1 .0477 > do1 .0464 > wd1e5 .0459 > L3 .0427 > listwise .0345; OOS(not selective): L3 1.89, wd1e5 1.81, L1 1.75. **REJECT at screen: E4_range (LS 0.24), E5_liq (1.01, IC .020), RL2 listwise (val-IC gate — ranking-loss family closed for good)**. B7_spread excluded from family comparison (own line, 1.46 unremarkable) | — | — | 94c52c6 |
 | B6s | 07-24 | dd-adjusted target screen | **INVERSION #2 (B4 pattern)** | val IC +0.158 / OOS LS **−1.98** — risk-proxy targets inflate val IC and invert OOS; P5 inversion check queued with pre-declared expected REJECT; promotion rule fixed (val IC within-family only) | — | — | — |
-| A8 | 07-24 | 7-seed ensemble (queue v5) | **CHAMPION-WINDOW WIN — bear run queued** | **blend50+band10: L/S 2.147 / DD −10.6%, net100 2.00, LO 1.99** vs ref 2.06/−10.7%/1.95; standalone band10 1.67 (7-seed standalone unremarkable — the blend is what improved) | blend +0.09 | pending bear | — |
+| A8 | 07-24 | 7-seed ensemble (queue v5) | **ADOPTED — new production spec** | champion window **2.147 / −10.6%** (+0.088 vs ref), bear window **1.443 / −18.0%, 2022 −0.15** (−0.027 vs ref, within 0.05 tol; DD 0.7pp better). Cost: +2 seeds ≈ +40% retrain (~6 min/day, trivial). New refs B4e/B4f set | +0.09 | supersedes | — |
+| P5s | 07-24 | 5-seed promotions (run 2) | **all REJECT** | A5_L1 blend 1.86/−9.9%; **seq90 blend 1.815 despite family-best val IC 0.054 — val-IC edges ≠ OOS wins (again)**; B6 5-seed inversion CONFIRMED (val 0.159/OOS −1.94, blend −0.46) — B4/B6 pattern now twice 5-seed-confirmed | lose | lose | — |
 
 <!-- new experiments appended below by the loop -->
 
