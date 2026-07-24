@@ -19,3 +19,6 @@
 {"id": "P5_B6_ddadj_screen", "start": "2026-07-24 16:22:57", "elapsed_s": 1268.5, "peak_vram_mb": 2152.1, "val_ic": 0.15927, "seeds": 5, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
 {"id": "P5_A7_seq90_screen", "start": "2026-07-24 16:44:05", "elapsed_s": 2436.5, "peak_vram_mb": 3390.9, "val_ic": 0.05367, "seeds": 5, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
 {"id": "P5_A7_seq120_screen", "start": "2026-07-24 17:31:32", "elapsed_s": 3170.3, "peak_vram_mb": 5203.7, "val_ic": 0.05178, "seeds": 5, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "A9_seeds9_2023", "start": "2026-07-24 18:30:59", "elapsed_s": 2259.7, "peak_vram_mb": 2155.3, "val_ic": 0.04578, "seeds": 9, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "A9_seeds9_2021", "start": "2026-07-24 19:08:38", "elapsed_s": 3180.9, "peak_vram_mb": 2155.3, "val_ic": 0.05197, "seeds": 9, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "BEAR_A9_seeds9_2023", "event": "failed", "error": "TypeError: '<=' not supported between instances of 'float' and 'NoneType'", "ts": "2026-07-24 20:01:39"}

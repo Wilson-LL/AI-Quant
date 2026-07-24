@@ -1,0 +1,58 @@
+﻿
+===== A9_seeds9_2023 (promoted) — 9-seed ensemble: does the seed curve saturate at 7? (5->2.06, 7->2.147 blend ref
+[dataset] 108 stocks loaded, feature_set=close_only, seq_len=60, exec_lag=1
+[dataset] X (276247, 60, 10) (663 MB), 2815 dates 2015-01-05..2026-07-24
+[A9_seeds9_2023] [wf 1/7] 2023-01-03 train 162233 val_ic +0.0215 (423s elapsed)
+[A9_seeds9_2023] [wf 2/7] 2023-07-20 train 174099 val_ic +0.0761 (694s elapsed)
+[A9_seeds9_2023] [wf 3/7] 2024-01-19 train 186137 val_ic +0.0571 (962s elapsed)
+[A9_seeds9_2023] [wf 4/7] 2024-08-02 train 198124 val_ic +0.0377 (1234s elapsed)
+[A9_seeds9_2023] [wf 5/7] 2025-02-13 train 210142 val_ic +0.0323 (1522s elapsed)
+[A9_seeds9_2023] [wf 6/7] 2025-08-15 train 222235 val_ic +0.0196 (1842s elapsed)
+[A9_seeds9_2023] [wf 7/7] 2026-02-26 train 234230 val_ic +0.0763 (2250s elapsed)
+  [lo band10]                      IC +0.0645 | net60 Sharpe  1.71 ann +42.74% dd -18.23% | net100  1.53 | turn 0.36 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0645 | net60 Sharpe  1.80 ann +61.29% dd -26.93% | net100  1.74 | turn 0.31 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0729 | net60 Sharpe  2.17 ann +53.97% dd -10.07% | net100  2.02 | turn 0.30 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0729 | net60 Sharpe  2.02 ann +71.70% dd -23.93% | net100  1.97 | turn 0.25 | maxW 10.0% | n 42
+
+===== A9_seeds9_2021 (bear) — 9-seed bear window (paired with A9_seeds9_2023 regardless of its outcome - the s
+[A9_seeds9_2021] [wf 1/11] 2021-01-04 train 115852 val_ic +0.1385 (237s elapsed)
+[A9_seeds9_2021] [wf 2/11] 2021-07-15 train 127692 val_ic +0.1483 (437s elapsed)
+[A9_seeds9_2021] [wf 3/11] 2022-01-13 train 139724 val_ic +0.0008 (792s elapsed)
+[A9_seeds9_2021] [wf 4/11] 2022-07-26 train 151622 val_ic -0.0729 (997s elapsed)
+[A9_seeds9_2021] [wf 5/11] 2023-02-02 train 163490 val_ic +0.0110 (1379s elapsed)
+[A9_seeds9_2021] [wf 6/11] 2023-08-10 train 175464 val_ic +0.1133 (1738s elapsed)
+[A9_seeds9_2021] [wf 7/11] 2024-02-19 train 187409 val_ic +0.0596 (1991s elapsed)
+[A9_seeds9_2021] [wf 8/11] 2024-08-22 train 199512 val_ic +0.0448 (2224s elapsed)
+[A9_seeds9_2021] [wf 9/11] 2025-03-06 train 211533 val_ic +0.0057 (2472s elapsed)
+[A9_seeds9_2021] [wf 10/11] 2025-09-04 train 223500 val_ic +0.0145 (2782s elapsed)
+[A9_seeds9_2021] [wf 11/11] 2026-03-19 train 235621 val_ic +0.1082 (3171s elapsed)
+  [lo band10]                      IC +0.0286 | net60 Sharpe  1.06 ann +24.27% dd -15.42% | net100  0.89 | turn 0.34 | maxW 10.0% | n 67
+  [lo band10]                      IC +0.0286 | net60 Sharpe  1.30 ann +39.82% dd -27.91% | net100  1.25 | turn 0.30 | maxW 10.0% | n 67
+  [lo band10]                      IC +0.0340 | net60 Sharpe  1.44 ann +33.80% dd -20.38% | net100  1.29 | turn 0.30 | maxW 10.0% | n 67
+  [lo band10]                      IC +0.0340 | net60 Sharpe  1.43 ann +43.79% dd -27.25% | net100  1.38 | turn 0.26 | maxW 10.0% | n 67
+[promote] queued BEAR_A9_seeds9_2023
+
+===== BEAR_A9_seeds9_2023 (bear) — bear-window validation of A9_seeds9_2023
+[BEAR_A9_seeds9_2023] FAILED: TypeError: '<=' not supported between instances of 'float' and 'NoneType'
+
+[scheduler] queue complete: 2 done, 1 failed
+.venv\Scripts\python.exe : Exception in thread Thread-1 (_readerthread):
+At line:1 char:302
++ ... tch {} } }; .venv\Scripts\python.exe -u research\gpu_research_schedul ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Exception in th..._readerthread)::String) [], RemoteExcepti 
+   on
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Traceback (most recent call last):
+  File "C:\Users\wilso\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1073, in 
+_bootstrap_inner
+    self.run()
+  File "C:\Users\wilso\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1010, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\wilso\AppData\Local\Programs\Python\Python312\Lib\subprocess.py", line 1599, in 
+_readerthread
+    buffer.append(fh.read())
+                  ^^^^^^^^^
+UnicodeDecodeError: 'cp950' codec can't decode byte 0xe2 in position 16: illegal multibyte sequence
+[daily] 

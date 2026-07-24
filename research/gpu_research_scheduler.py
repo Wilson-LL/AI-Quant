@@ -181,9 +181,11 @@ def spawn_bear(queue):
             bid = f"BEAR_{c['id']}"
             if any(q["id"] == bid for q in queue):
                 continue
-            queue.append({**{k: c.get(k) for k in
-                             ("feature_set", "target", "seq_len", "preset_base",
-                              "overrides", "seeds", "weight_decay", "loss", "holding")},
+            inherit = {k: c.get(k) for k in
+                       ("feature_set", "target", "seq_len", "preset_base",
+                        "overrides", "seeds", "weight_decay", "loss", "holding")}
+            inherit = {k: v for k, v in inherit.items() if v is not None}
+            queue.append({**inherit,
                           "id": bid, "phase": "bear", "status": "pending",
                           "hypothesis": f"bear-window validation of {c['id']}",
                           "oos_start": "2021-01-01", "eval_blend": True,

@@ -64,3 +64,15 @@ reason, expected benefit, rollback, and tests — per sprint rules.
 - **Tests:** smoke via scheduler SMOKE config (MSE, regression-guarded by Edit
   2's identical-path check) + RL2 screen run itself (finite loss/val IC logged
   by the scheduler; a NaN/failure is recorded as status=failed, not skipped).
+
+## Edit 4 — 2026-07-24 (GPU mode, A8/A9 verdicts): `train_transformer_eod.py`
+
+- **Change:** `mode_daily_retrain` default seed list 5 → 7 (`list(range(7))`),
+  implementing the adopted production spec. PRESETS untouched (experiments
+  pass explicit seed lists). Inference loads whatever checkpoints exist.
+- **Reason:** A8 dual-window win (blend 2.147/−10.6% & 1.443/−18.0%); A9
+  showed the seed curve saturates at 7 (9 within tolerance, worse 2022/DD).
+- **Expected benefit:** daily production ensemble matches the validated spec.
+- **Rollback:** revert one line (or pass seeds explicitly).
+- **Tests:** next daily retrain writes 7 checkpoints and a 7-seed train log;
+  inference consumes them unchanged (it globs seed checkpoints).

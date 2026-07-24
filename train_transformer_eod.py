@@ -361,7 +361,9 @@ def mode_daily_retrain(feature_set="close_only", preset="B", target="tgt_rank_20
     refit_rank = int(data["date_rank"].max())
     tr, va, w = matured_train_val(data, target, refit_rank, horizon, recency=recency)
     cfg = PRESETS[preset]
-    seeds = seeds or list(range(cfg["seeds"]))
+    # production spec (2026-07-24, A8/A9): 7-seed ensemble — the seed curve
+    # saturates at 7 (see RESEARCH_SCOREBOARD.md B4e/B4f)
+    seeds = seeds or list(range(7))
     asof = str(data["dates"][refit_rank])[:10]
 
     os.makedirs(CKPT_DIR, exist_ok=True)
