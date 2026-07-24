@@ -80,6 +80,8 @@ B3c/B4c on the 2015-backfilled cache are the standing references.
 | B6s | 07-24 | dd-adjusted target screen | **INVERSION #2 (B4 pattern)** | val IC +0.158 / OOS LS **−1.98** — risk-proxy targets inflate val IC and invert OOS; P5 inversion check queued with pre-declared expected REJECT; promotion rule fixed (val IC within-family only) | — | — | — |
 | A8 | 07-24 | 7-seed ensemble (queue v5) | **ADOPTED — new production spec** | champion window **2.147 / −10.6%** (+0.088 vs ref), bear window **1.443 / −18.0%, 2022 −0.15** (−0.027 vs ref, within 0.05 tol; DD 0.7pp better). Cost: +2 seeds ≈ +40% retrain (~6 min/day, trivial). New refs B4e/B4f set | +0.09 | supersedes | — |
 | P5s | 07-24 | 5-seed promotions (run 2) | **all REJECT** | A5_L1 blend 1.86/−9.9%; **seq90 blend 1.815 despite family-best val IC 0.054 — val-IC edges ≠ OOS wins (again)**; B6 5-seed inversion CONFIRMED (val 0.159/OOS −1.94, blend −0.46) — B4/B6 pattern now twice 5-seed-confirmed | lose | lose | — |
+| S120 | 07-24 18:00 | seq120 at 5 seeds | **REJECT — sequence axis closed** | blend 1.659/1.747 vs 2.147/1.99; decision-grade ordering 40 < 60 > 90 > 120 | loses | loses | 89c586e |
+| D7b | 07-24 18:10 | conservative spec on 7-seed panels | **ADOPT as recommended deployment spec** | band15+cap7.5 on 7-seed signal: **2.15 champ (= ref), 1.44 bear (= ref), bear DD −15.2% (+2.8pp), 2022 −0.08, turn 0.29/0.23, maxW 7.5%** (bull DD −11.2%, 0.6pp worse — noted). Shadow books stay band10 until quarter boundary | = , safer | = , safer | — |
 
 <!-- new experiments appended below by the loop -->
 
