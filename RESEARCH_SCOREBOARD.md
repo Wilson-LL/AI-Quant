@@ -74,6 +74,9 @@ B3c/B4c on the 2015-backfilled cache are the standing references.
 | D5 | 07-24 | variance-parity leg weighting (queue v5 CPU) | **REJECT** | 1.87/1.28 L/S vs refs 2.06/1.47 — risk-based weighting loses again (invvol precedent) | — | worse | — |
 | D6 | 07-24 | concentrated top-10/15 LO books | **REJECT** | top10 LO 1.94/−35% (champ), 1.32/−43% (bear); Sharpe ≈ quintile at far worse DD | — | worse risk | — |
 | D7 | 07-24 | conservative spec band15+cap7.5 | **DOCUMENTED OPTION (near-gate)** | 1.98/−10.6% champ (−0.08 vs ref, misses 0.05 tol), 1.46/−16.1% bear (+2.6pp DD, turn 0.28/0.22) — the conservative production variant | — | ≈, safer | — |
+| V5s | 07-24 | queue v5 screens (3-seed, scheduler run 1) | **screens read** | family val ICs: wd1e3 .0485 > L1 .0477 > do1 .0464 > wd1e5 .0459 > L3 .0427 > listwise .0345; OOS(not selective): L3 1.89, wd1e5 1.81, L1 1.75. **REJECT at screen: E4_range (LS 0.24), E5_liq (1.01, IC .020), RL2 listwise (val-IC gate — ranking-loss family closed for good)**. B7_spread excluded from family comparison (own line, 1.46 unremarkable) | — | — | 94c52c6 |
+| B6s | 07-24 | dd-adjusted target screen | **INVERSION #2 (B4 pattern)** | val IC +0.158 / OOS LS **−1.98** — risk-proxy targets inflate val IC and invert OOS; P5 inversion check queued with pre-declared expected REJECT; promotion rule fixed (val IC within-family only) | — | — | — |
+| A8 | 07-24 | 7-seed ensemble (queue v5) | **CHAMPION-WINDOW WIN — bear run queued** | **blend50+band10: L/S 2.147 / DD −10.6%, net100 2.00, LO 1.99** vs ref 2.06/−10.7%/1.95; standalone band10 1.67 (7-seed standalone unremarkable — the blend is what improved) | blend +0.09 | pending bear | — |
 
 <!-- new experiments appended below by the loop -->
 

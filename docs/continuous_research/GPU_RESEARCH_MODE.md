@@ -39,6 +39,18 @@ against champion transformer (1.91), blend50+band10 refs (2.06/−10.7% and
 1.47/−18.7%), D1.2, mom20, equal-weight universe; val-IC selection discipline;
 hard 10% name cap; costs 0/60/100/150 bps.
 
+## Promotion-rule refinement (learned from run 1, 2026-07-24)
+
+Raw mean-val-IC comparison across DIFFERENT targets is invalid: each config's
+val IC is measured on its own labels, and easily-learnable risk-proxy targets
+produce inflated val ICs with inverted OOS behavior (B4: +0.146/−0.069;
+B6 screen: +0.158/OOS −1.98). Rule going forward: mechanical val-IC promotion
+applies WITHIN the champion target/loss family; novel-target configs are
+separate lines requiring their own 5-seed dual-window case. The already-queued
+P5_B6 runs as a 5-seed inversion check (expected REJECT per B4 precedent —
+declared before it ran). Also fixed in run 2: derived presets inherit the
+config's seq_len (run-1 seq90/120 failures), spawn_bear tolerates absent keys.
+
 ## Verdict duty
 
 Screen results are decision-grade only for *promotion*; final keep/reject

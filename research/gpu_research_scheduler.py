@@ -74,7 +74,10 @@ def _save(queue, path):
 
 def _preset_for(cfg):
     base = cfg.get("preset_base", "B")
-    ov = cfg.get("overrides") or {}
+    ov = dict(cfg.get("overrides") or {})
+    # the model's positional sizing must match the dataset's sequence length
+    if cfg["seq_len"] != PRESETS[base]["seq_len"]:
+        ov["seq_len"] = cfg["seq_len"]
     if not ov:
         return base
     name = f"__{cfg['id']}"
@@ -178,7 +181,7 @@ def spawn_bear(queue):
             bid = f"BEAR_{c['id']}"
             if any(q["id"] == bid for q in queue):
                 continue
-            queue.append({**{k: c[k] for k in
+            queue.append({**{k: c.get(k) for k in
                              ("feature_set", "target", "seq_len", "preset_base",
                               "overrides", "seeds", "weight_decay", "loss", "holding")},
                           "id": bid, "phase": "bear", "status": "pending",

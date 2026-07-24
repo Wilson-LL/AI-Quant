@@ -1,0 +1,14 @@
+{"id": "SMOKE_1seed", "start": "2026-07-24 11:45:03", "elapsed_s": 126.9, "peak_vram_mb": 2149.0, "val_ic": 0.09432, "seeds": 1, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "A5_L1_screen", "start": "2026-07-24 11:47:10", "elapsed_s": 514.8, "peak_vram_mb": 2148.9, "val_ic": 0.04766, "seeds": 3, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "A5_L3_screen", "start": "2026-07-24 11:55:45", "elapsed_s": 1125.9, "peak_vram_mb": 2151.3, "val_ic": 0.04268, "seeds": 3, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "A6_do1_screen", "start": "2026-07-24 12:14:31", "elapsed_s": 760.0, "peak_vram_mb": 2150.1, "val_ic": 0.04638, "seeds": 3, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "A6_wd1e3_screen", "start": "2026-07-24 12:27:11", "elapsed_s": 751.3, "peak_vram_mb": 2150.1, "val_ic": 0.04849, "seeds": 3, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "A6_wd1e5_screen", "start": "2026-07-24 12:39:42", "elapsed_s": 723.9, "peak_vram_mb": 2150.1, "val_ic": 0.04594, "seeds": 3, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "B6_ddadj_screen", "start": "2026-07-24 12:51:46", "elapsed_s": 742.6, "peak_vram_mb": 2150.1, "val_ic": 0.1578, "seeds": 3, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "B7_spread_screen", "start": "2026-07-24 13:04:09", "elapsed_s": 846.6, "peak_vram_mb": 2150.1, "val_ic": 0.04783, "seeds": 3, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "RL2_listwise_screen", "start": "2026-07-24 13:18:15", "elapsed_s": 883.1, "peak_vram_mb": 2150.2, "val_ic": 0.03453, "seeds": 3, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "A8_seeds7_full", "start": "2026-07-24 13:32:59", "elapsed_s": 1717.9, "peak_vram_mb": 2154.0, "val_ic": 0.04824, "seeds": 7, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "A7_seq90_screen", "event": "failed", "error": "RuntimeError: The size of tensor a (90) must match the size of tensor b (60) at non-singleton dimension 1", "ts": "2026-07-24 14:01:40"}
+{"id": "A7_seq120_screen", "event": "failed", "error": "RuntimeError: The size of tensor a (120) must match the size of tensor b (60) at non-singleton dimension 1", "ts": "2026-07-24 14:01:44"}
+{"id": "E4_range_screen", "start": "2026-07-24 14:01:44", "elapsed_s": 968.3, "peak_vram_mb": 2363.9, "val_ic": 0.04344, "seeds": 3, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "E5_liq_screen", "start": "2026-07-24 14:17:52", "elapsed_s": 807.5, "peak_vram_mb": 2292.2, "val_ic": 0.02031, "seeds": 3, "gpu": "NVIDIA GeForce RTX 4060 Ti"}

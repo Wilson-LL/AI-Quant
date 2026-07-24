@@ -1,0 +1,4 @@
+﻿
+===== BEAR_A8_seeds7_full (bear) — bear-window validation of 7-seed ensemble (champion-window blend 2.147/-10.6% be
+[dataset] 108 stocks loaded, feature_set=close_only, seq_len=60, exec_lag=1
+[dataset] X (276139, 60, 10) (663 MB), 2814 dates 2015-01-05..2026-07-23

@@ -1,0 +1,163 @@
+﻿
+===== SMOKE_1seed (smoke) — scheduler smoke test: 1 seed, short OOS window, must produce panel+metrics
+[dataset] 108 stocks loaded, feature_set=close_only, seq_len=60, exec_lag=1
+[dataset] X (276139, 60, 10) (663 MB), 2814 dates 2015-01-05..2026-07-23
+[SMOKE_1seed] [wf 1/2] 2026-01-02 train 231135 val_ic +0.0285 (68s elapsed)
+[SMOKE_1seed] [wf 2/2] 2026-07-16 train 243316 val_ic +0.1601 (122s elapsed)
+  [lo band10]                      IC +0.1764 | net60 Sharpe  6.30 ann +261.87% dd   0.00% | net100  6.19 | turn 0.27 | maxW 10.0% | n 6
+  [lo band10]                      IC +0.1764 | net60 Sharpe  7.93 ann +369.50% dd   0.00% | net100  7.94 | turn 0.22 | maxW 10.0% | n 6
+
+===== A5_L1_screen (screen) — 1 transformer layer (less capacity) matches champion at lower overfit risk
+[A5_L1_screen] [wf 1/7] 2023-01-03 train 162233 val_ic +0.0102 (76s elapsed)
+[A5_L1_screen] [wf 2/7] 2023-07-20 train 174099 val_ic +0.1140 (193s elapsed)
+[A5_L1_screen] [wf 3/7] 2024-01-19 train 186137 val_ic +0.0485 (248s elapsed)
+[A5_L1_screen] [wf 4/7] 2024-08-02 train 198124 val_ic +0.0314 (301s elapsed)
+[A5_L1_screen] [wf 5/7] 2025-02-13 train 210142 val_ic +0.0314 (362s elapsed)
+[A5_L1_screen] [wf 6/7] 2025-08-15 train 222235 val_ic +0.0178 (432s elapsed)
+[A5_L1_screen] [wf 7/7] 2026-02-26 train 234230 val_ic +0.0803 (511s elapsed)
+  [lo band10]                      IC +0.0706 | net60 Sharpe  1.75 ann +43.79% dd -15.74% | net100  1.57 | turn 0.37 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0706 | net60 Sharpe  1.74 ann +60.00% dd -25.98% | net100  1.68 | turn 0.32 | maxW 10.0% | n 42
+
+===== A5_L3_screen (screen) — 3 transformer layers (more capacity) beats champion
+[A5_L3_screen] [wf 1/7] 2023-01-03 train 162233 val_ic -0.0160 (163s elapsed)
+[A5_L3_screen] [wf 2/7] 2023-07-20 train 174099 val_ic +0.0744 (345s elapsed)
+[A5_L3_screen] [wf 3/7] 2024-01-19 train 186137 val_ic +0.0541 (495s elapsed)
+[A5_L3_screen] [wf 4/7] 2024-08-02 train 198124 val_ic +0.0412 (598s elapsed)
+[A5_L3_screen] [wf 5/7] 2025-02-13 train 210142 val_ic +0.0434 (700s elapsed)
+[A5_L3_screen] [wf 6/7] 2025-08-15 train 222235 val_ic +0.0202 (915s elapsed)
+[A5_L3_screen] [wf 7/7] 2026-02-26 train 234230 val_ic +0.0814 (1122s elapsed)
+  [lo band10]                      IC +0.0694 | net60 Sharpe  1.89 ann +47.03% dd -11.91% | net100  1.74 | turn 0.32 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0694 | net60 Sharpe  1.88 ann +64.20% dd -25.85% | net100  1.83 | turn 0.27 | maxW 10.0% | n 42
+
+===== A6_do1_screen (screen) — dropout 0.1 (champion 0.2 may over-regularize)
+[A6_do1_screen] [wf 1/7] 2023-01-03 train 162233 val_ic +0.0136 (142s elapsed)
+[A6_do1_screen] [wf 2/7] 2023-07-20 train 174099 val_ic +0.0924 (263s elapsed)
+[A6_do1_screen] [wf 3/7] 2024-01-19 train 186137 val_ic +0.0566 (362s elapsed)
+[A6_do1_screen] [wf 4/7] 2024-08-02 train 198124 val_ic +0.0381 (479s elapsed)
+[A6_do1_screen] [wf 5/7] 2025-02-13 train 210142 val_ic +0.0291 (554s elapsed)
+[A6_do1_screen] [wf 6/7] 2025-08-15 train 222235 val_ic +0.0188 (639s elapsed)
+[A6_do1_screen] [wf 7/7] 2026-02-26 train 234230 val_ic +0.0761 (756s elapsed)
+  [lo band10]                      IC +0.0607 | net60 Sharpe  1.28 ann +30.32% dd -30.19% | net100  1.07 | turn 0.41 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0607 | net60 Sharpe  1.55 ann +51.55% dd -30.35% | net100  1.47 | turn 0.37 | maxW 10.0% | n 42
+
+===== A6_wd1e3_screen (screen) — weight decay 1e-3 (heavier; wd 5e-4 was ~neutral in A3)
+[A6_wd1e3_screen] [wf 1/7] 2023-01-03 train 162233 val_ic +0.0212 (167s elapsed)
+[A6_wd1e3_screen] [wf 2/7] 2023-07-20 train 174099 val_ic +0.0795 (306s elapsed)
+[A6_wd1e3_screen] [wf 3/7] 2024-01-19 train 186137 val_ic +0.0532 (388s elapsed)
+[A6_wd1e3_screen] [wf 4/7] 2024-08-02 train 198124 val_ic +0.0422 (458s elapsed)
+[A6_wd1e3_screen] [wf 5/7] 2025-02-13 train 210142 val_ic +0.0395 (539s elapsed)
+[A6_wd1e3_screen] [wf 6/7] 2025-08-15 train 222235 val_ic +0.0307 (624s elapsed)
+[A6_wd1e3_screen] [wf 7/7] 2026-02-26 train 234230 val_ic +0.0732 (748s elapsed)
+  [lo band10]                      IC +0.0637 | net60 Sharpe  1.65 ann +42.93% dd -17.34% | net100  1.49 | turn 0.34 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0637 | net60 Sharpe  1.70 ann +58.48% dd -27.01% | net100  1.64 | turn 0.31 | maxW 10.0% | n 42
+
+===== A6_wd1e5_screen (screen) — weight decay 1e-5 (lighter than champion 1e-4)
+[A6_wd1e5_screen] [wf 1/7] 2023-01-03 train 162233 val_ic +0.0154 (155s elapsed)
+[A6_wd1e5_screen] [wf 2/7] 2023-07-20 train 174099 val_ic +0.0762 (267s elapsed)
+[A6_wd1e5_screen] [wf 3/7] 2024-01-19 train 186137 val_ic +0.0513 (355s elapsed)
+[A6_wd1e5_screen] [wf 4/7] 2024-08-02 train 198124 val_ic +0.0410 (431s elapsed)
+[A6_wd1e5_screen] [wf 5/7] 2025-02-13 train 210142 val_ic +0.0386 (511s elapsed)
+[A6_wd1e5_screen] [wf 6/7] 2025-08-15 train 222235 val_ic +0.0243 (597s elapsed)
+[A6_wd1e5_screen] [wf 7/7] 2026-02-26 train 234230 val_ic +0.0747 (720s elapsed)
+  [lo band10]                      IC +0.0727 | net60 Sharpe  1.81 ann +43.35% dd -13.18% | net100  1.63 | turn 0.35 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0727 | net60 Sharpe  1.71 ann +58.34% dd -27.03% | net100  1.65 | turn 0.31 | maxW 10.0% | n 42
+
+===== B6_ddadj_screen (screen) — drawdown-adjusted forward return target (path-risk penalty) improves DD/Calmar
+[B6_ddadj_screen] [wf 1/7] 2023-01-03 train 162233 val_ic +0.2010 (68s elapsed)
+[B6_ddadj_screen] [wf 2/7] 2023-07-20 train 174099 val_ic +0.0643 (133s elapsed)
+[B6_ddadj_screen] [wf 3/7] 2024-01-19 train 186137 val_ic +0.1481 (215s elapsed)
+[B6_ddadj_screen] [wf 4/7] 2024-08-02 train 198124 val_ic +0.2198 (326s elapsed)
+[B6_ddadj_screen] [wf 5/7] 2025-02-13 train 210142 val_ic +0.2320 (431s elapsed)
+[B6_ddadj_screen] [wf 6/7] 2025-08-15 train 222235 val_ic +0.1647 (556s elapsed)
+[B6_ddadj_screen] [wf 7/7] 2026-02-26 train 234230 val_ic +0.0747 (739s elapsed)
+  [lo band10]                      IC -0.0600 | net60 Sharpe -1.98 ann -44.80% dd -87.59% | net100 -2.06 | turn 0.24 | maxW 10.0% | n 42
+  [lo band10]                      IC -0.0600 | net60 Sharpe -0.01 ann  -0.09% dd -19.49% | net100 -0.11 | turn 0.20 | maxW 10.0% | n 42
+
+===== B7_spread_screen (screen) — top/bottom-quintile spread target (tails-only supervision) sharpens book edges
+[B7_spread_screen] [wf 1/7] 2023-01-03 train 162233 val_ic +0.0446 (166s elapsed)
+[B7_spread_screen] [wf 2/7] 2023-07-20 train 174099 val_ic +0.0876 (346s elapsed)
+[B7_spread_screen] [wf 3/7] 2024-01-19 train 186137 val_ic +0.0412 (439s elapsed)
+[B7_spread_screen] [wf 4/7] 2024-08-02 train 198124 val_ic +0.0296 (514s elapsed)
+[B7_spread_screen] [wf 5/7] 2025-02-13 train 210142 val_ic +0.0269 (606s elapsed)
+[B7_spread_screen] [wf 6/7] 2025-08-15 train 222235 val_ic +0.0283 (696s elapsed)
+[B7_spread_screen] [wf 7/7] 2026-02-26 train 234230 val_ic +0.0766 (843s elapsed)
+  [lo band10]                      IC +0.0559 | net60 Sharpe  1.46 ann +42.88% dd -17.91% | net100  1.30 | turn 0.37 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0559 | net60 Sharpe  1.66 ann +58.60% dd -27.63% | net100  1.59 | turn 0.33 | maxW 10.0% | n 42
+
+===== RL2_listwise_screen (screen) — listwise (ListNet top-1) loss; pairwise failed the val-IC gate, listwise optimiz
+[RL2_listwise_screen] [wf 1/7] 2023-01-03 train 162233 val_ic -0.0257 (103s elapsed)
+[RL2_listwise_screen] [wf 2/7] 2023-07-20 train 174099 val_ic +0.1311 (249s elapsed)
+[RL2_listwise_screen] [wf 3/7] 2024-01-19 train 186137 val_ic +0.0592 (429s elapsed)
+[RL2_listwise_screen] [wf 4/7] 2024-08-02 train 198124 val_ic -0.0028 (580s elapsed)
+[RL2_listwise_screen] [wf 5/7] 2025-02-13 train 210142 val_ic -0.0412 (678s elapsed)
+[RL2_listwise_screen] [wf 6/7] 2025-08-15 train 222235 val_ic +0.0071 (776s elapsed)
+[RL2_listwise_screen] [wf 7/7] 2026-02-26 train 234230 val_ic +0.1141 (879s elapsed)
+  [lo band10]                      IC +0.0606 | net60 Sharpe  1.59 ann +59.38% dd -33.18% | net100  1.50 | turn 0.25 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0606 | net60 Sharpe  1.73 ann +66.32% dd -31.18% | net100  1.68 | turn 0.27 | maxW 10.0% | n 42
+
+===== A8_seeds7_full (promoted) — 7-seed ensemble > 5-seed champion (ensemble-size curve)
+[A8_seeds7_full] [wf 1/7] 2023-01-03 train 162233 val_ic +0.0340 (372s elapsed)
+[A8_seeds7_full] [wf 2/7] 2023-07-20 train 174099 val_ic +0.0815 (603s elapsed)
+[A8_seeds7_full] [wf 3/7] 2024-01-19 train 186137 val_ic +0.0543 (790s elapsed)
+[A8_seeds7_full] [wf 4/7] 2024-08-02 train 198124 val_ic +0.0390 (988s elapsed)
+[A8_seeds7_full] [wf 5/7] 2025-02-13 train 210142 val_ic +0.0314 (1200s elapsed)
+[A8_seeds7_full] [wf 6/7] 2025-08-15 train 222235 val_ic +0.0189 (1429s elapsed)
+[A8_seeds7_full] [wf 7/7] 2026-02-26 train 234230 val_ic +0.0785 (1711s elapsed)
+  [lo band10]                      IC +0.0633 | net60 Sharpe  1.67 ann +43.69% dd -17.65% | net100  1.50 | turn 0.36 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0633 | net60 Sharpe  1.73 ann +61.92% dd -26.74% | net100  1.68 | turn 0.31 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0739 | net60 Sharpe  2.15 ann +53.23% dd -10.63% | net100  2.00 | turn 0.30 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0739 | net60 Sharpe  1.99 ann +71.05% dd -23.79% | net100  1.94 | turn 0.25 | maxW 10.0% | n 42
+
+===== A7_seq90_screen (screen) — seq 90 (longer context) beats seq 60
+[dataset] 108 stocks loaded, feature_set=close_only, seq_len=90, exec_lag=1
+[dataset] X (272899, 90, 10) (982 MB), 2814 dates 2015-01-05..2026-07-23
+[A7_seq90_screen] FAILED: RuntimeError: The size of tensor a (90) must match the size of tensor b (60) at non-singleton dimension 1
+
+===== A7_seq120_screen (screen) — seq 120 (half-year context) beats seq 60
+[dataset] 108 stocks loaded, feature_set=close_only, seq_len=120, exec_lag=1
+[dataset] X (269659, 120, 10) (1294 MB), 2814 dates 2015-01-05..2026-07-23
+[A7_seq120_screen] FAILED: RuntimeError: The size of tensor a (120) must match the size of tensor b (60) at non-singleton dimension 1
+
+===== E4_range_screen (screen) — close + curated OHLC range (3 cols) adds intraday info without full-field diluti
+[dataset] 108 stocks loaded, feature_set=close_range, seq_len=60, exec_lag=1
+[dataset] X (276139, 60, 13) (862 MB), 2814 dates 2015-01-05..2026-07-23
+[E4_range_screen] [wf 1/7] 2023-01-03 train 162233 val_ic -0.0204 (140s elapsed)
+[E4_range_screen] [wf 2/7] 2023-07-20 train 174099 val_ic +0.0710 (260s elapsed)
+[E4_range_screen] [wf 3/7] 2024-01-19 train 186137 val_ic +0.0677 (377s elapsed)
+[E4_range_screen] [wf 4/7] 2024-08-02 train 198124 val_ic +0.0579 (526s elapsed)
+[E4_range_screen] [wf 5/7] 2025-02-13 train 210142 val_ic +0.0378 (619s elapsed)
+[E4_range_screen] [wf 6/7] 2025-08-15 train 222235 val_ic +0.0313 (814s elapsed)
+[E4_range_screen] [wf 7/7] 2026-02-26 train 234230 val_ic +0.0587 (961s elapsed)
+  [lo band10]                      IC +0.0370 | net60 Sharpe  0.24 ann  +5.20% dd -53.94% | net100 -0.04 | turn 0.58 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0370 | net60 Sharpe  1.18 ann +33.59% dd -37.02% | net100  1.07 | turn 0.51 | maxW 10.0% | n 42
+
+===== E5_liq_screen (screen) — close + curated liquidity (vol_z, turn_z) adds flow info
+[dataset] 108 stocks loaded, feature_set=close_liq, seq_len=60, exec_lag=1
+[dataset] X (276139, 60, 12) (795 MB), 2814 dates 2015-01-05..2026-07-23
+[E5_liq_screen] [wf 1/7] 2023-01-03 train 162233 val_ic -0.0318 (143s elapsed)
+[E5_liq_screen] [wf 2/7] 2023-07-20 train 174099 val_ic +0.0342 (241s elapsed)
+[E5_liq_screen] [wf 3/7] 2024-01-19 train 186137 val_ic +0.0634 (358s elapsed)
+[E5_liq_screen] [wf 4/7] 2024-08-02 train 198124 val_ic +0.0000 (464s elapsed)
+[E5_liq_screen] [wf 5/7] 2025-02-13 train 210142 val_ic +0.0113 (544s elapsed)
+[E5_liq_screen] [wf 6/7] 2025-08-15 train 222235 val_ic +0.0133 (705s elapsed)
+[E5_liq_screen] [wf 7/7] 2026-02-26 train 234230 val_ic +0.0518 (800s elapsed)
+  [lo band10]                      IC +0.0239 | net60 Sharpe  1.01 ann +18.23% dd -20.19% | net100  0.61 | turn 0.66 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0239 | net60 Sharpe  1.56 ann +45.99% dd -27.89% | net100  1.44 | turn 0.56 | maxW 10.0% | n 42
+[promote] queued P5_B6_ddadj_screen
+[promote] queued P5_A6_wd1e3_screen
+.venv\Scripts\python.exe : Traceback (most recent call last):
+At line:1 char:302
++ ... tch {} } }; .venv\Scripts\python.exe -u research\gpu_research_schedul ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback (most recent call last)::String) [], RemoteExcept 
+   ion
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  File "C:\Users\wilso\source\code\AI-Quant\research\gpu_research_scheduler.py", line 262, in <module>
+    {"run": run, "status": status}[mode](qp)
+  File "C:\Users\wilso\source\code\AI-Quant\research\gpu_research_scheduler.py", line 221, in run
+    spawn_bear(queue)
+  File "C:\Users\wilso\source\code\AI-Quant\research\gpu_research_scheduler.py", line 181, in spawn_bear
+    queue.append({**{k: c[k] for k in
+                        ~^^^
+KeyError: 'overrides'
