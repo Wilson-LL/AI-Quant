@@ -1,0 +1,63 @@
+[
+  {
+    "id": "ENS14_2023",
+    "phase": "promoted",
+    "order": 1,
+    "status": "running",
+    "hypothesis": "14-seed ensemble (0-6 + 10-16) averages away seed-set variance discovered in SR1; expect ~mid-range of 1.843/2.147 with lower set-dependence",
+    "feature_set": "close_only",
+    "target": "tgt_rank_20",
+    "seq_len": 60,
+    "preset_base": "B",
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+    ],
+    "eval_blend": true,
+    "gate": "descriptive convergence check: blend expected in [1.85, 2.15]; adopt-14 only if BOTH windows land at/above their seed-set midpoints (else 7 seeds stay - cost discipline)",
+    "expected_runtime_min": 110
+  },
+  {
+    "id": "ENS14_2021",
+    "phase": "bear",
+    "order": 2,
+    "status": "pending",
+    "hypothesis": "14-seed bear window; midpoint of 1.301/1.443 expected; 2022 should stabilize between -0.81 and -0.15",
+    "feature_set": "close_only",
+    "target": "tgt_rank_20",
+    "seq_len": 60,
+    "preset_base": "B",
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+    ],
+    "oos_start": "2021-01-01",
+    "eval_blend": true,
+    "gate": "same convergence logic",
+    "expected_runtime_min": 150
+  }
+]

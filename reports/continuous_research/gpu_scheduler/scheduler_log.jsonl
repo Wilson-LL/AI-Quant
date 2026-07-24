@@ -22,3 +22,8 @@
 {"id": "A9_seeds9_2023", "start": "2026-07-24 18:30:59", "elapsed_s": 2259.7, "peak_vram_mb": 2155.3, "val_ic": 0.04578, "seeds": 9, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
 {"id": "A9_seeds9_2021", "start": "2026-07-24 19:08:38", "elapsed_s": 3180.9, "peak_vram_mb": 2155.3, "val_ic": 0.05197, "seeds": 9, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
 {"id": "BEAR_A9_seeds9_2023", "event": "failed", "error": "TypeError: '<=' not supported between instances of 'float' and 'NoneType'", "ts": "2026-07-24 20:01:39"}
+{"id": "SR1_disjoint_seeds_2023", "start": "2026-07-24 20:14:45", "elapsed_s": 1760.9, "peak_vram_mb": 2153.3, "val_ic": 0.04835, "seeds": 7, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "SR2_disjoint_seeds_2021", "start": "2026-07-24 20:44:05", "elapsed_s": 2548.3, "peak_vram_mb": 2153.3, "val_ic": 0.0562, "seeds": 7, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "RF1_refit63_2023", "start": "2026-07-24 21:26:34", "elapsed_s": 3462.9, "peak_vram_mb": 2153.1, "val_ic": 0.05965, "seeds": 7, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "W22_oos2022_start", "start": "2026-07-24 22:24:17", "elapsed_s": 2750.9, "peak_vram_mb": 2153.3, "val_ic": 0.02978, "seeds": 7, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "BEAR_RF1_refit63_2023", "start": "2026-07-24 23:10:08", "elapsed_s": 3298.8, "peak_vram_mb": 2153.3, "val_ic": 0.04976, "seeds": 7, "gpu": "NVIDIA GeForce RTX 4060 Ti"}

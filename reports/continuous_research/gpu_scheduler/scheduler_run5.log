@@ -1,0 +1,107 @@
+﻿
+===== SR1_disjoint_seeds_2023 (promoted) — 7-seed blend result is seed-set independent: disjoint seeds 10-16 reproduce 2.14
+[dataset] 108 stocks loaded, feature_set=close_only, seq_len=60, exec_lag=1
+[dataset] X (276247, 60, 10) (663 MB), 2815 dates 2015-01-05..2026-07-24
+[SR1_disjoint_seeds_2023] [wf 1/7] 2023-01-03 train 162233 val_ic +0.0065 (329s elapsed)
+[SR1_disjoint_seeds_2023] [wf 2/7] 2023-07-20 train 174099 val_ic +0.1155 (638s elapsed)
+[SR1_disjoint_seeds_2023] [wf 3/7] 2024-01-19 train 186137 val_ic +0.0545 (849s elapsed)
+[SR1_disjoint_seeds_2023] [wf 4/7] 2024-08-02 train 198124 val_ic +0.0287 (1030s elapsed)
+[SR1_disjoint_seeds_2023] [wf 5/7] 2025-02-13 train 210142 val_ic +0.0339 (1209s elapsed)
+[SR1_disjoint_seeds_2023] [wf 6/7] 2025-08-15 train 222235 val_ic +0.0161 (1437s elapsed)
+[SR1_disjoint_seeds_2023] [wf 7/7] 2026-02-26 train 234230 val_ic +0.0833 (1751s elapsed)
+  [lo band10]                      IC +0.0646 | net60 Sharpe  1.79 ann +44.27% dd -13.53% | net100  1.63 | turn 0.33 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0646 | net60 Sharpe  1.71 ann +57.09% dd -27.26% | net100  1.66 | turn 0.28 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0686 | net60 Sharpe  1.84 ann +44.30% dd -10.20% | net100  1.70 | turn 0.29 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0686 | net60 Sharpe  1.81 ann +61.36% dd -25.73% | net100  1.76 | turn 0.25 | maxW 10.0% | n 42
+
+===== SR2_disjoint_seeds_2021 (bear) — same for the bear window: seeds 10-16 vs 1.443/-18.0%
+[SR2_disjoint_seeds_2021] [wf 1/11] 2021-01-04 train 115852 val_ic +0.1310 (157s elapsed)
+[SR2_disjoint_seeds_2021] [wf 2/11] 2021-07-15 train 127692 val_ic +0.1517 (315s elapsed)
+[SR2_disjoint_seeds_2021] [wf 3/11] 2022-01-13 train 139724 val_ic +0.0177 (552s elapsed)
+[SR2_disjoint_seeds_2021] [wf 4/11] 2022-07-26 train 151622 val_ic -0.0244 (783s elapsed)
+[SR2_disjoint_seeds_2021] [wf 5/11] 2023-02-02 train 163490 val_ic +0.0038 (1074s elapsed)
+[SR2_disjoint_seeds_2021] [wf 6/11] 2023-08-10 train 175464 val_ic +0.1114 (1373s elapsed)
+[SR2_disjoint_seeds_2021] [wf 7/11] 2024-02-19 train 187409 val_ic +0.0628 (1567s elapsed)
+[SR2_disjoint_seeds_2021] [wf 8/11] 2024-08-22 train 199512 val_ic +0.0403 (1760s elapsed)
+[SR2_disjoint_seeds_2021] [wf 9/11] 2025-03-06 train 211533 val_ic +0.0027 (1964s elapsed)
+[SR2_disjoint_seeds_2021] [wf 10/11] 2025-09-04 train 223500 val_ic +0.0099 (2194s elapsed)
+[SR2_disjoint_seeds_2021] [wf 11/11] 2026-03-19 train 235621 val_ic +0.1113 (2538s elapsed)
+  [lo band10]                      IC +0.0345 | net60 Sharpe  1.16 ann +24.90% dd -21.21% | net100  0.97 | turn 0.37 | maxW 10.0% | n 67
+  [lo band10]                      IC +0.0345 | net60 Sharpe  1.24 ann +36.14% dd -26.29% | net100  1.18 | turn 0.31 | maxW 10.0% | n 67
+  [lo band10]                      IC +0.0330 | net60 Sharpe  1.30 ann +29.69% dd -26.75% | net100  1.15 | turn 0.31 | maxW 10.0% | n 67
+  [lo band10]                      IC +0.0330 | net60 Sharpe  1.32 ann +41.25% dd -35.90% | net100  1.27 | turn 0.27 | maxW 10.0% | n 67
+
+===== RF1_refit63_2023 (promoted) — reference is not an artifact of the 126d refit grid: quarterly refits (63d) repr
+[RF1_refit63_2023] [wf 1/14] 2023-01-03 train 162233 val_ic +0.0340 (394s elapsed)
+[RF1_refit63_2023] [wf 2/14] 2023-04-19 train 168177 val_ic +0.0925 (774s elapsed)
+[RF1_refit63_2023] [wf 3/14] 2023-07-20 train 174099 val_ic +0.0815 (1005s elapsed)
+[RF1_refit63_2023] [wf 4/14] 2023-10-23 train 180055 val_ic +0.0740 (1242s elapsed)
+[RF1_refit63_2023] [wf 5/14] 2024-01-19 train 186137 val_ic +0.0543 (1426s elapsed)
+[RF1_refit63_2023] [wf 6/14] 2024-05-02 train 192073 val_ic +0.0628 (1618s elapsed)
+[RF1_refit63_2023] [wf 7/14] 2024-08-02 train 198124 val_ic +0.0390 (1815s elapsed)
+[RF1_refit63_2023] [wf 8/14] 2024-11-06 train 204172 val_ic +0.0608 (1999s elapsed)
+[RF1_refit63_2023] [wf 9/14] 2025-02-13 train 210142 val_ic +0.0314 (2208s elapsed)
+[RF1_refit63_2023] [wf 10/14] 2025-05-19 train 216195 val_ic -0.0018 (2397s elapsed)
+[RF1_refit63_2023] [wf 11/14] 2025-08-15 train 222235 val_ic +0.0189 (2625s elapsed)
+[RF1_refit63_2023] [wf 12/14] 2025-11-18 train 228268 val_ic +0.0294 (2858s elapsed)
+[RF1_refit63_2023] [wf 13/14] 2026-02-26 train 234230 val_ic +0.0785 (3157s elapsed)
+[RF1_refit63_2023] [wf 14/14] 2026-06-01 train 240333 val_ic +0.1797 (3456s elapsed)
+  [lo band10]                      IC +0.0621 | net60 Sharpe  1.69 ann +45.80% dd -17.49% | net100  1.53 | turn 0.34 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0621 | net60 Sharpe  1.78 ann +65.41% dd -26.37% | net100  1.72 | turn 0.31 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0714 | net60 Sharpe  2.08 ann +49.21% dd -11.19% | net100  1.93 | turn 0.31 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0714 | net60 Sharpe  1.93 ann +67.59% dd -25.52% | net100  1.88 | turn 0.26 | maxW 10.0% | n 42
+
+===== W22_oos2022_start (bear) — third-window read: OOS starting 2022-01 (crash-first) for the adopted 7-seed spe
+[W22_oos2022_start] [wf 1/9] 2022-01-03 train 138876 val_ic +0.0208 (234s elapsed)
+[W22_oos2022_start] [wf 2/9] 2022-07-14 train 150887 val_ic -0.0614 (430s elapsed)
+[W22_oos2022_start] [wf 3/9] 2023-01-11 train 162755 val_ic -0.0040 (744s elapsed)
+[W22_oos2022_start] [wf 4/9] 2023-07-28 train 174729 val_ic +0.0851 (1060s elapsed)
+[W22_oos2022_start] [wf 5/9] 2024-01-29 train 186667 val_ic +0.0536 (1305s elapsed)
+[W22_oos2022_start] [wf 6/9] 2024-08-12 train 198659 val_ic +0.0334 (1640s elapsed)
+[W22_oos2022_start] [wf 7/9] 2025-02-21 train 210784 val_ic +0.0221 (1979s elapsed)
+[W22_oos2022_start] [wf 8/9] 2025-08-25 train 222765 val_ic +0.0241 (2348s elapsed)
+[W22_oos2022_start] [wf 9/9] 2026-03-09 train 234872 val_ic +0.0944 (2741s elapsed)
+  [lo band10]                      IC +0.0400 | net60 Sharpe  0.85 ann +19.99% dd -23.07% | net100  0.67 | turn 0.37 | maxW 10.0% | n 55
+  [lo band10]                      IC +0.0400 | net60 Sharpe  0.99 ann +29.88% dd -31.19% | net100  0.93 | turn 0.32 | maxW 10.0% | n 55
+  [lo band10]                      IC +0.0441 | net60 Sharpe  1.32 ann +31.48% dd -14.20% | net100  1.17 | turn 0.32 | maxW 10.0% | n 55
+  [lo band10]                      IC +0.0441 | net60 Sharpe  1.24 ann +37.53% dd -24.99% | net100  1.19 | turn 0.28 | maxW 10.0% | n 55
+[promote] queued BEAR_RF1_refit63_2023
+
+===== BEAR_RF1_refit63_2023 (bear) — bear-window validation of RF1_refit63_2023
+[BEAR_RF1_refit63_2023] [wf 1/11] 2021-01-04 train 115852 val_ic +0.1405 (279s elapsed)
+[BEAR_RF1_refit63_2023] [wf 2/11] 2021-07-15 train 127692 val_ic +0.1483 (490s elapsed)
+[BEAR_RF1_refit63_2023] [wf 3/11] 2022-01-13 train 139724 val_ic +0.0008 (798s elapsed)
+[BEAR_RF1_refit63_2023] [wf 4/11] 2022-07-26 train 151622 val_ic -0.0828 (964s elapsed)
+[BEAR_RF1_refit63_2023] [wf 5/11] 2023-02-02 train 163490 val_ic +0.0056 (1402s elapsed)
+[BEAR_RF1_refit63_2023] [wf 6/11] 2023-08-10 train 175464 val_ic +0.1057 (1825s elapsed)
+[BEAR_RF1_refit63_2023] [wf 7/11] 2024-02-19 train 187409 val_ic +0.0609 (2082s elapsed)
+[BEAR_RF1_refit63_2023] [wf 8/11] 2024-08-22 train 199512 val_ic +0.0435 (2347s elapsed)
+[BEAR_RF1_refit63_2023] [wf 9/11] 2025-03-06 train 211533 val_ic +0.0065 (2610s elapsed)
+[BEAR_RF1_refit63_2023] [wf 10/11] 2025-09-04 train 223500 val_ic +0.0153 (2933s elapsed)
+[BEAR_RF1_refit63_2023] [wf 11/11] 2026-03-19 train 235621 val_ic +0.1029 (3287s elapsed)
+  [lo band10]                      IC +0.0286 | net60 Sharpe  0.96 ann +21.67% dd -20.40% | net100  0.80 | turn 0.34 | maxW 10.0% | n 67
+  [lo band10]                      IC +0.0286 | net60 Sharpe  1.19 ann +36.35% dd -30.29% | net100  1.14 | turn 0.29 | maxW 10.0% | n 67
+  [lo band10]                      IC +0.0353 | net60 Sharpe  1.44 ann +34.86% dd -18.03% | net100  1.30 | turn 0.30 | maxW 10.0% | n 67
+  [lo band10]                      IC +0.0353 | net60 Sharpe  1.46 ann +44.55% dd -26.04% | net100  1.41 | turn 0.26 | maxW 10.0% | n 67
+
+[scheduler] queue complete: 5 done, 0 failed
+.venv\Scripts\python.exe : Exception in thread Thread-1 (_readerthread):
+At line:1 char:302
++ ... tch {} } }; .venv\Scripts\python.exe -u research\gpu_research_schedul ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Exception in th..._readerthread)::String) [], RemoteExcepti 
+   on
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Traceback (most recent call last):
+  File "C:\Users\wilso\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1073, in 
+_bootstrap_inner
+    self.run()
+  File "C:\Users\wilso\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1010, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\wilso\AppData\Local\Programs\Python\Python312\Lib\subprocess.py", line 1599, in 
+_readerthread
+    buffer.append(fh.read())
+                  ^^^^^^^^^
+UnicodeDecodeError: 'cp950' codec can't decode byte 0xe2 in position 16: illegal multibyte sequence
+[daily] 

@@ -183,7 +183,8 @@ def spawn_bear(queue):
                 continue
             inherit = {k: c.get(k) for k in
                        ("feature_set", "target", "seq_len", "preset_base",
-                        "overrides", "seeds", "weight_decay", "loss", "holding")}
+                        "overrides", "seeds", "weight_decay", "loss", "holding",
+                        "refit_every")}
             inherit = {k: v for k, v in inherit.items() if v is not None}
             queue.append({**inherit,
                           "id": bid, "phase": "bear", "status": "pending",
