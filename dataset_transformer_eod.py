@@ -85,11 +85,11 @@ def _stock_features(df, feature_set):
 
     fs = feature_set
     if fs in ("close_only", "close_d12", "curated_full", "full_d12",
-              "sector_rel", "close_regime"):
+              "sector_rel", "close_regime", "close_range", "close_liq"):
         close_block()
-    if fs in ("ohlc_range", "curated_full", "full_d12"):
+    if fs in ("ohlc_range", "curated_full", "full_d12", "close_range"):
         range_block()
-    if fs in ("volume_block", "curated_full", "full_d12"):
+    if fs in ("volume_block", "curated_full", "full_d12", "close_liq"):
         volume_block()
     if fs == "ohlc_range":
         # range-only set still needs a return anchor
@@ -159,6 +159,12 @@ FEATURE_COLS = {
                      "vol_20", "vol_60", "dist_hi_60", "dist_lo_60",
                      "px_over_ma20", "mkt_dd", "mkt_vol20", "mkt_mom20",
                      "breadth"],
+    "close_range": ["log_ret_1", "mom_5", "mom_20", "mom_60", "mom_126_5",
+                    "vol_20", "vol_60", "dist_hi_60", "dist_lo_60",
+                    "px_over_ma20", "hl_range", "atr_ratio", "close_loc"],
+    "close_liq": ["log_ret_1", "mom_5", "mom_20", "mom_60", "mom_126_5",
+                  "vol_20", "vol_60", "dist_hi_60", "dist_lo_60",
+                  "px_over_ma20", "vol_z", "turn_z"],
     "ohlc_range": ["log_ret_1", "hl_range", "true_range", "atr_ratio", "close_loc",
                    "oc_ret", "overnight_gap", "range_z"],
     "volume_block": ["log_ret_1", "vol_z", "turn_z", "vol_ma_ratio", "log_vol_chg",
@@ -233,6 +239,13 @@ def build_dataset(feature_set="close_only", seq_len=40, horizons=(5, 10, 20),
         # realized 20d vol at t (annualization-free; used by tgt_voladj_20)
         lr = np.log(c[1:] / c[:-1])
         blk["_vol20_t"] = pd.Series(np.concatenate([[np.nan], lr])).rolling(20).std().to_numpy()
+        # within-window max drawdown of the forward 20d path (≤ 0), for tgt_ddadj_20
+        n_ = len(c)
+        ddw = np.full(n_, np.nan)
+        for t in range(n_ - 20 - exec_lag):
+            path = c[t + exec_lag:t + exec_lag + 21]
+            ddw[t] = float((path / np.maximum.accumulate(path) - 1.0).min())
+        blk["_ddwin_20"] = ddw
         if include_barrier:
             blk["tgt_barrier"] = _barrier(c, 20, exec_lag)
         blocks.append(blk)
@@ -269,6 +282,18 @@ def build_dataset(feature_set="close_only", seq_len=40, horizons=(5, 10, 20),
         tab = (pct20.clip(upper=0.3) / 0.3) * 2.0 - 1.0
         tab[date_count < min_names_per_date] = np.nan
         panel["tgt_avoid_bot_20"] = tab.where(panel["fwd_20"].notna())
+        # top/bottom-quintile spread target: ±1 tails, 0 middle
+        tsp = pd.Series(np.where(pct20 >= 0.8, 1.0,
+                        np.where(pct20 <= 0.2, -1.0, 0.0)), index=panel.index)
+        tsp[date_count < min_names_per_date] = np.nan
+        panel["tgt_spread_20"] = tsp.where(panel["fwd_20"].notna())
+        # drawdown-adjusted forward return: fwd_20 + within-window max drawdown
+        # (path-risk penalty), then cross-sectionally ranked to [-1, 1]
+        raw_dd = panel["fwd_20"] + panel["_ddwin_20"]
+        pct_dd = raw_dd.groupby(panel["date"]).rank(pct=True)
+        tdd = 2.0 * (pct_dd - 0.5)
+        tdd[date_count < min_names_per_date] = np.nan
+        panel["tgt_ddadj_20"] = tdd.where(raw_dd.notna())
 
     # ---- global trading calendar ranks
     all_dates = np.array(sorted(panel["date"].unique()))
@@ -283,7 +308,8 @@ def build_dataset(feature_set="close_only", seq_len=40, horizons=(5, 10, 20),
     target_names = [f"tgt_rank_{Y}" for Y in horizons]
     if 20 in horizons:
         target_names += ["tgt_exc_uni_20", "tgt_exc_sec_20", "fwd_20",
-                         "tgt_voladj_20", "tgt_avoid_bot_20"]
+                         "tgt_voladj_20", "tgt_avoid_bot_20",
+                         "tgt_spread_20", "tgt_ddadj_20"]
     for Y in horizons:
         if f"fwd_{Y}" not in target_names:
             target_names.append(f"fwd_{Y}")

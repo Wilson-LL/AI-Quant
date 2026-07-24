@@ -53,3 +53,14 @@ reason, expected benefit, rollback, and tests — per sprint rules.
 - **Tests:** (1) default-path regression — a 2-epoch MSE fit before/after the
   edit produces identical val IC for the same seed; (2) pairwise smoke run
   (1 seed, 3 epochs) shows finite loss, nonzero grad flow, val IC computed.
+
+## Edit 3 — 2026-07-24 (GPU research mode, queue v5): `train_transformer_eod.py`
+
+- **Change:** `loss="listwise"` (ListNet top-1: CE between softmax(y/τ) and
+  log-softmax(pred) per date group) reusing Edit 2's date-grouped batching.
+  MSE default path untouched (dispatch only).
+- **Reason:** RL2 screen in queue v5 (allowed Track-A item).
+- **Rollback:** parameter default; revert diff.
+- **Tests:** smoke via scheduler SMOKE config (MSE, regression-guarded by Edit
+  2's identical-path check) + RL2 screen run itself (finite loss/val IC logged
+  by the scheduler; a NaN/failure is recorded as status=failed, not skipped).

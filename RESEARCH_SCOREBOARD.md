@@ -84,6 +84,17 @@ retrain) → inference → blended decision book → paper ledger; monitors arme
 reopens on: new market regimes in the paper ledger, true full-field data
 (~2027-01), or new external information.
 
+## Hypothesis queue v5 (GPU research mode, 2026-07-24; supersedes v3/v4 idle state)
+
+User-directed GPU-saturated phase. 13 GPU configs registered in
+`reports/continuous_research/gpu_scheduler/queue_v5.json` (+auto-promotions,
++bear spawns), run by `research/gpu_research_scheduler.py`:
+layers 1/3 · dropout 0.1 · wd 1e-5/1e-3 · spread target · dd-adjusted target ·
+listwise loss · seq 90/120 · close+range · close+liquidity · 7-seed ensemble.
+CPU items: ERC weighting, top-N LO, conservative spec (band15+cap7.5).
+Closed lines from v1–v4 are NOT re-run. Gates unchanged (dual-window vs refs
+2.06/−10.7% and 1.47/−18.7%, val-IC selection, hard 10% cap).
+
 ## Hypothesis queue v3 (regenerated 2026-07-23 11:50; v2 fully executed)
 
 Closed lines (do not reopen without new information): adaptive weights, return-level

@@ -1,0 +1,270 @@
+[
+  {
+    "id": "SMOKE_1seed",
+    "phase": "smoke",
+    "order": 0,
+    "status": "running",
+    "hypothesis": "scheduler smoke test: 1 seed, short OOS window, must produce panel+metrics",
+    "feature_set": "close_only",
+    "target": "tgt_rank_20",
+    "seq_len": 60,
+    "preset_base": "B",
+    "seeds": [
+      0
+    ],
+    "oos_start": "2026-01-01",
+    "gate": "completes with finite val IC; validates the runner end-to-end",
+    "expected_runtime_min": 40
+  },
+  {
+    "id": "A5_L1_screen",
+    "phase": "screen",
+    "order": 1,
+    "status": "pending",
+    "hypothesis": "1 transformer layer (less capacity) matches champion at lower overfit risk",
+    "feature_set": "close_only",
+    "target": "tgt_rank_20",
+    "seq_len": 60,
+    "preset_base": "B",
+    "overrides": {
+      "trans_layers": 1
+    },
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "gate": "promote if top-2 val IC among screens; final gates dual-window vs champion/blend refs",
+    "expected_runtime_min": 12
+  },
+  {
+    "id": "A5_L3_screen",
+    "phase": "screen",
+    "order": 1,
+    "status": "pending",
+    "hypothesis": "3 transformer layers (more capacity) beats champion",
+    "feature_set": "close_only",
+    "target": "tgt_rank_20",
+    "seq_len": 60,
+    "preset_base": "B",
+    "overrides": {
+      "trans_layers": 3
+    },
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "gate": "same as A5_L1",
+    "expected_runtime_min": 18
+  },
+  {
+    "id": "A6_do1_screen",
+    "phase": "screen",
+    "order": 1,
+    "status": "pending",
+    "hypothesis": "dropout 0.1 (champion 0.2 may over-regularize)",
+    "feature_set": "close_only",
+    "target": "tgt_rank_20",
+    "seq_len": 60,
+    "preset_base": "B",
+    "overrides": {
+      "dropout": 0.1
+    },
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "gate": "same as A5_L1",
+    "expected_runtime_min": 12
+  },
+  {
+    "id": "A6_wd1e5_screen",
+    "phase": "screen",
+    "order": 1,
+    "status": "pending",
+    "hypothesis": "weight decay 1e-5 (lighter than champion 1e-4)",
+    "feature_set": "close_only",
+    "target": "tgt_rank_20",
+    "seq_len": 60,
+    "preset_base": "B",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "weight_decay": 1e-05,
+    "gate": "same as A5_L1",
+    "expected_runtime_min": 12
+  },
+  {
+    "id": "A6_wd1e3_screen",
+    "phase": "screen",
+    "order": 1,
+    "status": "pending",
+    "hypothesis": "weight decay 1e-3 (heavier; wd 5e-4 was ~neutral in A3)",
+    "feature_set": "close_only",
+    "target": "tgt_rank_20",
+    "seq_len": 60,
+    "preset_base": "B",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "weight_decay": 0.001,
+    "gate": "same as A5_L1",
+    "expected_runtime_min": 12
+  },
+  {
+    "id": "B7_spread_screen",
+    "phase": "screen",
+    "order": 1,
+    "status": "pending",
+    "hypothesis": "top/bottom-quintile spread target (tails-only supervision) sharpens book edges",
+    "feature_set": "close_only",
+    "target": "tgt_spread_20",
+    "seq_len": 60,
+    "preset_base": "B",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "gate": "same as A5_L1; extra scrutiny after B4 val/OOS inversion precedent",
+    "expected_runtime_min": 12
+  },
+  {
+    "id": "B6_ddadj_screen",
+    "phase": "screen",
+    "order": 1,
+    "status": "pending",
+    "hypothesis": "drawdown-adjusted forward return target (path-risk penalty) improves DD/Calmar",
+    "feature_set": "close_only",
+    "target": "tgt_ddadj_20",
+    "seq_len": 60,
+    "preset_base": "B",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "gate": "same as A5_L1; DD-focused reading",
+    "expected_runtime_min": 12
+  },
+  {
+    "id": "RL2_listwise_screen",
+    "phase": "screen",
+    "order": 1,
+    "status": "pending",
+    "hypothesis": "listwise (ListNet top-1) loss; pairwise failed the val-IC gate, listwise optimizes the whole date list",
+    "feature_set": "close_only",
+    "target": "tgt_rank_20",
+    "seq_len": 60,
+    "preset_base": "B",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "loss": "listwise",
+    "gate": "same as A5_L1; val-IC gate decisive (RL1 precedent)",
+    "expected_runtime_min": 16
+  },
+  {
+    "id": "A8_seeds7_full",
+    "phase": "promoted",
+    "order": 2,
+    "status": "pending",
+    "hypothesis": "7-seed ensemble > 5-seed champion (ensemble-size curve)",
+    "feature_set": "close_only",
+    "target": "tgt_rank_20",
+    "seq_len": 60,
+    "preset_base": "B",
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "eval_blend": true,
+    "gate": "blend books vs refs 2.06/-10.7%; >= ref-0.05 spawns bear run",
+    "expected_runtime_min": 25
+  },
+  {
+    "id": "A7_seq90_screen",
+    "phase": "screen",
+    "order": 3,
+    "status": "pending",
+    "hypothesis": "seq 90 (longer context) beats seq 60",
+    "feature_set": "close_only",
+    "target": "tgt_rank_20",
+    "seq_len": 90,
+    "preset_base": "B",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "gate": "same as A5_L1",
+    "expected_runtime_min": 55
+  },
+  {
+    "id": "A7_seq120_screen",
+    "phase": "screen",
+    "order": 4,
+    "status": "pending",
+    "hypothesis": "seq 120 (half-year context) beats seq 60",
+    "feature_set": "close_only",
+    "target": "tgt_rank_20",
+    "seq_len": 120,
+    "preset_base": "B",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "gate": "same as A5_L1; OOM fallback allowed",
+    "expected_runtime_min": 65
+  },
+  {
+    "id": "E4_range_screen",
+    "phase": "screen",
+    "order": 5,
+    "status": "pending",
+    "hypothesis": "close + curated OHLC range (3 cols) adds intraday info without full-field dilution",
+    "feature_set": "close_range",
+    "target": "tgt_rank_20",
+    "seq_len": 60,
+    "preset_base": "B",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "gate": "same as A5_L1; E-track precedent: extra features usually dilute",
+    "expected_runtime_min": 50
+  },
+  {
+    "id": "E5_liq_screen",
+    "phase": "screen",
+    "order": 6,
+    "status": "pending",
+    "hypothesis": "close + curated liquidity (vol_z, turn_z) adds flow info",
+    "feature_set": "close_liq",
+    "target": "tgt_rank_20",
+    "seq_len": 60,
+    "preset_base": "B",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "gate": "same as A5_L1",
+    "expected_runtime_min": 50
+  }
+]

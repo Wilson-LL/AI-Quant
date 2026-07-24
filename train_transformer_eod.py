@@ -117,10 +117,10 @@ def fit_one(Xg, yg, tr_idx, va_idx, va_dates, cfg, seed, weights=None,
         # normalize so the mean train weight is 1 (keeps lr scale comparable)
         w_full[tr] /= w_full[tr].mean().clamp_min(1e-8)
 
-    # pairwise mode: pre-group train indices by date (same-date pairs only)
+    # pairwise/listwise modes: pre-group train indices by date
     date_groups = None
-    if loss == "pairwise":
-        assert date_ranks is not None, "pairwise loss needs date_ranks"
+    if loss in ("pairwise", "listwise"):
+        assert date_ranks is not None, f"{loss} loss needs date_ranks"
         drt = np.asarray(date_ranks)[np.asarray(tr_idx)]
         order = np.argsort(drt, kind="stable")
         tr_np = np.asarray(tr_idx)[order]
@@ -135,6 +135,13 @@ def fit_one(Xg, yg, tr_idx, va_idx, va_dates, cfg, seed, weights=None,
         if not mask.any():
             return pred.sum() * 0.0
         return torch.nn.functional.softplus(-dp * dy.sign())[mask].mean()
+
+    def _listwise_loss(pred, y, tau=0.5):
+        # ListNet top-1: CE between target and prediction softmax over the date
+        p_tgt = torch.softmax(y.float() / tau, dim=0)
+        return -(p_tgt * torch.log_softmax(pred.float(), dim=0)).sum()
+
+    _group_loss = _listwise_loss if loss == "listwise" else _pairwise_loss
 
     best_ic, best_state, no_improve = -1e9, None, 0
     epochs = max_epochs or cfg["max_epochs"]
@@ -157,7 +164,7 @@ def fit_one(Xg, yg, tr_idx, va_idx, va_dates, cfg, seed, weights=None,
                     pred = net(Xg[b_all])
                     parts, off = [], 0
                     for c in chunk:
-                        parts.append(_pairwise_loss(pred[off:off + len(c)], yg[c]))
+                        parts.append(_group_loss(pred[off:off + len(c)], yg[c]))
                         off += len(c)
                     loss_t = torch.stack(parts).mean()
                 scaler.scale(loss_t).backward()
