@@ -1,0 +1,37 @@
+﻿
+===== P5_A7_seq120_screen (promoted) — 5-seed confirmation of seq120 (within-family val IC #2: 0.0514)
+[dataset] 108 stocks loaded, feature_set=close_only, seq_len=120, exec_lag=1
+[dataset] X (269767, 120, 10) (1295 MB), 2815 dates 2015-01-05..2026-07-24
+[P5_A7_seq120_screen] [wf 1/7] 2023-01-03 train 156500 val_ic +0.0131 (434s elapsed)
+[P5_A7_seq120_screen] [wf 2/7] 2023-07-20 train 168369 val_ic +0.1180 (1327s elapsed)
+[P5_A7_seq120_screen] [wf 3/7] 2024-01-19 train 180353 val_ic +0.0535 (1666s elapsed)
+[P5_A7_seq120_screen] [wf 4/7] 2024-08-02 train 192346 val_ic +0.0549 (2013s elapsed)
+[P5_A7_seq120_screen] [wf 5/7] 2025-02-13 train 204364 val_ic +0.0207 (2353s elapsed)
+[P5_A7_seq120_screen] [wf 6/7] 2025-08-15 train 216450 val_ic +0.0129 (2771s elapsed)
+[P5_A7_seq120_screen] [wf 7/7] 2026-02-26 train 228428 val_ic +0.0895 (3159s elapsed)
+  [lo band10]                      IC +0.0686 | net60 Sharpe  1.73 ann +49.55% dd -15.46% | net100  1.63 | turn 0.24 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0686 | net60 Sharpe  1.58 ann +54.58% dd -29.64% | net100  1.54 | turn 0.22 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0680 | net60 Sharpe  1.66 ann +46.80% dd -16.86% | net100  1.54 | turn 0.27 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0680 | net60 Sharpe  1.75 ann +62.43% dd -32.12% | net100  1.71 | turn 0.23 | maxW 10.0% | n 42
+
+[scheduler] queue complete: 19 done, 0 failed
+.venv\Scripts\python.exe : Exception in thread Thread-1 (_readerthread):
+At line:1 char:302
++ ... tch {} } }; .venv\Scripts\python.exe -u research\gpu_research_schedul ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Exception in th..._readerthread)::String) [], RemoteExcepti 
+   on
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Traceback (most recent call last):
+  File "C:\Users\wilso\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1073, in 
+_bootstrap_inner
+    self.run()
+  File "C:\Users\wilso\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1010, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\wilso\AppData\Local\Programs\Python\Python312\Lib\subprocess.py", line 1599, in 
+_readerthread
+    buffer.append(fh.read())
+                  ^^^^^^^^^
+UnicodeDecodeError: 'cp950' codec can't decode byte 0xe2 in position 16: illegal multibyte sequence
+[daily] 

@@ -1,0 +1,53 @@
+[
+  {
+    "id": "A9_seeds9_2023",
+    "phase": "promoted",
+    "order": 1,
+    "status": "running",
+    "hypothesis": "9-seed ensemble: does the seed curve saturate at 7? (5->2.06, 7->2.147 blend refs)",
+    "feature_set": "close_only",
+    "target": "tgt_rank_20",
+    "seq_len": 60,
+    "preset_base": "B",
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "eval_blend": true,
+    "gate": "blend vs B4e 2.147/-10.6%: >= +0.05 adopt-9; within +-0.05 = saturation (keep 7); < -0.05 = noise warning on the 7-seed win",
+    "expected_runtime_min": 35
+  },
+  {
+    "id": "A9_seeds9_2021",
+    "phase": "bear",
+    "order": 2,
+    "status": "pending",
+    "hypothesis": "9-seed bear window (paired with A9_seeds9_2023 regardless of its outcome - the seed-curve reading needs both windows)",
+    "feature_set": "close_only",
+    "target": "tgt_rank_20",
+    "seq_len": 60,
+    "preset_base": "B",
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "oos_start": "2021-01-01",
+    "eval_blend": true,
+    "gate": "blend vs B4f 1.443/-18.0%: same tolerance logic",
+    "expected_runtime_min": 55
+  }
+]
