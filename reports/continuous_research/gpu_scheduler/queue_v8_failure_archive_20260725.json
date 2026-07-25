@@ -1,0 +1,17 @@
+{
+  "note": "Original failure records from queue_v8.json before crash-recovery resume on 2026-07-26. Both failures occurred at 2026-07-25 01:42:03 (CUDA driver/GPU wedge preceding the unexpected shutdown; see RECOVERY_AFTER_SHUTDOWN.md). ENS14_2021 had completed wf 1-3 of 11 (partial val_ics in scheduler_run6.log are INVALID, not decision-grade); BEAR_ENS14_2023 never trained (0 refits). Error fields were removed from queue_v8.json and statuses reset to pending for the resume.",
+  "failures": [
+    {
+      "id": "ENS14_2021",
+      "failed_at": "2026-07-25 01:42:03",
+      "progress_at_failure": "wf 3/11 complete (2022-01-13), crashed during wf 4/11",
+      "error": "AcceleratorError: CUDA error: unknown error\nSearch for `cudaErrorUnknown' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.\nFor more detailed error information, run with CUDA_LOG_FILE=stderr\n"
+    },
+    {
+      "id": "BEAR_ENS14_2023",
+      "failed_at": "2026-07-25 01:42:03",
+      "progress_at_failure": "0 refits (failed immediately; GPU already unusable)",
+      "error": "AcceleratorError: CUDA error: unknown error\nSearch for `cudaErrorUnknown' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.\nFor more detailed error information, run with CUDA_LOG_FILE=stderr\n"
+    }
+  ]
+}

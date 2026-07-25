@@ -1,0 +1,33 @@
+﻿
+===== ENS14_2023 (promoted) — 14-seed ensemble (0-6 + 10-16) averages away seed-set variance discovered in SR1
+[dataset] 108 stocks loaded, feature_set=close_only, seq_len=60, exec_lag=1
+[dataset] X (276247, 60, 10) (663 MB), 2815 dates 2015-01-05..2026-07-24
+[ENS14_2023] [wf 1/7] 2023-01-03 train 162233 val_ic +0.0202 (896s elapsed)
+[ENS14_2023] [wf 2/7] 2023-07-20 train 174099 val_ic +0.0985 (1495s elapsed)
+[ENS14_2023] [wf 3/7] 2024-01-19 train 186137 val_ic +0.0544 (1920s elapsed)
+[ENS14_2023] [wf 4/7] 2024-08-02 train 198124 val_ic +0.0339 (2334s elapsed)
+[ENS14_2023] [wf 5/7] 2025-02-13 train 210142 val_ic +0.0326 (2768s elapsed)
+[ENS14_2023] [wf 6/7] 2025-08-15 train 222235 val_ic +0.0175 (3271s elapsed)
+[ENS14_2023] [wf 7/7] 2026-02-26 train 234230 val_ic +0.0809 (3885s elapsed)
+  [lo band10]                      IC +0.0680 | net60 Sharpe  1.68 ann +42.32% dd -16.35% | net100  1.51 | turn 0.35 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0680 | net60 Sharpe  1.68 ann +57.77% dd -27.81% | net100  1.62 | turn 0.29 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0719 | net60 Sharpe  2.12 ann +51.86% dd -10.07% | net100  1.97 | turn 0.30 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0719 | net60 Sharpe  1.97 ann +67.49% dd -24.24% | net100  1.92 | turn 0.26 | maxW 10.0% | n 42
+
+===== ENS14_2021 (bear) — 14-seed bear window; midpoint of 1.301/1.443 expected; 2022 should stabilize bet
+[ENS14_2021] [wf 1/11] 2021-01-04 train 115852 val_ic +0.1358 (360s elapsed)
+[ENS14_2021] [wf 2/11] 2021-07-15 train 127692 val_ic +0.1500 (676s elapsed)
+[ENS14_2021] [wf 3/11] 2022-01-13 train 139724 val_ic +0.0092 (1174s elapsed)
+[ENS14_2021] FAILED: AcceleratorError: CUDA error: unknown error
+Search for `cudaErrorUnknown' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+For more detailed error information, run with CUDA_LOG_FILE=stderr
+
+[promote] queued BEAR_ENS14_2023
+
+===== BEAR_ENS14_2023 (bear) — bear-window validation of ENS14_2023
+[BEAR_ENS14_2023] FAILED: AcceleratorError: CUDA error: unknown error
+Search for `cudaErrorUnknown' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+For more detailed error information, run with CUDA_LOG_FILE=stderr
+
+
+[scheduler] queue complete: 1 done, 2 failed

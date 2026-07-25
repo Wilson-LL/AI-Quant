@@ -203,3 +203,29 @@ Branch: research/continuous-alpha-loop-4060ti · RTX 4060 Ti (CUDA OK, torch 2.1
 - GPU utilization: near-continuous training since mode start; VRAM ~2.2–2.9 GB
   alongside FFXIV (~3 GB); 0 OOM.
 - Blockers: none.
+
+### 2026-07-26 — crash recovery + queue v8 completion (14-seed verdict: keep 7)
+- **07-25 01:42 incident:** CUDA `unknown error` (driver/GPU wedge) killed
+  ENS14_2021 at wf 4/11 and BEAR_ENS14_2023 at spawn; the PC then shut down
+  unexpectedly. Scheduler finalized all files before exit — recovery audit
+  found **zero corruption** (all JSON/JSONL/gzip verified; ENS14_2023 result
+  cross-consistent and VALID). Full audit: `RECOVERY_AFTER_SHUTDOWN.md`.
+  Pre-crash ENS14_2021 partials (wf 1–3 val_ics) declared INVALID, unused.
+- **Resume (user-approved):** failed items re-pended (original errors archived
+  in `gpu_scheduler/queue_v8_failure_archive_20260725.json`), ENS14_2023 kept
+  done (not rerun). Pre-flight: CUDA smoke + AMP OK, nvidia-smi healthy, no
+  stray python, correct branch. Scheduler resumed 07-26 00:23, completed 05:25:
+  **3 done, 0 failed** — the CUDA error did not recur (post-reboot, under the
+  same FFXIV load that accompanied the original crash).
+- **Queue v8 verdict (scoreboard V8):** convergence hypothesis CONFIRMED —
+  champ blend 2.125 (midpoint 1.995), bear blend 1.383 (midpoint 1.372). The
+  adopt-14 gate passes by the letter, but the bear margin (+0.011) is parity
+  within seed noise, bear DD is 4.6pp worse (−22.6% vs −18.0%) and 2022 is
+  −0.43 vs −0.15 at 2× retrain cost → **recommendation: keep 7-seed spec;
+  adoption decision left to user.** Production unchanged (7 seeds, D7b
+  band15+cap7.5 remains recommended deployment variant).
+- Scheduler design note: bear auto-spawn duplicated ENS14_2021 exactly
+  (bit-identical books — determinism reconfirmed; ~2.4h GPU on a redundant
+  run; dedup-by-config worth adding before the next queue).
+- Daily ops ran at queue completion: +0 rows (TWSE weekend, nothing to infer).
+- Blockers: none. Queue v8 CLOSED; no new queue started (per user direction).

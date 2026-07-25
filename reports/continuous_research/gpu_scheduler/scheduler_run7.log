@@ -1,0 +1,39 @@
+
+===== ENS14_2021 (bear) ¡X 14-seed bear window; midpoint of 1.301/1.443 expected; 2022 should stabilize bet
+[dataset] 108 stocks loaded, feature_set=close_only, seq_len=60, exec_lag=1
+[dataset] X (276247, 60, 10) (663 MB), 2815 dates 2015-01-05..2026-07-24
+[ENS14_2021] [wf 1/11] 2021-01-04 train 115852 val_ic +0.1358 (1274s elapsed)
+[ENS14_2021] [wf 2/11] 2021-07-15 train 127692 val_ic +0.1500 (1855s elapsed)
+[ENS14_2021] [wf 3/11] 2022-01-13 train 139724 val_ic +0.0092 (2842s elapsed)
+[ENS14_2021] [wf 4/11] 2022-07-26 train 151622 val_ic -0.0536 (3627s elapsed)
+[ENS14_2021] [wf 5/11] 2023-02-02 train 163490 val_ic +0.0047 (4765s elapsed)
+[ENS14_2021] [wf 6/11] 2023-08-10 train 175464 val_ic +0.1085 (5704s elapsed)
+[ENS14_2021] [wf 7/11] 2024-02-19 train 187409 val_ic +0.0618 (6369s elapsed)
+[ENS14_2021] [wf 8/11] 2024-08-22 train 199512 val_ic +0.0419 (7025s elapsed)
+[ENS14_2021] [wf 9/11] 2025-03-06 train 211533 val_ic +0.0046 (7723s elapsed)
+[ENS14_2021] [wf 10/11] 2025-09-04 train 223500 val_ic +0.0126 (8587s elapsed)
+[ENS14_2021] [wf 11/11] 2026-03-19 train 235621 val_ic +0.1071 (9574s elapsed)
+  [lo band10]                      IC +0.0342 | net60 Sharpe  1.20 ann +26.80% dd -19.72% | net100  1.02 | turn 0.36 | maxW 10.0% | n 67
+  [lo band10]                      IC +0.0342 | net60 Sharpe  1.33 ann +40.24% dd -28.17% | net100  1.27 | turn 0.30 | maxW 10.0% | n 67
+  [lo band10]                      IC +0.0342 | net60 Sharpe  1.38 ann +31.66% dd -22.63% | net100  1.23 | turn 0.31 | maxW 10.0% | n 67
+  [lo band10]                      IC +0.0342 | net60 Sharpe  1.38 ann +44.04% dd -33.56% | net100  1.33 | turn 0.27 | maxW 10.0% | n 67
+
+===== BEAR_ENS14_2023 (bear) ¡X bear-window validation of ENS14_2023
+[BEAR_ENS14_2023] [wf 1/11] 2021-01-04 train 115852 val_ic +0.1358 (587s elapsed)
+[BEAR_ENS14_2023] [wf 2/11] 2021-07-15 train 127692 val_ic +0.1500 (1133s elapsed)
+[BEAR_ENS14_2023] [wf 3/11] 2022-01-13 train 139724 val_ic +0.0092 (2004s elapsed)
+[BEAR_ENS14_2023] [wf 4/11] 2022-07-26 train 151622 val_ic -0.0536 (2686s elapsed)
+[BEAR_ENS14_2023] [wf 5/11] 2023-02-02 train 163490 val_ic +0.0047 (3749s elapsed)
+[BEAR_ENS14_2023] [wf 6/11] 2023-08-10 train 175464 val_ic +0.1085 (4691s elapsed)
+[BEAR_ENS14_2023] [wf 7/11] 2024-02-19 train 187409 val_ic +0.0618 (5363s elapsed)
+[BEAR_ENS14_2023] [wf 8/11] 2024-08-22 train 199512 val_ic +0.0419 (6003s elapsed)
+[BEAR_ENS14_2023] [wf 9/11] 2025-03-06 train 211533 val_ic +0.0046 (6684s elapsed)
+[BEAR_ENS14_2023] [wf 10/11] 2025-09-04 train 223500 val_ic +0.0126 (7519s elapsed)
+[BEAR_ENS14_2023] [wf 11/11] 2026-03-19 train 235621 val_ic +0.1071 (8487s elapsed)
+  [lo band10]                      IC +0.0342 | net60 Sharpe  1.20 ann +26.80% dd -19.72% | net100  1.02 | turn 0.36 | maxW 10.0% | n 67
+  [lo band10]                      IC +0.0342 | net60 Sharpe  1.33 ann +40.24% dd -28.17% | net100  1.27 | turn 0.30 | maxW 10.0% | n 67
+  [lo band10]                      IC +0.0342 | net60 Sharpe  1.38 ann +31.66% dd -22.63% | net100  1.23 | turn 0.31 | maxW 10.0% | n 67
+  [lo band10]                      IC +0.0342 | net60 Sharpe  1.38 ann +44.04% dd -33.56% | net100  1.33 | turn 0.27 | maxW 10.0% | n 67
+
+[scheduler] queue complete: 3 done, 0 failed
+[daily] Refresh done: +0 rows across 112 stocks in 326s
