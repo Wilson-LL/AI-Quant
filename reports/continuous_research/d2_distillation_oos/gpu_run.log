@@ -1,0 +1,24 @@
+[dataset] 108 stocks loaded, feature_set=close_only, seq_len=60, exec_lag=1
+[dataset] X (276247, 60, 10) (663 MB), 2815 dates 2015-01-05..2026-07-24
+[champ_2023] [wf 1/7] 2023-01-03 student val_ic -0.0092 (383s elapsed)
+[champ_2023] [wf 2/7] 2023-07-20 student val_ic +0.0903 (722s elapsed)
+[champ_2023] [wf 3/7] 2024-01-19 student val_ic +0.0531 (940s elapsed)
+[champ_2023] [wf 4/7] 2024-08-02 student val_ic +0.0536 (1161s elapsed)
+[champ_2023] [wf 5/7] 2025-02-13 student val_ic +0.0602 (1395s elapsed)
+[champ_2023] [wf 6/7] 2025-08-15 student val_ic +0.0446 (1650s elapsed)
+[champ_2023] [wf 7/7] 2026-02-26 student val_ic +0.0788 (1976s elapsed)
+[champ_2023] done in 1978.9s (teachers 1605s, student 279s)
+[dataset] 108 stocks loaded, feature_set=close_only, seq_len=60, exec_lag=1
+[dataset] X (276247, 60, 10) (663 MB), 2815 dates 2015-01-05..2026-07-24
+[bear_2021] [wf 1/11] 2021-01-04 student val_ic +0.1078 (220s elapsed)
+[bear_2021] [wf 2/11] 2021-07-15 student val_ic +0.1545 (391s elapsed)
+[bear_2021] [wf 3/11] 2022-01-13 student val_ic +0.0250 (672s elapsed)
+[bear_2021] [wf 4/11] 2022-07-26 student val_ic +0.0089 (825s elapsed)
+[bear_2021] [wf 5/11] 2023-02-02 student val_ic -0.0345 (1139s elapsed)
+[bear_2021] [wf 6/11] 2023-08-10 student val_ic +0.0556 (1466s elapsed)
+[bear_2021] [wf 7/11] 2024-02-19 student val_ic +0.0668 (1702s elapsed)
+[bear_2021] [wf 8/11] 2024-08-22 student val_ic +0.0573 (1902s elapsed)
+[bear_2021] [wf 9/11] 2025-03-06 student val_ic +0.0428 (2109s elapsed)
+[bear_2021] [wf 10/11] 2025-09-04 student val_ic +0.0045 (2396s elapsed)
+[bear_2021] [wf 11/11] 2026-03-19 student val_ic +0.0920 (2718s elapsed)
+[bear_2021] done in 2722.4s (teachers 2250s, student 340s)

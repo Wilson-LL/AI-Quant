@@ -1,0 +1,43 @@
+{
+  "tag": "champ_2023",
+  "refits": [
+    {
+      "refit_date": "2023-01-03",
+      "student_val_ic": -0.00915,
+      "student_train_s": 22.4
+    },
+    {
+      "refit_date": "2023-07-20",
+      "student_val_ic": 0.09033,
+      "student_train_s": 110.8
+    },
+    {
+      "refit_date": "2024-01-19",
+      "student_val_ic": 0.05312,
+      "student_train_s": 30.8
+    },
+    {
+      "refit_date": "2024-08-02",
+      "student_val_ic": 0.05356,
+      "student_train_s": 21.9
+    },
+    {
+      "refit_date": "2025-02-13",
+      "student_val_ic": 0.06016,
+      "student_train_s": 23.4
+    },
+    {
+      "refit_date": "2025-08-15",
+      "student_val_ic": 0.0446,
+      "student_train_s": 24.8
+    },
+    {
+      "refit_date": "2026-02-26",
+      "student_val_ic": 0.07876,
+      "student_train_s": 45.2
+    }
+  ],
+  "teacher_s": 1605.405471086502,
+  "student_s": 279.14933729171753,
+  "total_s": 1978.9
+}

@@ -1,0 +1,63 @@
+{
+  "tag": "bear_2021",
+  "refits": [
+    {
+      "refit_date": "2021-01-04",
+      "student_val_ic": 0.10781,
+      "student_train_s": 32.1
+    },
+    {
+      "refit_date": "2021-07-15",
+      "student_val_ic": 0.15451,
+      "student_train_s": 21.2
+    },
+    {
+      "refit_date": "2022-01-13",
+      "student_val_ic": 0.02503,
+      "student_train_s": 34.8
+    },
+    {
+      "refit_date": "2022-07-26",
+      "student_val_ic": 0.00889,
+      "student_train_s": 16.8
+    },
+    {
+      "refit_date": "2023-02-02",
+      "student_val_ic": -0.0345,
+      "student_train_s": 18.1
+    },
+    {
+      "refit_date": "2023-08-10",
+      "student_val_ic": 0.05564,
+      "student_train_s": 38.8
+    },
+    {
+      "refit_date": "2024-02-19",
+      "student_val_ic": 0.06678,
+      "student_train_s": 31.2
+    },
+    {
+      "refit_date": "2024-08-22",
+      "student_val_ic": 0.05726,
+      "student_train_s": 22.1
+    },
+    {
+      "refit_date": "2025-03-06",
+      "student_val_ic": 0.04283,
+      "student_train_s": 23.3
+    },
+    {
+      "refit_date": "2025-09-04",
+      "student_val_ic": 0.00454,
+      "student_train_s": 55.7
+    },
+    {
+      "refit_date": "2026-03-19",
+      "student_val_ic": 0.09197,
+      "student_train_s": 45.6
+    }
+  ],
+  "teacher_s": 2249.874133348465,
+  "student_s": 339.5602467060089,
+  "total_s": 2722.4
+}

@@ -320,3 +320,23 @@ Branch: research/continuous-alpha-loop-4060ti · RTX 4060 Ti (CUDA OK, torch 2.1
   (would need pre-registration, adaptive-weight-adjacent).
 - Blockers: none. No queue running; loop returns to operational cadence
   (daily ops + P1 ledger maturation — evidence gate ~3 rebalances out).
+
+### 2026-07-27 — D2 distillation OOS check (user-approved): REJECT 0/6, line closed
+- Focused walkforward: 7 teachers + 1 distilled student per refit, paired
+  same-run panels, both windows (~1.9h GPU). Scope held (D2 only, no signal
+  research, no production change, cache read-only).
+- **Every adoption gate failed by a wide margin:** student blend 1.034/1.004
+  vs ensemble 2.147/1.443 (48%/70% vs the 95% bar), DD 8.4pp/5.7pp worse,
+  2022 −0.45 vs −0.15, book overlap 0.52/0.70 (<0.80 trust bar).
+- Validity: same-run ensemble books reproduced the frozen A8 refs EXACTLY
+  (determinism cross-check) — comparison airtight. Runtime saving real
+  (~6.6×) but moot.
+- **Key lesson (4th val-IC/book dissociation, the sharpest):** the student
+  recovered 96% of ensemble val IC at the single-refit check yet destroyed
+  the books OOS — ensemble averaging stabilizes the rank TAILS that books
+  are built from, and average rank correlation cannot see that. Rule
+  hardened: no adoption on val-IC evidence alone, ever.
+- **7-seed production spec stays. Distillation line CLOSED** (0/6 is
+  rejected, not research-only; daily retrain at ~5 min was never a real
+  pain point). Results: `reports/continuous_research/d2_distillation_oos/`.
+- Blockers: none. Loop in operational cadence; no open compute.
