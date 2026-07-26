@@ -1,0 +1,26 @@
+{
+  "id": "SR_MT1_disjoint_2023",
+  "item": "gpu",
+  "exp": "MT-battery",
+  "status": "running",
+  "hypothesis": "MT heads bear/champ profile survives disjoint seeds: champion window, seeds 10-16; gate: blend LS net60 in [1.85, 2.15]",
+  "feature_set": "close_only",
+  "target": "tgt_rank_20",
+  "seq_len": 60,
+  "preset_base": "B",
+  "overrides": {
+    "mt_aux": true
+  },
+  "seeds": [
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16
+  ],
+  "eval_blend": true,
+  "panel": "SCHED_SR_MT1_disjoint_2023.csv.gz",
+  "runtime_s": 1688.6
+}

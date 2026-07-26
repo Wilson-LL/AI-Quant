@@ -1,0 +1,27 @@
+{
+  "id": "SR_MT2_disjoint_2021",
+  "item": "gpu",
+  "exp": "MT-battery",
+  "status": "running",
+  "hypothesis": "MT bear profile survives disjoint seeds: bear window, seeds 10-16; gate: blend >= 1.44 AND 2022 >= 0.0 AND max_dd >= -0.16",
+  "feature_set": "close_only",
+  "target": "tgt_rank_20",
+  "seq_len": 60,
+  "preset_base": "B",
+  "overrides": {
+    "mt_aux": true
+  },
+  "seeds": [
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16
+  ],
+  "oos_start": "2021-01-01",
+  "eval_blend": true,
+  "panel": "SCHED_SR_MT2_disjoint_2021.csv.gz",
+  "runtime_s": 2401.7
+}

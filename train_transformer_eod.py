@@ -124,6 +124,55 @@ class MTNet(torch.nn.Module):
         return main
 
 
+class QNet(torch.nn.Module):
+    """v10b-B2: quantile head (q10/q50/q90, pinball loss). Default forward
+    returns q50, so every prediction/inference path is unchanged."""
+
+    def __init__(self, base, hidden, dropout):
+        super().__init__()
+        self.base = base
+        self.qhead = torch.nn.Sequential(
+            torch.nn.Linear(hidden, 32), torch.nn.ReLU(),
+            torch.nn.Dropout(dropout), torch.nn.Linear(32, 3))
+
+    def forward(self, x, quantiles=False):
+        q = self.qhead(_embed(self.base, x))
+        return q if quantiles else q[:, 1]
+
+
+def _pinball(q, y, taus=(0.1, 0.5, 0.9)):
+    diff = y.unsqueeze(1) - q
+    t = torch.as_tensor(taus, device=q.device, dtype=q.dtype).unsqueeze(0)
+    return torch.maximum(t * diff, (t - 1) * diff).mean()
+
+
+class TCNNet(torch.nn.Module):
+    """v10b-A3: causal dilated temporal-convolution baseline (~matched params
+    to preset B). Anchor experiment: is attention earning its complexity?"""
+
+    def __init__(self, input_dim, hidden, dropout, blocks=4, k=3):
+        super().__init__()
+        self.blocks = torch.nn.ModuleList()
+        ch = input_dim
+        for i in range(blocks):
+            self.blocks.append(torch.nn.Sequential(
+                torch.nn.Conv1d(ch, hidden, k, dilation=2 ** i,
+                                padding=(k - 1) * 2 ** i),
+                torch.nn.ReLU(), torch.nn.Dropout(dropout)))
+            ch = hidden
+        self.pad = [(k - 1) * 2 ** i for i in range(blocks)]
+        self.fc = torch.nn.Sequential(
+            torch.nn.Linear(hidden, 32), torch.nn.ReLU(),
+            torch.nn.Dropout(dropout), torch.nn.Linear(32, 1))
+
+    def forward(self, x):
+        h = x.transpose(1, 2)                       # (B, feat, seq)
+        for blk, p in zip(self.blocks, self.pad):
+            out = blk(h)[..., :h.shape[-1]]         # causal: trim right pad
+            h = out + h if out.shape == h.shape else out
+        return self.fc(h[..., -1]).squeeze(-1)
+
+
 @torch.no_grad()
 def predict_idx_cs(net, Xg, idx, dranks):
     """Date-grouped prediction for CSAttnNet: attention must see exactly the
@@ -179,18 +228,24 @@ def fit_one(Xg, yg, tr_idx, va_idx, va_dates, cfg, seed, weights=None,
     """
     torch.manual_seed(seed)
     np.random.seed(seed)
-    net = build_net(Xg.shape[2], cfg).to(Xg.device)
-    if warm_state is not None:
-        net.load_state_dict(warm_state)
-    # v10 flags (all default OFF; wrappers consume RNG only when active)
+    # v10/v10b flags (all default OFF; extra RNG consumed only when active)
     cs_mode = bool(cfg.get("cs_attn"))
     mt_mode = bool(cfg.get("mt_aux")) and aux_targets is not None
+    q_mode = bool(cfg.get("quantile"))
     aug_sigma = float(cfg.get("aug_noise") or 0.0)
     aug_drop = float(cfg.get("aug_datedrop") or 0.0)
+    if cfg.get("tcn"):
+        net = TCNNet(Xg.shape[2], cfg["hidden"], cfg["dropout"]).to(Xg.device)
+    else:
+        net = build_net(Xg.shape[2], cfg).to(Xg.device)
+    if warm_state is not None:
+        net.load_state_dict(warm_state)
     if cs_mode:
         net = CSAttnNet(net, cfg["hidden"], cfg["heads"]).to(Xg.device)
     elif mt_mode:
         net = MTNet(net, cfg["hidden"], cfg["dropout"]).to(Xg.device)
+    elif q_mode:
+        net = QNet(net, cfg["hidden"], cfg["dropout"]).to(Xg.device)
     opt = torch.optim.AdamW(net.parameters(), lr=lr, weight_decay=weight_decay)
     scaler = torch.amp.GradScaler("cuda", enabled=Xg.is_cuda)
 
@@ -290,6 +345,8 @@ def fit_one(Xg, yg, tr_idx, va_idx, va_dates, cfg, seed, weights=None,
                         loss_t = (((m_out - yg[b]) ** 2).mean()
                                   + 0.3 * ((a5 - aux_targets[5][b]) ** 2).mean()
                                   + 0.3 * ((a10 - aux_targets[10][b]) ** 2).mean())
+                    elif q_mode:
+                        loss_t = _pinball(net(xb, quantiles=True), yg[b])  # v10b-B2
                     else:
                         pred = net(xb)
                         per = (pred - yg[b]) ** 2

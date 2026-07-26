@@ -1,0 +1,8 @@
+{
+  "ensemble_val_ic": 0.14941,
+  "student_val_ic": 0.14364,
+  "ratio": 0.961,
+  "student_train_s": 39.6,
+  "teachers": "checkpoints/transformer_eod/daily_seed0-6.pt (read-only)",
+  "verdict": "PASS \u2014 student recovers 96% of ensemble val IC (bar 95%); daily retrain could drop 7x -> 1x"
+}

@@ -1,0 +1,22 @@
+{
+  "id": "A3_TCN3",
+  "item": "gpu",
+  "exp": "A3",
+  "status": "running",
+  "hypothesis": "EXPECTED LOSE (anchor): causal dilated TCN at ~matched params cannot reach champion val IC; an upset would question the attention trunk",
+  "feature_set": "close_only",
+  "target": "tgt_rank_20",
+  "seq_len": 60,
+  "preset_base": "B",
+  "overrides": {
+    "tcn": true
+  },
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "eval_blend": true,
+  "panel": "SCHED_A3_TCN3.csv.gz",
+  "runtime_s": 217.6
+}

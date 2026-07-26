@@ -1,0 +1,29 @@
+{
+  "gates": {
+    "SR_MT1_champ_in_range": {
+      "value": 1.947,
+      "dd": -0.1036,
+      "pass": true
+    },
+    "SR_MT2_bear_holds": {
+      "value": 1.259,
+      "dd": -0.2353,
+      "yr2022": null,
+      "pass": false
+    },
+    "RF_MT_protocol_robust": {
+      "value": 1.881,
+      "dd": -0.1046,
+      "pass": true
+    }
+  },
+  "reference": {
+    "original_draw": {
+      "champ": 2.011,
+      "bear": 1.515,
+      "bear_dd": -0.1301,
+      "yr2022": 0.23
+    }
+  },
+  "verdict": "MT NOT VALIDATED (2/3 gates; failed: SR_MT2_bear_holds) \u2014 seed-luck component recorded, line closed, champion stands"
+}

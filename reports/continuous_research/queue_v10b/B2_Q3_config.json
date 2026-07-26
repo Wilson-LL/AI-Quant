@@ -1,0 +1,22 @@
+{
+  "id": "B2_Q3",
+  "item": "gpu",
+  "exp": "B2",
+  "status": "running",
+  "hypothesis": "quantile head (pinball q10/50/90, score=q50) holds val IC >= 0.048; stage-2 width-damped sizing implemented only if promoted (staged, documented)",
+  "feature_set": "close_only",
+  "target": "tgt_rank_20",
+  "seq_len": 60,
+  "preset_base": "B",
+  "overrides": {
+    "quantile": true
+  },
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "eval_blend": true,
+  "panel": "SCHED_B2_Q3.csv.gz",
+  "runtime_s": 801.1
+}

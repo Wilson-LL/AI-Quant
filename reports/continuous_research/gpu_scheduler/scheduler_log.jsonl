@@ -42,3 +42,11 @@
 {"id": "D1_DROP_s101112", "start": "2026-07-26 16:27:58", "elapsed_s": 860.8, "peak_vram_mb": 2153.8, "val_ic": 0.04671, "seeds": 3, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
 {"id": "P7_B1_MT3_champ_2023", "start": "2026-07-26 16:43:00", "elapsed_s": 2181.1, "peak_vram_mb": 2159.1, "val_ic": 0.04865, "seeds": 7, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
 {"id": "P7_B1_MT3_bear_2021", "start": "2026-07-26 17:19:21", "elapsed_s": 4828.1, "peak_vram_mb": 2159.0, "val_ic": 0.04982, "seeds": 7, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "SR_MT1_disjoint_2023", "start": "2026-07-26 19:21:31", "elapsed_s": 1688.6, "peak_vram_mb": 2159.5, "val_ic": 0.04852, "seeds": 7, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "SR_MT2_disjoint_2021", "start": "2026-07-26 19:49:40", "elapsed_s": 2401.7, "peak_vram_mb": 2159.4, "val_ic": 0.05623, "seeds": 7, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "RF_MT_refit63_2023", "start": "2026-07-26 20:29:41", "elapsed_s": 3295.4, "peak_vram_mb": 2159.3, "val_ic": 0.06021, "seeds": 7, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "B2_Q3", "start": "2026-07-26 21:25:59", "elapsed_s": 801.1, "peak_vram_mb": 2152.3, "val_ic": 0.06299, "seeds": 3, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "A3_TCN3", "start": "2026-07-26 21:39:20", "elapsed_s": 217.6, "peak_vram_mb": 1030.4, "val_ic": 0.04995, "seeds": 3, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "C2_RES3", "start": "2026-07-26 21:42:59", "elapsed_s": 755.2, "peak_vram_mb": 2153.8, "val_ic": 0.03246, "seeds": 3, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "P7_B2_Q_champ_2023", "start": "2026-07-26 21:57:37", "elapsed_s": 2022.0, "peak_vram_mb": 2156.3, "val_ic": 0.05613, "seeds": 7, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "P7_B2_Q_bear_2021", "start": "2026-07-26 22:31:19", "elapsed_s": 2725.0, "peak_vram_mb": 2155.9, "val_ic": 0.06061, "seeds": 7, "gpu": "NVIDIA GeForce RTX 4060 Ti"}

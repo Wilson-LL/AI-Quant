@@ -1,0 +1,87 @@
+
+===== B2_Q3 ¡X quantile head (pinball q10/50/90, score=q50) holds val IC >= 0.048; stage-2 width-damped s
+[dataset] 108 stocks loaded, feature_set=close_only, seq_len=60, exec_lag=1
+[dataset] X (276247, 60, 10) (663 MB), 2815 dates 2015-01-05..2026-07-24
+[B2_Q3] [wf 1/7] 2023-01-03 train 162233 val_ic +0.0542 (214s elapsed)
+[B2_Q3] [wf 2/7] 2023-07-20 train 174099 val_ic +0.1144 (300s elapsed)
+[B2_Q3] [wf 3/7] 2024-01-19 train 186137 val_ic +0.0544 (381s elapsed)
+[B2_Q3] [wf 4/7] 2024-08-02 train 198124 val_ic +0.0309 (448s elapsed)
+[B2_Q3] [wf 5/7] 2025-02-13 train 210142 val_ic +0.0376 (519s elapsed)
+[B2_Q3] [wf 6/7] 2025-08-15 train 222235 val_ic +0.0404 (653s elapsed)
+[B2_Q3] [wf 7/7] 2026-02-26 train 234230 val_ic +0.1092 (792s elapsed)
+  [lo band10]                      IC +0.0590 | net60 Sharpe  1.89 ann +58.22% dd -15.78% | net100  1.76 | turn 0.32 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0590 | net60 Sharpe  1.77 ann +67.86% dd -27.88% | net100  1.73 | turn 0.27 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0684 | net60 Sharpe  1.96 ann +57.98% dd -11.23% | net100  1.83 | turn 0.30 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0684 | net60 Sharpe  1.90 ann +72.83% dd -26.78% | net100  1.85 | turn 0.27 | maxW 10.0% | n 42
+[B2_Q3] done 801.1s ¡X val_ic 0.06299 blend LS 1.964 dd -0.1123
+
+===== A3_TCN3 ¡X EXPECTED LOSE (anchor): causal dilated TCN at ~matched params cannot reach champion val IC
+[A3_TCN3] [wf 1/7] 2023-01-03 train 162233 val_ic +0.0282 (23s elapsed)
+[A3_TCN3] [wf 2/7] 2023-07-20 train 174099 val_ic +0.1004 (36s elapsed)
+[A3_TCN3] [wf 3/7] 2024-01-19 train 186137 val_ic +0.0393 (60s elapsed)
+[A3_TCN3] [wf 4/7] 2024-08-02 train 198124 val_ic +0.0560 (94s elapsed)
+[A3_TCN3] [wf 5/7] 2025-02-13 train 210142 val_ic -0.0139 (136s elapsed)
+[A3_TCN3] [wf 6/7] 2025-08-15 train 222235 val_ic +0.0481 (193s elapsed)
+[A3_TCN3] [wf 7/7] 2026-02-26 train 234230 val_ic +0.0915 (211s elapsed)
+  [lo band10]                      IC +0.0225 | net60 Sharpe  0.30 ann  +5.78% dd -28.03% | net100 -0.02 | turn 0.59 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0225 | net60 Sharpe  1.36 ann +37.29% dd -31.48% | net100  1.23 | turn 0.56 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0469 | net60 Sharpe  1.60 ann +38.40% dd -14.59% | net100  1.37 | turn 0.47 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0469 | net60 Sharpe  1.82 ann +58.21% dd -25.87% | net100  1.74 | turn 0.41 | maxW 10.0% | n 42
+[A3_TCN3] done 217.6s ¡X val_ic 0.04995 blend LS 1.602 dd -0.1459
+
+===== C2_RES3 ¡X market-beta-residualized rank target (tgt_rank_res20, beta = 126d rolling vs equal-weight 
+[C2_RES3] [wf 1/7] 2023-01-03 train 162233 val_ic -0.0012 (110s elapsed)
+[C2_RES3] [wf 2/7] 2023-07-20 train 174099 val_ic +0.0806 (257s elapsed)
+[C2_RES3] [wf 3/7] 2024-01-19 train 186137 val_ic +0.0447 (374s elapsed)
+[C2_RES3] [wf 4/7] 2024-08-02 train 198124 val_ic +0.0641 (513s elapsed)
+[C2_RES3] [wf 5/7] 2025-02-13 train 210142 val_ic +0.0477 (588s elapsed)
+[C2_RES3] [wf 6/7] 2025-08-15 train 222235 val_ic -0.0163 (667s elapsed)
+[C2_RES3] [wf 7/7] 2026-02-26 train 234230 val_ic +0.0077 (749s elapsed)
+  [lo band10]                      IC -0.0021 | net60 Sharpe -0.81 ann -13.47% dd -50.26% | net100 -1.14 | turn 0.59 | maxW 10.0% | n 42
+  [lo band10]                      IC -0.0021 | net60 Sharpe  1.20 ann +24.81% dd -24.85% | net100  1.03 | turn 0.60 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0414 | net60 Sharpe  0.53 ann  +9.96% dd -34.26% | net100  0.26 | turn 0.48 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0414 | net60 Sharpe  1.39 ann +37.85% dd -27.75% | net100  1.28 | turn 0.47 | maxW 10.0% | n 42
+[C2_RES3] done 756.4s ¡X val_ic 0.03246 oos_ic -0.0021
+
+===== D2_DIST ¡X one student distilled from the 7 production daily checkpoints (teachers read-only, asof 20
+[dataset] 108 stocks loaded, feature_set=close_only, seq_len=60, exec_lag=1
+[dataset] X (276247, 60, 10) (663 MB), 2815 dates 2015-01-05..2026-07-24
+[D2_DIST] done 59.9s ¡X PASS ¡X student recovers 96% of ensemble val IC (bar 95%); daily retrain could drop 7x -> 1x
+
+[v10b] phase complete: 5 done, 0 failed
+
+===== P7_B2_Q_champ_2023 ¡X B2 quantile 7-seed dual-window (champ_2023): blend must land in seed-robust range (1.85-2.
+[dataset] 108 stocks loaded, feature_set=close_only, seq_len=60, exec_lag=1
+[dataset] X (276247, 60, 10) (663 MB), 2815 dates 2015-01-05..2026-07-24
+[P7_B2_Q_champ_2023] [wf 1/7] 2023-01-03 train 162233 val_ic +0.0387 (351s elapsed)
+[P7_B2_Q_champ_2023] [wf 2/7] 2023-07-20 train 174099 val_ic +0.1037 (595s elapsed)
+[P7_B2_Q_champ_2023] [wf 3/7] 2024-01-19 train 186137 val_ic +0.0485 (798s elapsed)
+[P7_B2_Q_champ_2023] [wf 4/7] 2024-08-02 train 198124 val_ic +0.0235 (1009s elapsed)
+[P7_B2_Q_champ_2023] [wf 5/7] 2025-02-13 train 210142 val_ic +0.0248 (1220s elapsed)
+[P7_B2_Q_champ_2023] [wf 6/7] 2025-08-15 train 222235 val_ic +0.0406 (1622s elapsed)
+[P7_B2_Q_champ_2023] [wf 7/7] 2026-02-26 train 234230 val_ic +0.1131 (2005s elapsed)
+  [lo band10]                      IC +0.0523 | net60 Sharpe  2.04 ann +48.09% dd -14.60% | net100  1.86 | turn 0.34 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0523 | net60 Sharpe  1.93 ann +64.13% dd -27.77% | net100  1.87 | turn 0.30 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0672 | net60 Sharpe  1.91 ann +56.60% dd -13.32% | net100  1.78 | turn 0.31 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0672 | net60 Sharpe  1.87 ann +71.31% dd -28.59% | net100  1.82 | turn 0.28 | maxW 10.0% | n 42
+[P7_B2_Q_champ_2023] done 2022.0s ¡X val_ic 0.05613 blend LS 1.91 dd -0.1332
+
+===== P7_B2_Q_bear_2021 ¡X B2 quantile 7-seed dual-window (bear_2021): blend must land in seed-robust range (1.85-2.1
+[P7_B2_Q_bear_2021] [wf 1/11] 2021-01-04 train 115852 val_ic +0.1297 (146s elapsed)
+[P7_B2_Q_bear_2021] [wf 2/11] 2021-07-15 train 127692 val_ic +0.1385 (282s elapsed)
+[P7_B2_Q_bear_2021] [wf 3/11] 2022-01-13 train 139724 val_ic +0.0038 (574s elapsed)
+[P7_B2_Q_bear_2021] [wf 4/11] 2022-07-26 train 151622 val_ic -0.0299 (754s elapsed)
+[P7_B2_Q_bear_2021] [wf 5/11] 2023-02-02 train 163490 val_ic +0.0299 (1108s elapsed)
+[P7_B2_Q_bear_2021] [wf 6/11] 2023-08-10 train 175464 val_ic +0.1210 (1327s elapsed)
+[P7_B2_Q_bear_2021] [wf 7/11] 2024-02-19 train 187409 val_ic +0.0559 (1560s elapsed)
+[P7_B2_Q_bear_2021] [wf 8/11] 2024-08-22 train 199512 val_ic +0.0392 (1783s elapsed)
+[P7_B2_Q_bear_2021] [wf 9/11] 2025-03-06 train 211533 val_ic +0.0092 (1989s elapsed)
+[P7_B2_Q_bear_2021] [wf 10/11] 2025-09-04 train 223500 val_ic +0.0439 (2328s elapsed)
+[P7_B2_Q_bear_2021] [wf 11/11] 2026-03-19 train 235621 val_ic +0.1256 (2705s elapsed)
+  [lo band10]                      IC +0.0243 | net60 Sharpe  1.24 ann +32.92% dd -20.84% | net100  1.10 | turn 0.32 | maxW 10.0% | n 67
+  [lo band10]                      IC +0.0243 | net60 Sharpe  1.28 ann +44.71% dd -29.06% | net100  1.24 | turn 0.27 | maxW 10.0% | n 67
+  [lo band10]                      IC +0.0301 | net60 Sharpe  1.27 ann +31.43% dd -20.18% | net100  1.13 | turn 0.30 | maxW 10.0% | n 67
+  [lo band10]                      IC +0.0301 | net60 Sharpe  1.39 ann +45.31% dd -29.91% | net100  1.34 | turn 0.26 | maxW 10.0% | n 67
+[P7_B2_Q_bear_2021] done 2725.0s ¡X val_ic 0.06061 blend LS 1.274 dd -0.2018
+
+[v10b] phase complete: 7 done, 0 failed

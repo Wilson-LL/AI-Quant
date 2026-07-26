@@ -1,0 +1,27 @@
+{
+  "id": "RF_MT_refit63_2023",
+  "item": "gpu",
+  "exp": "MT-battery",
+  "status": "running",
+  "hypothesis": "MT result is protocol-robust: refit every 63 days, seeds 0-6, champion window; gate: blend in [1.85, 2.15]",
+  "feature_set": "close_only",
+  "target": "tgt_rank_20",
+  "seq_len": 60,
+  "preset_base": "B",
+  "overrides": {
+    "mt_aux": true
+  },
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "refit_every": 63,
+  "eval_blend": true,
+  "panel": "SCHED_RF_MT_refit63_2023.csv.gz",
+  "runtime_s": 3295.4
+}

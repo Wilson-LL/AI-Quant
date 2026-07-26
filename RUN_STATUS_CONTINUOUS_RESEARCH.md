@@ -294,3 +294,29 @@ Branch: research/continuous-alpha-loop-4060ti · RTX 4060 Ti (CUDA OK, torch 2.1
   config+metrics JSON, QUEUE_V10_SHORT_SUMMARY.md). Production unchanged;
   no cache mutation; panels gitignored.
 - Blockers: none. v10b proposal to follow — NOT started without approval.
+
+### 2026-07-27 — v10b complete (user-approved): MT killed by battery, no adoptions
+- **MT battery NOT VALIDATED (2/3)** — the decisive bear gate failed on all
+  three conditions (disjoint seeds: 1.259 / DD −23.5% / 2022 −0.38 vs the
+  original draw's 1.515 / −13.0% / +0.23). MT bear case = seed-set luck,
+  exactly the v7 failure mode; line closed BEFORE any adoption discussion.
+  The battery paid for itself.
+- Phase 2: C2 residual target REJECT (plain failure both sides, tripwire not
+  triggered); A3 TCN anchor confirmed expected-lose with an important twist —
+  **val-IC parity, book collapse** (third dissociation this arc: val IC does
+  not see book space); D2 distillation **PASS** (student 96.1% of ensemble
+  val IC, 40 s) — 7×→1× daily-retrain candidate, held for user decision +
+  an OOS walkforward check.
+- B2 quantile won the promotion slot on a wide margin (val IC 0.063, healthy
+  3-seed books) but **REJECTED at the 7-seed dual-window gate: bear blend
+  1.274 < 1.30 range floor**. Honest lead recorded: quantile training
+  improves the STANDALONE transformer (+0.36 champ / +0.05 bear) — the gain
+  is real but does not survive the 50/50 momentum blend.
+- **Net of the whole v10 arc: zero adoptions, five lines closed, champion
+  unchanged and better-evidenced.** Training flags now available (default
+  OFF, anchor-verified): cs_attn, mt_aux, aug_noise, aug_datedrop, quantile,
+  tcn. Results: `reports/continuous_research/queue_v10b/`.
+- Open user decisions: D2 distillation follow-up; quantile-standalone lead
+  (would need pre-registration, adaptive-weight-adjacent).
+- Blockers: none. No queue running; loop returns to operational cadence
+  (daily ops + P1 ledger maturation — evidence gate ~3 rebalances out).

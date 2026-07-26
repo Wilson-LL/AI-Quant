@@ -1,0 +1,19 @@
+{
+  "id": "C2_RES3",
+  "item": "c2_gpu",
+  "exp": "C2",
+  "status": "running",
+  "hypothesis": "market-beta-residualized rank target (tgt_rank_res20, beta = 126d rolling vs equal-weight proxy) is a cleaner learning target. TRIPWIRE: val_ic >= 0.055 with OOS IC < 0.02 -> inversion #3, line closed. EXCLUDED from the val-IC promotion slot (cross-target val ICs are known unreliable); candidate only if its BOOKS beat the BASE3 blend (1.969) by >= 0.1 with no inversion",
+  "feature_set": "close_only",
+  "target": "tgt_rank_res20",
+  "seq_len": 60,
+  "preset_base": "B",
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "eval_blend": true,
+  "panel": "SCHED_C2_RES3.csv.gz",
+  "runtime_s": 755.2
+}

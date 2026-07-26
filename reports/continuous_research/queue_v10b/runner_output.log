@@ -1,0 +1,60 @@
+
+===== SR_MT1_disjoint_2023 ¡X MT heads bear/champ profile survives disjoint seeds: champion window, seeds 10-16; gate: b
+[dataset] 108 stocks loaded, feature_set=close_only, seq_len=60, exec_lag=1
+[dataset] X (276247, 60, 10) (663 MB), 2815 dates 2015-01-05..2026-07-24
+[SR_MT1_disjoint_2023] [wf 1/7] 2023-01-03 train 162233 val_ic +0.0010 (287s elapsed)
+[SR_MT1_disjoint_2023] [wf 2/7] 2023-07-20 train 174099 val_ic +0.1037 (608s elapsed)
+[SR_MT1_disjoint_2023] [wf 3/7] 2024-01-19 train 186137 val_ic +0.0539 (800s elapsed)
+[SR_MT1_disjoint_2023] [wf 4/7] 2024-08-02 train 198124 val_ic +0.0331 (987s elapsed)
+[SR_MT1_disjoint_2023] [wf 5/7] 2025-02-13 train 210142 val_ic +0.0374 (1156s elapsed)
+[SR_MT1_disjoint_2023] [wf 6/7] 2025-08-15 train 222235 val_ic +0.0200 (1383s elapsed)
+[SR_MT1_disjoint_2023] [wf 7/7] 2026-02-26 train 234230 val_ic +0.0905 (1679s elapsed)
+  [lo band10]                      IC +0.0589 | net60 Sharpe  1.53 ann +38.95% dd -16.55% | net100  1.37 | turn 0.36 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0589 | net60 Sharpe  1.74 ann +59.58% dd -27.44% | net100  1.69 | turn 0.29 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0668 | net60 Sharpe  1.95 ann +47.10% dd -10.36% | net100  1.79 | turn 0.30 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0668 | net60 Sharpe  1.88 ann +62.21% dd -25.88% | net100  1.83 | turn 0.26 | maxW 10.0% | n 42
+[SR_MT1_disjoint_2023] done 1688.6s ¡X val_ic 0.04852 blend LS 1.947 dd -0.1036
+
+===== SR_MT2_disjoint_2021 ¡X MT bear profile survives disjoint seeds: bear window, seeds 10-16; gate: blend >= 1.44 AND
+[SR_MT2_disjoint_2021] [wf 1/11] 2021-01-04 train 115852 val_ic +0.1440 (164s elapsed)
+[SR_MT2_disjoint_2021] [wf 2/11] 2021-07-15 train 127692 val_ic +0.1536 (285s elapsed)
+[SR_MT2_disjoint_2021] [wf 3/11] 2022-01-13 train 139724 val_ic +0.0215 (517s elapsed)
+[SR_MT2_disjoint_2021] [wf 4/11] 2022-07-26 train 151622 val_ic -0.0553 (668s elapsed)
+[SR_MT2_disjoint_2021] [wf 5/11] 2023-02-02 train 163490 val_ic +0.0202 (993s elapsed)
+[SR_MT2_disjoint_2021] [wf 6/11] 2023-08-10 train 175464 val_ic +0.1086 (1245s elapsed)
+[SR_MT2_disjoint_2021] [wf 7/11] 2024-02-19 train 187409 val_ic +0.0627 (1439s elapsed)
+[SR_MT2_disjoint_2021] [wf 8/11] 2024-08-22 train 199512 val_ic +0.0399 (1621s elapsed)
+[SR_MT2_disjoint_2021] [wf 9/11] 2025-03-06 train 211533 val_ic +0.0075 (1814s elapsed)
+[SR_MT2_disjoint_2021] [wf 10/11] 2025-09-04 train 223500 val_ic +0.0096 (2067s elapsed)
+[SR_MT2_disjoint_2021] [wf 11/11] 2026-03-19 train 235621 val_ic +0.1061 (2392s elapsed)
+  [lo band10]                      IC +0.0255 | net60 Sharpe  1.23 ann +28.11% dd -15.31% | net100  1.06 | turn 0.35 | maxW 10.0% | n 67
+  [lo band10]                      IC +0.0255 | net60 Sharpe  1.37 ann +42.75% dd -26.44% | net100  1.31 | turn 0.29 | maxW 10.0% | n 67
+  [lo band10]                      IC +0.0333 | net60 Sharpe  1.26 ann +30.76% dd -23.53% | net100  1.11 | turn 0.31 | maxW 10.0% | n 67
+  [lo band10]                      IC +0.0333 | net60 Sharpe  1.36 ann +43.54% dd -32.13% | net100  1.31 | turn 0.27 | maxW 10.0% | n 67
+[SR_MT2_disjoint_2021] done 2401.7s ¡X val_ic 0.05623 blend LS 1.259 dd -0.2353
+
+===== RF_MT_refit63_2023 ¡X MT result is protocol-robust: refit every 63 days, seeds 0-6, champion window; gate: blend
+[RF_MT_refit63_2023] [wf 1/14] 2023-01-03 train 162233 val_ic +0.0409 (318s elapsed)
+[RF_MT_refit63_2023] [wf 2/14] 2023-04-19 train 168177 val_ic +0.0886 (640s elapsed)
+[RF_MT_refit63_2023] [wf 3/14] 2023-07-20 train 174099 val_ic +0.0865 (886s elapsed)
+[RF_MT_refit63_2023] [wf 4/14] 2023-10-23 train 180055 val_ic +0.0747 (1110s elapsed)
+[RF_MT_refit63_2023] [wf 5/14] 2024-01-19 train 186137 val_ic +0.0497 (1286s elapsed)
+[RF_MT_refit63_2023] [wf 6/14] 2024-05-02 train 192073 val_ic +0.0641 (1450s elapsed)
+[RF_MT_refit63_2023] [wf 7/14] 2024-08-02 train 198124 val_ic +0.0295 (1619s elapsed)
+[RF_MT_refit63_2023] [wf 8/14] 2024-11-06 train 204172 val_ic +0.0620 (1804s elapsed)
+[RF_MT_refit63_2023] [wf 9/14] 2025-02-13 train 210142 val_ic +0.0327 (2005s elapsed)
+[RF_MT_refit63_2023] [wf 10/14] 2025-05-19 train 216195 val_ic -0.0026 (2172s elapsed)
+[RF_MT_refit63_2023] [wf 11/14] 2025-08-15 train 222235 val_ic +0.0210 (2430s elapsed)
+[RF_MT_refit63_2023] [wf 12/14] 2025-11-18 train 228268 val_ic +0.0335 (2709s elapsed)
+[RF_MT_refit63_2023] [wf 13/14] 2026-02-26 train 234230 val_ic +0.0802 (3009s elapsed)
+[RF_MT_refit63_2023] [wf 14/14] 2026-06-01 train 240333 val_ic +0.1820 (3289s elapsed)
+  [lo band10]                      IC +0.0685 | net60 Sharpe  1.47 ann +34.96% dd -16.28% | net100  1.29 | turn 0.36 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0685 | net60 Sharpe  1.63 ann +54.58% dd -26.03% | net100  1.58 | turn 0.31 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0740 | net60 Sharpe  1.88 ann +46.53% dd -10.46% | net100  1.73 | turn 0.31 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0740 | net60 Sharpe  1.82 ann +63.84% dd -24.74% | net100  1.77 | turn 0.26 | maxW 10.0% | n 42
+[RF_MT_refit63_2023] done 3295.4s ¡X val_ic 0.06021 blend LS 1.881 dd -0.1046
+
+===== MT_BATTERY_VERDICT ¡X PRE-REGISTERED: all three gates pass -> MT is a validated challenger/defensive-spec candid
+[MT_BATTERY_VERDICT] done 0.0s ¡X MT NOT VALIDATED (2/3 gates; failed: SR_MT2_bear_holds) ¡X seed-luck component recorded, line closed, champion stands
+
+[v10b] phase complete: 4 done, 0 failed
