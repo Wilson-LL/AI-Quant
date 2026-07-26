@@ -49,6 +49,27 @@ os.makedirs(SCHED_DIR, exist_ok=True)
 PROMOTE_TOP_K = 2
 FULL_SEEDS = [0, 1, 2, 3, 4]
 
+# run_one() defaults — two configs with equal normalized keys train the same thing
+_RUN_DEFAULTS = {"preset_base": "B", "overrides": None, "weight_decay": 1e-4,
+                 "loss": "mse", "holding": 20, "refit_every": 126,
+                 "oos_start": "2023-01-01", "horizon": 20}
+
+
+def _run_key(cfg):
+    d = {}
+    for k in ("feature_set", "target", "seq_len", "seeds", *_RUN_DEFAULTS):
+        v = cfg.get(k)
+        d[k] = _RUN_DEFAULTS.get(k) if v is None else v
+    return json.dumps(d, sort_keys=True, default=str)
+
+
+def _duplicate_of(queue, cand):
+    key = _run_key(cand)
+    for q in queue:
+        if q is not cand and _run_key(q) == key:
+            return q["id"]
+    return None
+
 _data_cache = {}
 
 
@@ -156,7 +177,7 @@ def promote(queue):
         pid = f"P5_{c['id']}"
         if any(q["id"] == pid for q in queue):
             continue
-        queue.append({
+        cand = {
             "id": pid, "phase": "promoted", "status": "pending",
             "hypothesis": f"5-seed confirmation of screen winner {c['id']} "
                           f"(val IC {c['result']['mean_val_ic']})",
@@ -167,7 +188,12 @@ def promote(queue):
             "loss": c.get("loss", "mse"), "holding": c.get("holding", 20),
             "oos_start": "2023-01-01", "eval_blend": True,
             "gate": "blend50+band10 books vs refs 2.06/-10.7% (2023) — if beaten, add bear run",
-        })
+        }
+        dup = _duplicate_of(queue, cand)
+        if dup:
+            print(f"[promote] skip {pid}: config-identical to {dup}")
+            continue
+        queue.append(cand)
         print(f"[promote] queued {pid}")
 
 
@@ -186,11 +212,18 @@ def spawn_bear(queue):
                         "overrides", "seeds", "weight_decay", "loss", "holding",
                         "refit_every")}
             inherit = {k: v for k, v in inherit.items() if v is not None}
-            queue.append({**inherit,
-                          "id": bid, "phase": "bear", "status": "pending",
-                          "hypothesis": f"bear-window validation of {c['id']}",
-                          "oos_start": "2021-01-01", "eval_blend": True,
-                          "gate": "blend books vs bear refs 1.47/-18.7%"})
+            cand = {**inherit,
+                    "id": bid, "phase": "bear", "status": "pending",
+                    "hypothesis": f"bear-window validation of {c['id']}",
+                    "oos_start": "2021-01-01", "eval_blend": True,
+                    "gate": "blend books vs bear refs 1.47/-18.7%"}
+            # dedup by run-defining config, not id: the v8 spawn duplicated
+            # ENS14_2021 bit-for-bit under a different id (~2.4h GPU wasted)
+            dup = _duplicate_of(queue, cand)
+            if dup:
+                print(f"[promote] skip {bid}: config-identical to {dup}")
+                continue
+            queue.append(cand)
             print(f"[promote] queued {bid}")
 
 

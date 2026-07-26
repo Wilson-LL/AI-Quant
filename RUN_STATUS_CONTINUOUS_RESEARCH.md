@@ -229,3 +229,16 @@ Branch: research/continuous-alpha-loop-4060ti · RTX 4060 Ti (CUDA OK, torch 2.1
   run; dedup-by-config worth adding before the next queue).
 - Daily ops ran at queue completion: +0 rows (TWSE weekend, nothing to infer).
 - Blockers: none. Queue v8 CLOSED; no new queue started (per user direction).
+
+### 2026-07-26 — user decision: keep 7 seeds; spawn-dedup fix landed
+- **User confirmed KEEP 7** — 14-seed line closed on the scoreboard (V8);
+  production spec unchanged (7-seed, blend50+band10; D7b band15+cap7.5 stays
+  the recommended deployment variant).
+- **Spawn-dedup fix** in `gpu_research_scheduler.py`: `promote()` and
+  `spawn_bear()` now dedup candidates by normalized run-defining config
+  (`_run_key`: feature_set/target/seq_len/seeds + run_one defaults), not just
+  id — closes the v8 gap where BEAR_ENS14_2023 duplicated ENS14_2021 under a
+  different id (~2.4h GPU). Verified by replaying the v8 queue: duplicate
+  spawn skipped, genuine spawn (uncovered window) still queued, default
+  normalization correct.
+- Next queue: none started (awaiting direction).
