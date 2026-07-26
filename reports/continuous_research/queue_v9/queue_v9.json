@@ -1,0 +1,132 @@
+[
+  {
+    "id": "C1",
+    "track": "T1-construction",
+    "status": "done",
+    "hypothesis": "D7b (band15+cap7.5) is non-dominated across the full band{10,15}xcap{7.5,10} grid on the frozen 7-seed blend; the two untested cells do not beat it on (Sharpe, bear DD, turnover)",
+    "gate": "D7b stays recommended unless a cell has Sharpe within 0.05 tol on BOTH gate windows AND bear DD >=1pp better AND turnover no worse",
+    "verdict": "D7b (band15+cap7.5) stays recommended \u2014 no grid cell dominates on Sharpe+DD+turnover",
+    "result_file": "C1_result.json",
+    "runtime_s": 54.0
+  },
+  {
+    "id": "X1",
+    "track": "T2-execution",
+    "status": "done",
+    "hypothesis": "deployment specs keep Sharpe >=1.0 at 150bps (CH) and >=0.7 (BR); break-even cost >250bps",
+    "gate": "descriptive; WARNING flag if net150 below thresholds",
+    "verdict": "PASS \u2014 deployment specs clear net150 thresholds (CH>=1.0, BR>=0.7) both modes",
+    "result_file": "X1_result.json",
+    "runtime_s": 33.8
+  },
+  {
+    "id": "X2",
+    "track": "T2-execution",
+    "status": "done",
+    "hypothesis": "at <=10M TWD capital, 10%-of-ADV20 participation caps never bind materially; degradation appears only at 100M TWD",
+    "gate": "descriptive capacity curve; FLAG if est Sharpe impact at 10M TWD < -0.1",
+    "verdict": "PASS \u2014 10M TWD portfolio: est Sharpe impact -0.0 (>= -0.1) on deployment spec",
+    "result_file": "X2_result.json",
+    "runtime_s": 25.4
+  },
+  {
+    "id": "X3",
+    "track": "T2-execution",
+    "status": "done",
+    "hypothesis": "exec_lag=1 already guarantees no same-bar execution (verify); T+2 costs <=0.15 Sharpe, T+3 <=0.30 (graceful decay)",
+    "gate": "if T+2 cost >0.3 -> deployment REQUIRES guaranteed next-session execution",
+    "verdict": "same-bar audit PASS; T+2 worst cost 0.226 <= 0.30 \u2014 delay-robust",
+    "result_file": "X3_result.json",
+    "runtime_s": 67.6
+  },
+  {
+    "id": "X4",
+    "track": "T2-execution",
+    "status": "done",
+    "hypothesis": "worst-case sell-first/settled-cash (new entries at T+3) costs <0.05 Sharpe on LO deployment books",
+    "gate": "if cost >=0.05 the paper book generator must adopt constrained fill logic",
+    "verdict": "PASS \u2014 worst-case settled-cash cost 0.0 < 0.05; idealized rebalance is safe for the paper book",
+    "result_file": "X4_result.json",
+    "runtime_s": 21.5
+  },
+  {
+    "id": "P1",
+    "track": "T3-paper",
+    "status": "done",
+    "hypothesis": "operational: matured 1/5/10/20d ledger populates for all four books; evidence gate arms at 20 matured 20d observations",
+    "gate": "operational pass; realized-vs-backtest comparison auto-reports at 20 obs",
+    "verdict": "OPERATIONAL \u2014 ledger populated (88 rows), EVIDENCE GATE ARMED",
+    "result_file": "P1_result.json",
+    "runtime_s": 2.9
+  },
+  {
+    "id": "P2",
+    "track": "T3-paper",
+    "status": "done",
+    "hypothesis": "operational: daily diff report (entries/exits, deltas, sector shares, anomalies) generates cleanly for the 3 most recent snapshots",
+    "gate": "operational pass on 3 consecutive snapshot dates",
+    "verdict": "OPERATIONAL \u2014 diff report generated for 3 snapshot dates",
+    "result_file": "P2_result.json",
+    "runtime_s": 1.7
+  },
+  {
+    "id": "B2",
+    "track": "T4-bear",
+    "status": "done",
+    "hypothesis": "EX3 own-equity DD gate (trigger -10%, scale 0.5, reentry -5%) cuts bear DD >=3pp at <=0.05 CH Sharpe cost \u2014 MONITOR-ONLY evaluation",
+    "gate": "adopt as ARMED MONITOR only if primary cell passes on blend AND d7b; else formally DISARM EX3",
+    "verdict": "REJECT \u2014 EX3 primary cell fails the pre-registered bar; DISARM EX3 (exposure-gate thread closed with numbers)",
+    "result_file": "B2_result.json",
+    "runtime_s": 17.8
+  },
+  {
+    "id": "B3",
+    "track": "T4-bear",
+    "status": "done",
+    "hypothesis": "triggered 15%-gross tf bottom-quintile short sleeve improves LO bear DD >=3pp at <=0.1 CH Sharpe cost \u2014 MONITOR-ONLY evaluation",
+    "gate": "candidate monitor only if bar met on both deployment books AND beats B2 pure descaling; never auto-adopted",
+    "verdict": "REJECT \u2014 triggered tf hedge sleeve fails the DD/cost bar; LO crash protection stays with (or without) B2 descaling",
+    "result_file": "B3_result.json",
+    "runtime_s": 24.2
+  },
+  {
+    "id": "B4",
+    "track": "T4-bear",
+    "status": "done",
+    "hypothesis": "EXPECTED REJECT (pre-declared): proxy<MA126 -> 70/30 tf/mom blend improves 2022 without hurting elsewhere; adjacent to closed adaptive-weight + regime-feature lines",
+    "gate": "adopt only if BOTH gate windows improve >=0.1 AND 2022 improves >=0.2 \u2014 deliberately above noise",
+    "verdict": "REJECT (as pre-declared) \u2014 adaptive-weight line stays closed, now with book-level evidence",
+    "result_file": "B4_result.json",
+    "runtime_s": 27.0
+  },
+  {
+    "id": "R3",
+    "track": "T5-audit",
+    "status": "done",
+    "hypothesis": "deployment spec bootstraps like R2: 100% positive draws, CH p5 >=1.5, BR p5 >=1.1, medians near 1.92/1.37",
+    "gate": "PASS/FLAG; on FLAG the spec choice reverts to whichever grid cell bootstraps better",
+    "verdict": "PASS \u2014 deployment spec bootstrap profile matches R2 (100% positive, p5 thresholds met)",
+    "result_file": "R3_result.json",
+    "runtime_s": 3443.8
+  },
+  {
+    "id": "R4",
+    "track": "T5-audit",
+    "status": "done",
+    "hypothesis": "hard 30% sector cap costs <=0.3 Sharpe on deployment books; prices the concentration premium",
+    "gate": "descriptive; if >0.3 the premium is load-bearing and P2 must track realized sector shares",
+    "verdict": "concentration premium priced: worst 30%-cap cost 0.001 <= 0.3 \u2014 cap available if needed",
+    "result_file": "R4_result.json",
+    "runtime_s": 98.1
+  },
+  {
+    "id": "R5",
+    "track": "T5-audit",
+    "status": "done",
+    "hypothesis": "no single name >15% of positive PnL; drop-top-5 (ex-post worst case) retains >=70% of Sharpe on deployment books",
+    "gate": "flag CONCENTRATION-RISK if either violated; feeds the 7.5%-vs-10% cap discussion",
+    "verdict": "CONCENTRATION-RISK: BR/d7b: drop-top5 retention 0.667 < 0.70",
+    "result_file": "R5_result.json",
+    "runtime_s": 57.4
+  }
+]

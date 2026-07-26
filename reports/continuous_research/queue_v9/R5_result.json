@@ -1,0 +1,81 @@
+{
+  "windows": {
+    "CH": {
+      "blend": {
+        "base_sharpe": 2.147,
+        "top_name": "1519",
+        "top_name_share_of_positive_pnl": 0.117,
+        "drop_top1": 1.855,
+        "drop_top3": 1.849,
+        "drop_top5": 1.821,
+        "retention_top5": 0.848
+      },
+      "d7b": {
+        "base_sharpe": 2.155,
+        "top_name": "1519",
+        "top_name_share_of_positive_pnl": 0.108,
+        "drop_top1": 1.881,
+        "drop_top3": 1.895,
+        "drop_top5": 1.735,
+        "retention_top5": 0.805
+      },
+      "tf": {
+        "base_sharpe": 1.672,
+        "top_name": "1519",
+        "top_name_share_of_positive_pnl": 0.103,
+        "drop_top1": 1.461,
+        "drop_top3": 1.434,
+        "drop_top5": 1.342,
+        "retention_top5": 0.803
+      },
+      "d12": {
+        "base_sharpe": 1.57,
+        "top_name": "1519",
+        "top_name_share_of_positive_pnl": 0.115,
+        "drop_top1": 1.483,
+        "drop_top3": 1.274,
+        "drop_top5": 1.107,
+        "retention_top5": 0.705
+      }
+    },
+    "BR": {
+      "blend": {
+        "base_sharpe": 1.443,
+        "top_name": "1519",
+        "top_name_share_of_positive_pnl": 0.104,
+        "drop_top1": 1.327,
+        "drop_top3": 1.217,
+        "drop_top5": 1.068,
+        "retention_top5": 0.74
+      },
+      "d7b": {
+        "base_sharpe": 1.441,
+        "top_name": "1519",
+        "top_name_share_of_positive_pnl": 0.091,
+        "drop_top1": 1.375,
+        "drop_top3": 1.131,
+        "drop_top5": 0.961,
+        "retention_top5": 0.667
+      },
+      "tf": {
+        "base_sharpe": 0.963,
+        "top_name": "1519",
+        "top_name_share_of_positive_pnl": 0.112,
+        "drop_top1": 0.742,
+        "drop_top3": 0.505,
+        "drop_top5": 0.426,
+        "retention_top5": 0.442
+      },
+      "d12": {
+        "base_sharpe": 0.989,
+        "top_name": "1519",
+        "top_name_share_of_positive_pnl": 0.122,
+        "drop_top1": 0.853,
+        "drop_top3": 0.631,
+        "drop_top5": 0.465,
+        "retention_top5": 0.47
+      }
+    }
+  },
+  "verdict": "CONCENTRATION-RISK: BR/d7b: drop-top5 retention 0.667 < 0.70"
+}

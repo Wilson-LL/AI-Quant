@@ -1,0 +1,109 @@
+{
+  "rule": "proxy<MA126 -> 0.7*z_tf+0.3*z_mom else 50/50",
+  "expected": "REJECT",
+  "books": {
+    "CH": {
+      "blend": {
+        "static": {
+          "sharpe": 2.147,
+          "yr2022": null
+        },
+        "regime": {
+          "sharpe": 2.001,
+          "yr2022": null
+        }
+      },
+      "d7b": {
+        "static": {
+          "sharpe": 2.155,
+          "yr2022": null
+        },
+        "regime": {
+          "sharpe": 2.021,
+          "yr2022": null
+        }
+      },
+      "tf": {
+        "static": {
+          "sharpe": 1.672,
+          "yr2022": null
+        }
+      },
+      "d12": {
+        "static": {
+          "sharpe": 1.57,
+          "yr2022": null
+        }
+      }
+    },
+    "BR": {
+      "blend": {
+        "static": {
+          "sharpe": 1.443,
+          "yr2022": -0.15
+        },
+        "regime": {
+          "sharpe": 1.48,
+          "yr2022": 0.04
+        }
+      },
+      "d7b": {
+        "static": {
+          "sharpe": 1.441,
+          "yr2022": -0.08
+        },
+        "regime": {
+          "sharpe": 1.537,
+          "yr2022": -0.03
+        }
+      },
+      "tf": {
+        "static": {
+          "sharpe": 0.963,
+          "yr2022": -0.32
+        }
+      },
+      "d12": {
+        "static": {
+          "sharpe": 0.989,
+          "yr2022": -1.6
+        }
+      }
+    },
+    "W22": {
+      "blend": {
+        "static": {
+          "sharpe": 1.321,
+          "yr2022": -0.72
+        },
+        "regime": {
+          "sharpe": 1.377,
+          "yr2022": -0.3
+        }
+      },
+      "d7b": {
+        "static": {
+          "sharpe": 1.468,
+          "yr2022": -0.71
+        },
+        "regime": {
+          "sharpe": 1.454,
+          "yr2022": -0.28
+        }
+      },
+      "tf": {
+        "static": {
+          "sharpe": 0.849,
+          "yr2022": -2.11
+        }
+      },
+      "d12": {
+        "static": {
+          "sharpe": 1.094,
+          "yr2022": -1.32
+        }
+      }
+    }
+  },
+  "verdict": "REJECT (as pre-declared) \u2014 adaptive-weight line stays closed, now with book-level evidence"
+}

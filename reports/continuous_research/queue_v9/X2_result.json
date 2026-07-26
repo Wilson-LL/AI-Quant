@@ -1,0 +1,202 @@
+{
+  "capacity": {
+    "CH": {
+      "blend": {
+        "capital_1e+06": {
+          "p95_participation": 0.0004,
+          "max_participation": 0.01,
+          "frac_trades_capped": 0.0,
+          "frac_traded_weight_capped": 0.0,
+          "est_sharpe_impact": -0.0
+        },
+        "capital_1e+07": {
+          "p95_participation": 0.0042,
+          "max_participation": 0.102,
+          "frac_trades_capped": 0.0012,
+          "frac_traded_weight_capped": 0.0027,
+          "est_sharpe_impact": -0.0
+        },
+        "capital_1e+08": {
+          "p95_participation": 0.0418,
+          "max_participation": 1.018,
+          "frac_trades_capped": 0.0214,
+          "frac_traded_weight_capped": 0.0567,
+          "est_sharpe_impact": -0.004
+        },
+        "lag1_lag2_decay": 0.068
+      },
+      "d7b": {
+        "capital_1e+06": {
+          "p95_participation": 0.0004,
+          "max_participation": 0.01,
+          "frac_trades_capped": 0.0,
+          "frac_traded_weight_capped": 0.0,
+          "est_sharpe_impact": -0.0
+        },
+        "capital_1e+07": {
+          "p95_participation": 0.0038,
+          "max_participation": 0.102,
+          "frac_trades_capped": 0.0013,
+          "frac_traded_weight_capped": 0.003,
+          "est_sharpe_impact": -0.0
+        },
+        "capital_1e+08": {
+          "p95_participation": 0.0375,
+          "max_participation": 1.018,
+          "frac_trades_capped": 0.0232,
+          "frac_traded_weight_capped": 0.0566,
+          "est_sharpe_impact": -0.003
+        },
+        "lag1_lag2_decay": 0.048
+      },
+      "tf": {
+        "capital_1e+06": {
+          "p95_participation": 0.0005,
+          "max_participation": 0.011,
+          "frac_trades_capped": 0.0,
+          "frac_traded_weight_capped": 0.0,
+          "est_sharpe_impact": -0.0
+        },
+        "capital_1e+07": {
+          "p95_participation": 0.0048,
+          "max_participation": 0.107,
+          "frac_trades_capped": 0.0011,
+          "frac_traded_weight_capped": 0.0023,
+          "est_sharpe_impact": -0.0
+        },
+        "capital_1e+08": {
+          "p95_participation": 0.048,
+          "max_participation": 1.069,
+          "frac_trades_capped": 0.0224,
+          "frac_traded_weight_capped": 0.0548,
+          "est_sharpe_impact": -0.001
+        },
+        "lag1_lag2_decay": 0.021
+      },
+      "d12": {
+        "capital_1e+06": {
+          "p95_participation": 0.0005,
+          "max_participation": 0.008,
+          "frac_trades_capped": 0.0,
+          "frac_traded_weight_capped": 0.0,
+          "est_sharpe_impact": -0.0
+        },
+        "capital_1e+07": {
+          "p95_participation": 0.0048,
+          "max_participation": 0.084,
+          "frac_trades_capped": 0.0,
+          "frac_traded_weight_capped": 0.0,
+          "est_sharpe_impact": -0.0
+        },
+        "capital_1e+08": {
+          "p95_participation": 0.0475,
+          "max_participation": 0.838,
+          "frac_trades_capped": 0.0308,
+          "frac_traded_weight_capped": 0.0806,
+          "est_sharpe_impact": -0.008
+        },
+        "lag1_lag2_decay": 0.1
+      }
+    },
+    "BR": {
+      "blend": {
+        "capital_1e+06": {
+          "p95_participation": 0.0004,
+          "max_participation": 0.008,
+          "frac_trades_capped": 0.0,
+          "frac_traded_weight_capped": 0.0,
+          "est_sharpe_impact": -0.0
+        },
+        "capital_1e+07": {
+          "p95_participation": 0.0041,
+          "max_participation": 0.082,
+          "frac_trades_capped": 0.0,
+          "frac_traded_weight_capped": 0.0,
+          "est_sharpe_impact": -0.0
+        },
+        "capital_1e+08": {
+          "p95_participation": 0.0415,
+          "max_participation": 0.822,
+          "frac_trades_capped": 0.0235,
+          "frac_traded_weight_capped": 0.0567,
+          "est_sharpe_impact": -0.0
+        },
+        "lag1_lag2_decay": 0.003
+      },
+      "d7b": {
+        "capital_1e+06": {
+          "p95_participation": 0.0004,
+          "max_participation": 0.008,
+          "frac_trades_capped": 0.0,
+          "frac_traded_weight_capped": 0.0,
+          "est_sharpe_impact": -0.0
+        },
+        "capital_1e+07": {
+          "p95_participation": 0.0043,
+          "max_participation": 0.082,
+          "frac_trades_capped": 0.0,
+          "frac_traded_weight_capped": 0.0,
+          "est_sharpe_impact": -0.0
+        },
+        "capital_1e+08": {
+          "p95_participation": 0.0427,
+          "max_participation": 0.822,
+          "frac_trades_capped": 0.0257,
+          "frac_traded_weight_capped": 0.0606,
+          "est_sharpe_impact": -0.001
+        },
+        "lag1_lag2_decay": 0.017
+      },
+      "tf": {
+        "capital_1e+06": {
+          "p95_participation": 0.0006,
+          "max_participation": 0.009,
+          "frac_trades_capped": 0.0,
+          "frac_traded_weight_capped": 0.0,
+          "est_sharpe_impact": -0.0
+        },
+        "capital_1e+07": {
+          "p95_participation": 0.0057,
+          "max_participation": 0.088,
+          "frac_trades_capped": 0.0,
+          "frac_traded_weight_capped": 0.0,
+          "est_sharpe_impact": -0.0
+        },
+        "capital_1e+08": {
+          "p95_participation": 0.0575,
+          "max_participation": 0.875,
+          "frac_trades_capped": 0.0279,
+          "frac_traded_weight_capped": 0.0625,
+          "est_sharpe_impact": -0.004
+        },
+        "lag1_lag2_decay": 0.059
+      },
+      "d12": {
+        "capital_1e+06": {
+          "p95_participation": 0.0005,
+          "max_participation": 0.018,
+          "frac_trades_capped": 0.0,
+          "frac_traded_weight_capped": 0.0,
+          "est_sharpe_impact": -0.0
+        },
+        "capital_1e+07": {
+          "p95_participation": 0.0046,
+          "max_participation": 0.178,
+          "frac_trades_capped": 0.0007,
+          "frac_traded_weight_capped": 0.0014,
+          "est_sharpe_impact": -0.0
+        },
+        "capital_1e+08": {
+          "p95_participation": 0.0464,
+          "max_participation": 1.78,
+          "frac_trades_capped": 0.0281,
+          "frac_traded_weight_capped": 0.0647,
+          "est_sharpe_impact": -0.001
+        },
+        "lag1_lag2_decay": 0.019
+      }
+    }
+  },
+  "note": "ADV proxy = 20d median(close*volume); cache is OHLCV-only (no true turnover field until full-field data ~2027-01)",
+  "verdict": "PASS \u2014 10M TWD portfolio: est Sharpe impact -0.0 (>= -0.1) on deployment spec"
+}

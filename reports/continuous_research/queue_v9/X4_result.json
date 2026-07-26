@@ -1,0 +1,57 @@
+{
+  "books": {
+    "CH": {
+      "blend": {
+        "base_sharpe": 1.989,
+        "cash_constrained_sharpe": 2.046,
+        "sharpe_cost": -0.057,
+        "avg_new_entry_frac": 0.254
+      },
+      "d7b": {
+        "base_sharpe": 1.952,
+        "cash_constrained_sharpe": 2.0,
+        "sharpe_cost": -0.048,
+        "avg_new_entry_frac": 0.231
+      },
+      "tf": {
+        "base_sharpe": 1.733,
+        "cash_constrained_sharpe": 1.767,
+        "sharpe_cost": -0.034,
+        "avg_new_entry_frac": 0.311
+      },
+      "d12": {
+        "base_sharpe": 1.708,
+        "cash_constrained_sharpe": 1.792,
+        "sharpe_cost": -0.084,
+        "avg_new_entry_frac": 0.309
+      }
+    },
+    "BR": {
+      "blend": {
+        "base_sharpe": 1.455,
+        "cash_constrained_sharpe": 1.468,
+        "sharpe_cost": -0.013,
+        "avg_new_entry_frac": 0.256
+      },
+      "d7b": {
+        "base_sharpe": 1.439,
+        "cash_constrained_sharpe": 1.491,
+        "sharpe_cost": -0.052,
+        "avg_new_entry_frac": 0.239
+      },
+      "tf": {
+        "base_sharpe": 1.193,
+        "cash_constrained_sharpe": 1.189,
+        "sharpe_cost": 0.004,
+        "avg_new_entry_frac": 0.294
+      },
+      "d12": {
+        "base_sharpe": 1.361,
+        "cash_constrained_sharpe": 1.381,
+        "sharpe_cost": -0.02,
+        "avg_new_entry_frac": 0.299
+      }
+    }
+  },
+  "verdict": "PASS \u2014 worst-case settled-cash cost 0.0 < 0.05; idealized rebalance is safe for the paper book"
+}

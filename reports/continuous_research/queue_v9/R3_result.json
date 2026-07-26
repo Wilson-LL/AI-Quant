@@ -1,0 +1,102 @@
+{
+  "draws": {
+    "blend": 200,
+    "d7b": 200,
+    "tf": 100,
+    "d12": 100
+  },
+  "note": "reference books capped at 100 draws (cost); same seed base",
+  "windows": {
+    "CH": {
+      "blend": {
+        "base": 2.147,
+        "p5": 1.607,
+        "p50": 1.916,
+        "p95": 2.169,
+        "positive_frac": 1.0
+      },
+      "d7b": {
+        "base": 2.155,
+        "p5": 1.701,
+        "p50": 1.937,
+        "p95": 2.191,
+        "positive_frac": 1.0
+      },
+      "tf": {
+        "base": 1.672,
+        "p5": 1.451,
+        "p50": 1.689,
+        "p95": 1.901,
+        "positive_frac": 1.0
+      },
+      "d12": {
+        "base": 1.57,
+        "p5": 1.331,
+        "p50": 1.567,
+        "p95": 1.767,
+        "positive_frac": 1.0
+      }
+    },
+    "BR": {
+      "blend": {
+        "base": 1.443,
+        "p5": 1.115,
+        "p50": 1.348,
+        "p95": 1.562,
+        "positive_frac": 1.0
+      },
+      "d7b": {
+        "base": 1.441,
+        "p5": 1.11,
+        "p50": 1.33,
+        "p95": 1.512,
+        "positive_frac": 1.0
+      },
+      "tf": {
+        "base": 0.963,
+        "p5": 0.709,
+        "p50": 0.974,
+        "p95": 1.157,
+        "positive_frac": 1.0
+      },
+      "d12": {
+        "base": 0.989,
+        "p5": 0.691,
+        "p50": 0.984,
+        "p95": 1.214,
+        "positive_frac": 1.0
+      }
+    },
+    "W22": {
+      "blend": {
+        "base": 1.321,
+        "p5": 1.009,
+        "p50": 1.256,
+        "p95": 1.482,
+        "positive_frac": 1.0
+      },
+      "d7b": {
+        "base": 1.468,
+        "p5": 1.016,
+        "p50": 1.253,
+        "p95": 1.476,
+        "positive_frac": 1.0
+      },
+      "tf": {
+        "base": 0.849,
+        "p5": 0.617,
+        "p50": 0.925,
+        "p95": 1.163,
+        "positive_frac": 1.0
+      },
+      "d12": {
+        "base": 1.094,
+        "p5": 0.83,
+        "p50": 1.032,
+        "p95": 1.268,
+        "positive_frac": 1.0
+      }
+    }
+  },
+  "verdict": "PASS \u2014 deployment spec bootstrap profile matches R2 (100% positive, p5 thresholds met)"
+}

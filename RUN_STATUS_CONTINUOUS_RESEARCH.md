@@ -242,3 +242,30 @@ Branch: research/continuous-alpha-loop-4060ti · RTX 4060 Ti (CUDA OK, torch 2.1
   spawn skipped, genuine spawn (uncovered window) still queued, default
   normalization correct.
 - Next queue: none started (awaiting direction).
+
+### 2026-07-26 — queue v9 complete (deployment validation, CPU-only): 13/13, 0 failed
+- **User-approved v9 ran as designed**: signal frozen to the three 7-seed
+  panels, zero GPU training, cache read-only, production untouched. All four
+  comparison books (blend / D7b / tf / D1.2) in every experiment. Runtime
+  ~65 min CPU (R3 bootstrap 57 min). Results:
+  `reports/continuous_research/queue_v9/` (per-experiment JSON +
+  QUEUE_V9_SUMMARY.md); scoreboard row V9.
+- **Deployment case execution-validated:** costs (break-even 632/463 bps),
+  capacity (10M TWD trivial), delay (T+2 cost 0.226 ≤ 0.30; same-bar audit
+  clean), settlement (constrained fills unnecessary), sector caps ~free.
+  **D7b (band15+cap7.5) survives its grid** — band15_cap10 looked better on
+  raw Sharpe (2.21 CH) but missed the pre-registered 1pp-DD dominance bar;
+  not adopted (no post-hoc grid picking).
+- **Track 4 all rejected at their bars → no crash overlay exists**: EX3
+  formally DISARMED (blend +4.0pp DD but d7b +2.2pp < 3pp), tf hedge sleeve
+  +1.6pp < 3pp, regime downweight rejected as pre-declared (bear side did
+  improve — 2022 −0.15→+0.04 — but CH flat; single crash sample, recorded).
+  Bear risk is managed by construction only; this is a documented, accepted
+  state, not an oversight.
+- **New operational tooling (P1/P2 passed):** matured forward ledger
+  (17/20 obs — realized-vs-backtest evidence gate ACTIVATES in ~3
+  rebalances) and daily diff report. Both should join the daily-ops cycle.
+- **Open flag (R5):** bear-window drop-top-5 retention on d7b = 0.667
+  (<0.70); top contributor 1519 at 9–12% of PnL. The single number to watch
+  as the paper ledger matures.
+- Blockers: none. v10 (GPU research queue) proposed separately — NOT started.

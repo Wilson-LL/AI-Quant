@@ -1,0 +1,26 @@
+{
+  "runs": [
+    {
+      "asof": "2026-07-22",
+      "rc": 0,
+      "tail": [
+        "[diff] C:\\Users\\wilso\\source\\code\\AI-Quant\\reports\\continuous_research\\daily_diffs\\DIFF_2026-07-22.md (0 anomalies)"
+      ]
+    },
+    {
+      "asof": "2026-07-23",
+      "rc": 0,
+      "tail": [
+        "[diff] C:\\Users\\wilso\\source\\code\\AI-Quant\\reports\\continuous_research\\daily_diffs\\DIFF_2026-07-23.md (0 anomalies)"
+      ]
+    },
+    {
+      "asof": "2026-07-24",
+      "rc": 0,
+      "tail": [
+        "[diff] C:\\Users\\wilso\\source\\code\\AI-Quant\\reports\\continuous_research\\daily_diffs\\DIFF_2026-07-24.md (0 anomalies)"
+      ]
+    }
+  ],
+  "verdict": "OPERATIONAL \u2014 diff report generated for 3 snapshot dates"
+}

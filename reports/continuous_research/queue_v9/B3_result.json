@@ -1,0 +1,193 @@
+{
+  "sleeve_gross": 0.15,
+  "monitor_only": true,
+  "books": {
+    "CH": {
+      "blend": {
+        "base": {
+          "sharpe": 1.989,
+          "max_dd": -0.2379
+        },
+        "always_on": {
+          "sharpe": 2.013,
+          "max_dd": -0.2199
+        },
+        "triggered": {
+          "sharpe": 2.021,
+          "max_dd": -0.2207,
+          "pct_time_active": 0.357
+        }
+      },
+      "d7b": {
+        "base": {
+          "sharpe": 1.952,
+          "max_dd": -0.2511
+        },
+        "always_on": {
+          "sharpe": 1.975,
+          "max_dd": -0.2328
+        },
+        "triggered": {
+          "sharpe": 1.987,
+          "max_dd": -0.234,
+          "pct_time_active": 0.357
+        }
+      },
+      "tf": {
+        "base": {
+          "sharpe": 1.733,
+          "max_dd": -0.2674
+        },
+        "always_on": {
+          "sharpe": 1.741,
+          "max_dd": -0.2427
+        },
+        "triggered": {
+          "sharpe": 1.71,
+          "max_dd": -0.2674,
+          "pct_time_active": 0.238
+        }
+      },
+      "d12": {
+        "base": {
+          "sharpe": 1.708,
+          "max_dd": -0.3066
+        },
+        "always_on": {
+          "sharpe": 1.714,
+          "max_dd": -0.2831
+        },
+        "triggered": {
+          "sharpe": 1.734,
+          "max_dd": -0.2908,
+          "pct_time_active": 0.429
+        }
+      }
+    },
+    "BR": {
+      "blend": {
+        "base": {
+          "sharpe": 1.455,
+          "max_dd": -0.2604
+        },
+        "always_on": {
+          "sharpe": 1.462,
+          "max_dd": -0.2441
+        },
+        "triggered": {
+          "sharpe": 1.478,
+          "max_dd": -0.2441,
+          "pct_time_active": 0.493
+        }
+      },
+      "d7b": {
+        "base": {
+          "sharpe": 1.439,
+          "max_dd": -0.2574
+        },
+        "always_on": {
+          "sharpe": 1.447,
+          "max_dd": -0.2425
+        },
+        "triggered": {
+          "sharpe": 1.449,
+          "max_dd": -0.2415,
+          "pct_time_active": 0.433
+        }
+      },
+      "tf": {
+        "base": {
+          "sharpe": 1.193,
+          "max_dd": -0.3029
+        },
+        "always_on": {
+          "sharpe": 1.181,
+          "max_dd": -0.2893
+        },
+        "triggered": {
+          "sharpe": 1.206,
+          "max_dd": -0.2901,
+          "pct_time_active": 0.507
+        }
+      },
+      "d12": {
+        "base": {
+          "sharpe": 1.361,
+          "max_dd": -0.3293
+        },
+        "always_on": {
+          "sharpe": 1.362,
+          "max_dd": -0.3129
+        },
+        "triggered": {
+          "sharpe": 1.367,
+          "max_dd": -0.3243,
+          "pct_time_active": 0.627
+        }
+      }
+    },
+    "W22": {
+      "blend": {
+        "base": {
+          "sharpe": 1.241,
+          "max_dd": -0.2499
+        },
+        "always_on": {
+          "sharpe": 1.243,
+          "max_dd": -0.2371
+        },
+        "triggered": {
+          "sharpe": 1.219,
+          "max_dd": -0.2445,
+          "pct_time_active": 0.4
+        }
+      },
+      "d7b": {
+        "base": {
+          "sharpe": 1.372,
+          "max_dd": -0.2411
+        },
+        "always_on": {
+          "sharpe": 1.379,
+          "max_dd": -0.2282
+        },
+        "triggered": {
+          "sharpe": 1.345,
+          "max_dd": -0.2356,
+          "pct_time_active": 0.364
+        }
+      },
+      "tf": {
+        "base": {
+          "sharpe": 0.993,
+          "max_dd": -0.3119
+        },
+        "always_on": {
+          "sharpe": 0.976,
+          "max_dd": -0.2999
+        },
+        "triggered": {
+          "sharpe": 0.965,
+          "max_dd": -0.3024,
+          "pct_time_active": 0.545
+        }
+      },
+      "d12": {
+        "base": {
+          "sharpe": 1.225,
+          "max_dd": -0.2478
+        },
+        "always_on": {
+          "sharpe": 1.221,
+          "max_dd": -0.229
+        },
+        "triggered": {
+          "sharpe": 1.208,
+          "max_dd": -0.2364,
+          "pct_time_active": 0.473
+        }
+      }
+    }
+  },
+  "verdict": "REJECT \u2014 triggered tf hedge sleeve fails the DD/cost bar; LO crash protection stays with (or without) B2 descaling"
+}

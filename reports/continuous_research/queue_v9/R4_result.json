@@ -1,0 +1,125 @@
+{
+  "cells": {
+    "CH": {
+      "blend": {
+        "long_short": {
+          "base": 2.147,
+          "seccap30": 2.25,
+          "seccap20": 2.147,
+          "drop_largest": 1.531
+        },
+        "long_only": {
+          "base": 1.989,
+          "seccap30": 2.038,
+          "seccap20": 1.989,
+          "drop_largest": 1.556
+        }
+      },
+      "d7b": {
+        "long_short": {
+          "base": 2.155,
+          "seccap30": 2.263,
+          "seccap20": 2.155,
+          "drop_largest": 1.58
+        },
+        "long_only": {
+          "base": 1.952,
+          "seccap30": 2.005,
+          "seccap20": 1.952,
+          "drop_largest": 1.567
+        }
+      },
+      "tf": {
+        "long_short": {
+          "base": 1.672,
+          "seccap30": 1.909,
+          "seccap20": 1.672,
+          "drop_largest": 1.512
+        },
+        "long_only": {
+          "base": 1.733,
+          "seccap30": 1.89,
+          "seccap20": 1.733,
+          "drop_largest": 1.581
+        }
+      },
+      "d12": {
+        "long_short": {
+          "base": 1.57,
+          "seccap30": 1.637,
+          "seccap20": 1.57,
+          "drop_largest": 1.347
+        },
+        "long_only": {
+          "base": 1.708,
+          "seccap30": 1.783,
+          "seccap20": 1.708,
+          "drop_largest": 1.462
+        }
+      }
+    },
+    "BR": {
+      "blend": {
+        "long_short": {
+          "base": 1.443,
+          "seccap30": 1.442,
+          "seccap20": 1.443,
+          "drop_largest": 1.304
+        },
+        "long_only": {
+          "base": 1.455,
+          "seccap30": 1.494,
+          "seccap20": 1.455,
+          "drop_largest": 1.284
+        }
+      },
+      "d7b": {
+        "long_short": {
+          "base": 1.441,
+          "seccap30": 1.476,
+          "seccap20": 1.441,
+          "drop_largest": 1.405
+        },
+        "long_only": {
+          "base": 1.439,
+          "seccap30": 1.501,
+          "seccap20": 1.439,
+          "drop_largest": 1.357
+        }
+      },
+      "tf": {
+        "long_short": {
+          "base": 0.963,
+          "seccap30": 1.05,
+          "seccap20": 0.963,
+          "drop_largest": 0.805
+        },
+        "long_only": {
+          "base": 1.193,
+          "seccap30": 1.256,
+          "seccap20": 1.193,
+          "drop_largest": 1.03
+        }
+      },
+      "d12": {
+        "long_short": {
+          "base": 0.989,
+          "seccap30": 1.051,
+          "seccap20": 0.989,
+          "drop_largest": 0.738
+        },
+        "long_only": {
+          "base": 1.361,
+          "seccap30": 1.438,
+          "seccap20": 1.361,
+          "drop_largest": 1.089
+        }
+      }
+    }
+  },
+  "largest_sector": {
+    "name": "electronics",
+    "n_names": 20
+  },
+  "verdict": "concentration premium priced: worst 30%-cap cost 0.001 <= 0.3 \u2014 cap available if needed"
+}

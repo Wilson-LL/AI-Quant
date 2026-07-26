@@ -1,0 +1,13 @@
+{"id": "C1", "elapsed_s": 54.0, "verdict": "D7b (band15+cap7.5) stays recommended \u2014 no grid cell dominates on Sharpe+DD+turnover", "ts": "2026-07-26 12:45:43"}
+{"id": "X1", "elapsed_s": 33.8, "verdict": "PASS \u2014 deployment specs clear net150 thresholds (CH>=1.0, BR>=0.7) both modes", "ts": "2026-07-26 12:46:17"}
+{"id": "X2", "elapsed_s": 25.4, "verdict": "PASS \u2014 10M TWD portfolio: est Sharpe impact -0.0 (>= -0.1) on deployment spec", "ts": "2026-07-26 12:46:42"}
+{"id": "X3", "elapsed_s": 67.6, "verdict": "same-bar audit PASS; T+2 worst cost 0.226 <= 0.30 \u2014 delay-robust", "ts": "2026-07-26 12:47:50"}
+{"id": "X4", "elapsed_s": 21.5, "verdict": "PASS \u2014 worst-case settled-cash cost 0.0 < 0.05; idealized rebalance is safe for the paper book", "ts": "2026-07-26 12:48:12"}
+{"id": "P1", "elapsed_s": 2.9, "verdict": "OPERATIONAL \u2014 ledger populated (88 rows), EVIDENCE GATE ARMED", "ts": "2026-07-26 12:48:15"}
+{"id": "P2", "elapsed_s": 1.7, "verdict": "OPERATIONAL \u2014 diff report generated for 3 snapshot dates", "ts": "2026-07-26 12:48:16"}
+{"id": "B2", "elapsed_s": 17.8, "verdict": "REJECT \u2014 EX3 primary cell fails the pre-registered bar; DISARM EX3 (exposure-gate thread closed with numbers)", "ts": "2026-07-26 12:48:34"}
+{"id": "B3", "elapsed_s": 24.2, "verdict": "REJECT \u2014 triggered tf hedge sleeve fails the DD/cost bar; LO crash protection stays with (or without) B2 descaling", "ts": "2026-07-26 12:48:58"}
+{"id": "B4", "elapsed_s": 27.0, "verdict": "REJECT (as pre-declared) \u2014 adaptive-weight line stays closed, now with book-level evidence", "ts": "2026-07-26 12:49:25"}
+{"id": "R3", "elapsed_s": 3443.8, "verdict": "PASS \u2014 deployment spec bootstrap profile matches R2 (100% positive, p5 thresholds met)", "ts": "2026-07-26 13:46:49"}
+{"id": "R4", "elapsed_s": 98.1, "verdict": "concentration premium priced: worst 30%-cap cost 0.001 <= 0.3 \u2014 cap available if needed", "ts": "2026-07-26 13:48:27"}
+{"id": "R5", "elapsed_s": 57.4, "verdict": "CONCENTRATION-RISK: BR/d7b: drop-top5 retention 0.667 < 0.70", "ts": "2026-07-26 13:49:25"}

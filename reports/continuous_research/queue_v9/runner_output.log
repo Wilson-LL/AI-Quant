@@ -1,0 +1,56 @@
+
+===== C1 (T1-construction) ¡X D7b (band15+cap7.5) is non-dominated across the full band{10,15}xcap{7.5,10} grid on the f
+[panel] SCHED_A8_seeds7_full.csv.gz: 91168 rows, 2023-01-03..2026-07-23
+[panel] SCHED_BEAR_A8_seeds7_full.csv.gz: 142775 rows, 2021-01-04..2026-07-23
+[panel] SCHED_W22_oos2022_start.csv.gz: 117169 rows, 2022-01-03..2026-07-24
+[C1] done in 54.0s ¡X D7b (band15+cap7.5) stays recommended ¡X no grid cell dominates on Sharpe+DD+turnover
+
+===== X1 (T2-execution) ¡X deployment specs keep Sharpe >=1.0 at 150bps (CH) and >=0.7 (BR); break-even cost >250bps
+[X1] done in 33.8s ¡X PASS ¡X deployment specs clear net150 thresholds (CH>=1.0, BR>=0.7) both modes
+
+===== X2 (T2-execution) ¡X at <=10M TWD capital, 10%-of-ADV20 participation caps never bind materially; degradation a
+[X2] done in 25.4s ¡X PASS ¡X 10M TWD portfolio: est Sharpe impact -0.0 (>= -0.1) on deployment spec
+
+===== X3 (T2-execution) ¡X exec_lag=1 already guarantees no same-bar execution (verify); T+2 costs <=0.15 Sharpe, T+3
+[X3] done in 67.6s ¡X same-bar audit PASS; T+2 worst cost 0.226 <= 0.30 ¡X delay-robust
+
+===== X4 (T2-execution) ¡X worst-case sell-first/settled-cash (new entries at T+3) costs <0.05 Sharpe on LO deploymen
+[X4] done in 21.5s ¡X PASS ¡X worst-case settled-cash cost 0.0 < 0.05; idealized rebalance is safe for the paper book
+
+===== P1 (T3-paper) ¡X operational: matured 1/5/10/20d ledger populates for all four books; evidence gate arms at
+[P1] done in 2.9s ¡X OPERATIONAL ¡X ledger populated (88 rows), EVIDENCE GATE ARMED
+
+===== P2 (T3-paper) ¡X operational: daily diff report (entries/exits, deltas, sector shares, anomalies) generates
+[P2] done in 1.7s ¡X OPERATIONAL ¡X diff report generated for 3 snapshot dates
+
+===== B2 (T4-bear) ¡X EX3 own-equity DD gate (trigger -10%, scale 0.5, reentry -5%) cuts bear DD >=3pp at <=0.05
+[B2] done in 17.8s ¡X REJECT ¡X EX3 primary cell fails the pre-registered bar; DISARM EX3 (exposure-gate thread closed with numbers)
+
+===== B3 (T4-bear) ¡X triggered 15%-gross tf bottom-quintile short sleeve improves LO bear DD >=3pp at <=0.1 CH 
+[B3] done in 24.2s ¡X REJECT ¡X triggered tf hedge sleeve fails the DD/cost bar; LO crash protection stays with (or without) B2 descaling
+
+===== B4 (T4-bear) ¡X EXPECTED REJECT (pre-declared): proxy<MA126 -> 70/30 tf/mom blend improves 2022 without hu
+[B4] done in 27.0s ¡X REJECT (as pre-declared) ¡X adaptive-weight line stays closed, now with book-level evidence
+
+===== R3 (T5-audit) ¡X deployment spec bootstraps like R2: 100% positive draws, CH p5 >=1.5, BR p5 >=1.1, medians
+[r3] CH/blend: base 2.147 p5 1.607 p50 1.916
+[r3] CH/d7b: base 2.155 p5 1.701 p50 1.937
+[r3] CH/tf: base 1.672 p5 1.451 p50 1.689
+[r3] CH/d12: base 1.57 p5 1.331 p50 1.567
+[r3] BR/blend: base 1.443 p5 1.115 p50 1.348
+[r3] BR/d7b: base 1.441 p5 1.11 p50 1.33
+[r3] BR/tf: base 0.963 p5 0.709 p50 0.974
+[r3] BR/d12: base 0.989 p5 0.691 p50 0.984
+[r3] W22/blend: base 1.321 p5 1.009 p50 1.256
+[r3] W22/d7b: base 1.468 p5 1.016 p50 1.253
+[r3] W22/tf: base 0.849 p5 0.617 p50 0.925
+[r3] W22/d12: base 1.094 p5 0.83 p50 1.032
+[R3] done in 3443.8s ¡X PASS ¡X deployment spec bootstrap profile matches R2 (100% positive, p5 thresholds met)
+
+===== R4 (T5-audit) ¡X hard 30% sector cap costs <=0.3 Sharpe on deployment books; prices the concentration premi
+[R4] done in 98.1s ¡X concentration premium priced: worst 30%-cap cost 0.001 <= 0.3 ¡X cap available if needed
+
+===== R5 (T5-audit) ¡X no single name >15% of positive PnL; drop-top-5 (ex-post worst case) retains >=70% of Shar
+[R5] done in 57.4s ¡X CONCENTRATION-RISK: BR/d7b: drop-top5 retention 0.667 < 0.70
+
+[v9] queue complete: 13 done, 0 failed
