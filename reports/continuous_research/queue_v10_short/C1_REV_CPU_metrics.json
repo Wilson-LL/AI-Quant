@@ -1,0 +1,82 @@
+{
+  "cells": {
+    "CH": {
+      "two_way_50_50": {
+        "net60_sharpe": 2.147,
+        "max_dd": -0.1063,
+        "rank_ic": 0.0739,
+        "turnover": 0.301
+      },
+      "rev10_45_45_10": {
+        "net60_sharpe": 1.552,
+        "max_dd": -0.1618,
+        "rank_ic": 0.0704,
+        "turnover": 0.372
+      },
+      "rev20_40_40_20": {
+        "net60_sharpe": 1.237,
+        "max_dd": -0.2105,
+        "rank_ic": 0.0619,
+        "turnover": 0.456
+      },
+      "rev_alone": {
+        "net60_sharpe": -0.514,
+        "max_dd": -0.3025,
+        "rank_ic": -0.0244,
+        "turnover": 0.778
+      },
+      "tf_alone": {
+        "net60_sharpe": 1.672,
+        "max_dd": -0.1765,
+        "rank_ic": 0.0633,
+        "turnover": 0.358
+      },
+      "d12_alone": {
+        "net60_sharpe": 1.57,
+        "max_dd": -0.1426,
+        "rank_ic": 0.0706,
+        "turnover": 0.34
+      }
+    },
+    "BR": {
+      "two_way_50_50": {
+        "net60_sharpe": 1.443,
+        "max_dd": -0.1803,
+        "rank_ic": 0.0357,
+        "turnover": 0.298
+      },
+      "rev10_45_45_10": {
+        "net60_sharpe": 1.335,
+        "max_dd": -0.1375,
+        "rank_ic": 0.0357,
+        "turnover": 0.377
+      },
+      "rev20_40_40_20": {
+        "net60_sharpe": 1.082,
+        "max_dd": -0.1778,
+        "rank_ic": 0.0337,
+        "turnover": 0.473
+      },
+      "rev_alone": {
+        "net60_sharpe": -1.051,
+        "max_dd": -0.7219,
+        "rank_ic": -0.0048,
+        "turnover": 0.795
+      },
+      "tf_alone": {
+        "net60_sharpe": 0.963,
+        "max_dd": -0.204,
+        "rank_ic": 0.0289,
+        "turnover": 0.338
+      },
+      "d12_alone": {
+        "net60_sharpe": 0.989,
+        "max_dd": -0.3568,
+        "rank_ic": 0.0358,
+        "turnover": 0.337
+      }
+    }
+  },
+  "note": "band10+cap10 construction throughout; pre-registered weights 45/45/10 and 40/40/20",
+  "verdict": "REJECT \u2014 no reversal cell beats the two-way blend on both windows; GPU branch not justified"
+}

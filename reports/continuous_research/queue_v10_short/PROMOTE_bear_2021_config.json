@@ -1,0 +1,25 @@
+{
+  "id": "P7_B1_MT3_bear_2021",
+  "phase": "v10promoted",
+  "feature_set": "close_only",
+  "target": "tgt_rank_20",
+  "seq_len": 60,
+  "preset_base": "B",
+  "overrides": {
+    "mt_aux": true
+  },
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "eval_blend": true,
+  "oos_start": "2021-01-01",
+  "panel": "SCHED_P7_B1_MT3_bear_2021.csv.gz",
+  "runtime_s": 4828.1,
+  "status": "done"
+}

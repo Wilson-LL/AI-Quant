@@ -1,0 +1,22 @@
+{
+  "id": "B1_MT3",
+  "exp": "B1",
+  "status": "running",
+  "phase": "v10screen",
+  "hypothesis": "joint aux heads on rank_5/rank_10 (flag mt_aux, weights 1.0/0.3/0.3 pre-registered) regularize the trunk and lift rank-20 val IC",
+  "feature_set": "close_only",
+  "target": "tgt_rank_20",
+  "seq_len": 60,
+  "preset_base": "B",
+  "overrides": {
+    "mt_aux": true
+  },
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "eval_blend": true,
+  "panel": "SCHED_B1_MT3.csv.gz",
+  "runtime_s": 969.0
+}

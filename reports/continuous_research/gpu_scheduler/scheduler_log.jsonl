@@ -32,3 +32,13 @@
 {"id": "BEAR_ENS14_2023", "event": "failed", "error": "AcceleratorError: CUDA error: unknown error\nSearch for `cudaErrorUnknown' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.\nFor more detailed error information, run with CUDA_LOG_FILE=stderr\n", "ts": "2026-07-25 01:42:03"}
 {"id": "ENS14_2021", "start": "2026-07-26 00:23:30", "elapsed_s": 9591.7, "peak_vram_mb": 2160.8, "val_ic": 0.05298, "seeds": 14, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
 {"id": "BEAR_ENS14_2023", "start": "2026-07-26 03:03:22", "elapsed_s": 8499.0, "peak_vram_mb": 2160.8, "val_ic": 0.05298, "seeds": 14, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "BASE3_s012", "start": "2026-07-26 14:17:31", "elapsed_s": 921.5, "peak_vram_mb": 2152.3, "val_ic": 0.04813, "seeds": 3, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "BASE3_s101112", "start": "2026-07-26 14:32:52", "elapsed_s": 838.1, "peak_vram_mb": 2152.3, "val_ic": 0.04838, "seeds": 3, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "A1_CS3", "start": "2026-07-26 14:46:51", "elapsed_s": 2619.4, "peak_vram_mb": 1202.9, "val_ic": 0.03704, "seeds": 3, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "B1_MT3", "start": "2026-07-26 15:30:30", "elapsed_s": 969.0, "peak_vram_mb": 2155.1, "val_ic": 0.05026, "seeds": 3, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "D1_NOISE_s012", "start": "2026-07-26 15:46:39", "elapsed_s": 800.1, "peak_vram_mb": 2153.9, "val_ic": 0.05021, "seeds": 3, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "D1_NOISE_s101112", "start": "2026-07-26 15:59:59", "elapsed_s": 913.4, "peak_vram_mb": 2153.9, "val_ic": 0.04764, "seeds": 3, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "D1_DROP_s012", "start": "2026-07-26 16:15:12", "elapsed_s": 765.7, "peak_vram_mb": 2153.6, "val_ic": 0.04852, "seeds": 3, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "D1_DROP_s101112", "start": "2026-07-26 16:27:58", "elapsed_s": 860.8, "peak_vram_mb": 2153.8, "val_ic": 0.04671, "seeds": 3, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "P7_B1_MT3_champ_2023", "start": "2026-07-26 16:43:00", "elapsed_s": 2181.1, "peak_vram_mb": 2159.1, "val_ic": 0.04865, "seeds": 7, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "P7_B1_MT3_bear_2021", "start": "2026-07-26 17:19:21", "elapsed_s": 4828.1, "peak_vram_mb": 2159.0, "val_ic": 0.04982, "seeds": 7, "gpu": "NVIDIA GeForce RTX 4060 Ti"}

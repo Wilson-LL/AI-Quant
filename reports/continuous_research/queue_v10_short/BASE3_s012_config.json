@@ -1,0 +1,19 @@
+{
+  "id": "BASE3_s012",
+  "exp": "baseline",
+  "status": "running",
+  "phase": "v10screen",
+  "hypothesis": "plain preset-B 3-seed baseline (seeds 0-2): the val-IC bar for the promotion slot and seed-set A for the D1 spread metric",
+  "feature_set": "close_only",
+  "target": "tgt_rank_20",
+  "seq_len": 60,
+  "preset_base": "B",
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "eval_blend": true,
+  "panel": "SCHED_BASE3_s012.csv.gz",
+  "runtime_s": 921.5
+}

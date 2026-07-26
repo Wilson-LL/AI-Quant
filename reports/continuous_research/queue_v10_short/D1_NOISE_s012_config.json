@@ -1,0 +1,22 @@
+{
+  "id": "D1_NOISE_s012",
+  "exp": "D1",
+  "status": "running",
+  "phase": "v10screen",
+  "hypothesis": "feature-noise augmentation (sigma 0.1) halves cross-seed-set val-IC spread at flat-or-better mean (seed-set A)",
+  "feature_set": "close_only",
+  "target": "tgt_rank_20",
+  "seq_len": 60,
+  "preset_base": "B",
+  "overrides": {
+    "aug_noise": 0.1
+  },
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "eval_blend": true,
+  "panel": "SCHED_D1_NOISE_s012.csv.gz",
+  "runtime_s": 800.1
+}

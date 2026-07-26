@@ -1,0 +1,22 @@
+{
+  "id": "A1_CS3",
+  "exp": "A1",
+  "status": "running",
+  "phase": "v10screen",
+  "hypothesis": "cross-sectional attention over each date's names (flag cs_attn) lifts val IC vs plain baseline",
+  "feature_set": "close_only",
+  "target": "tgt_rank_20",
+  "seq_len": 60,
+  "preset_base": "B",
+  "overrides": {
+    "cs_attn": true
+  },
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "eval_blend": true,
+  "panel": "SCHED_A1_CS3.csv.gz",
+  "runtime_s": 2619.4
+}

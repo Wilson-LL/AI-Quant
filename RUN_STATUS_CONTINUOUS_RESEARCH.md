@@ -269,3 +269,28 @@ Branch: research/continuous-alpha-loop-4060ti · RTX 4060 Ti (CUDA OK, torch 2.1
   (<0.70); top contributor 1519 at 9–12% of PnL. The single number to watch
   as the paper ledger matures.
 - Blockers: none. v10 (GPU research queue) proposed separately — NOT started.
+
+### 2026-07-26 — Short v10 complete (Option B): 10/10, 0 failed, ~4.4h GPU
+- Flag-gated training extensions landed (cs_attn / mt_aux / aug_noise /
+  aug_datedrop as preset keys, default OFF; model.py untouched — wrappers
+  reach the pre-head embedding via submodule composition). **Champion path
+  verified bit-identical with flags OFF** (pre/post anchor diff empty, twice).
+- **Three lines closed decisively:** cross-sectional attention (val IC 0.037
+  vs 0.048 baseline), 5d reversal (standalone Sharpe NEGATIVE −0.51/−1.05 —
+  TWSE shows continuation, not reversal), input augmentation (cross-set
+  val-IC spread is 0.00025 at baseline — already negligible; the v7
+  seed-set variance lives in OOS book space, not val IC. Aimed at the wrong
+  layer; informative miss).
+- **B1 multi-task heads promoted** (val IC 0.05026, cleared the +0.002 bar
+  by 0.0001 — thin) and passed dual-window at 7 seeds: blend **2.011 champ /
+  1.515 bear, bear DD −13.0% vs −18.0%, 2022 +0.23 vs −0.15** — the best
+  bear/2022 profile on record, priced at −0.136 champion Sharpe (inside the
+  ±0.15 seed-noise band). **Adoption HELD (user decision + validation
+  needed): one 7-seed draw, seed-set sensitivity unknown, marginal screen
+  edge.** Recommended: v10b opens with an MT validation battery
+  (disjoint seeds 10–16 both windows + refit-63), mirroring the v7 battery
+  that caught the 7-seed seed-luck inflation.
+- Results: `reports/continuous_research/queue_v10_short/` (per-experiment
+  config+metrics JSON, QUEUE_V10_SHORT_SUMMARY.md). Production unchanged;
+  no cache mutation; panels gitignored.
+- Blockers: none. v10b proposal to follow — NOT started without approval.

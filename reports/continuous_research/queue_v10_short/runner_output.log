@@ -1,0 +1,152 @@
+
+===== BASE3_s012 (baseline) ¡X plain preset-B 3-seed baseline (seeds 0-2): the val-IC bar for the promotion slot and seed
+[dataset] 108 stocks loaded, feature_set=close_only, seq_len=60, exec_lag=1
+[dataset] X (276247, 60, 10) (663 MB), 2815 dates 2015-01-05..2026-07-24
+[BASE3_s012] [wf 1/7] 2023-01-03 train 162233 val_ic +0.0217 (225s elapsed)
+[BASE3_s012] [wf 2/7] 2023-07-20 train 174099 val_ic +0.0757 (376s elapsed)
+[BASE3_s012] [wf 3/7] 2024-01-19 train 186137 val_ic +0.0522 (475s elapsed)
+[BASE3_s012] [wf 4/7] 2024-08-02 train 198124 val_ic +0.0534 (565s elapsed)
+[BASE3_s012] [wf 5/7] 2025-02-13 train 210142 val_ic +0.0404 (663s elapsed)
+[BASE3_s012] [wf 6/7] 2025-08-15 train 222235 val_ic +0.0179 (764s elapsed)
+[BASE3_s012] [wf 7/7] 2026-02-26 train 234230 val_ic +0.0754 (911s elapsed)
+  [lo band10]                      IC +0.0653 | net60 Sharpe  1.66 ann +42.41% dd -13.10% | net100  1.49 | turn 0.36 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0653 | net60 Sharpe  1.67 ann +58.56% dd -28.46% | net100  1.62 | turn 0.32 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0725 | net60 Sharpe  1.97 ann +49.03% dd -10.54% | net100  1.82 | turn 0.30 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0725 | net60 Sharpe  1.94 ann +68.68% dd -26.13% | net100  1.89 | turn 0.27 | maxW 10.0% | n 42
+[BASE3_s012] done 921.5s ¡X val_ic 0.04813
+
+===== BASE3_s101112 (baseline) ¡X plain preset-B 3-seed baseline (seeds 10-12): seed-set B for the D1 spread metric
+[BASE3_s101112] [wf 1/7] 2023-01-03 train 162233 val_ic +0.0325 (186s elapsed)
+[BASE3_s101112] [wf 2/7] 2023-07-20 train 174099 val_ic +0.1027 (331s elapsed)
+[BASE3_s101112] [wf 3/7] 2024-01-19 train 186137 val_ic +0.0495 (422s elapsed)
+[BASE3_s101112] [wf 4/7] 2024-08-02 train 198124 val_ic +0.0254 (511s elapsed)
+[BASE3_s101112] [wf 5/7] 2025-02-13 train 210142 val_ic +0.0347 (588s elapsed)
+[BASE3_s101112] [wf 6/7] 2025-08-15 train 222235 val_ic +0.0128 (682s elapsed)
+[BASE3_s101112] [wf 7/7] 2026-02-26 train 234230 val_ic +0.0811 (831s elapsed)
+  [lo band10]                      IC +0.0621 | net60 Sharpe  1.75 ann +43.97% dd -12.63% | net100  1.59 | turn 0.34 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0621 | net60 Sharpe  1.77 ann +62.16% dd -27.77% | net100  1.72 | turn 0.29 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0689 | net60 Sharpe  1.86 ann +44.61% dd -11.06% | net100  1.71 | turn 0.30 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0689 | net60 Sharpe  1.79 ann +61.20% dd -26.95% | net100  1.75 | turn 0.25 | maxW 10.0% | n 42
+[BASE3_s101112] done 838.1s ¡X val_ic 0.04838
+
+===== A1_CS3 (A1) ¡X cross-sectional attention over each date's names (flag cs_attn) lifts val IC vs plain base
+[A1_CS3] [wf 1/7] 2023-01-03 train 162233 val_ic -0.0265 (346s elapsed)
+[A1_CS3] [wf 2/7] 2023-07-20 train 174099 val_ic +0.0862 (817s elapsed)
+[A1_CS3] [wf 3/7] 2024-01-19 train 186137 val_ic +0.0452 (1149s elapsed)
+[A1_CS3] [wf 4/7] 2024-08-02 train 198124 val_ic +0.0337 (1433s elapsed)
+[A1_CS3] [wf 5/7] 2025-02-13 train 210142 val_ic +0.0321 (1787s elapsed)
+[A1_CS3] [wf 6/7] 2025-08-15 train 222235 val_ic +0.0189 (2190s elapsed)
+[A1_CS3] [wf 7/7] 2026-02-26 train 234230 val_ic +0.0697 (2613s elapsed)
+  [lo band10]                      IC +0.0749 | net60 Sharpe  2.04 ann +47.59% dd -14.66% | net100  1.88 | turn 0.32 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0749 | net60 Sharpe  1.86 ann +63.22% dd -26.03% | net100  1.81 | turn 0.27 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0754 | net60 Sharpe  1.89 ann +44.92% dd -13.14% | net100  1.74 | turn 0.30 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0754 | net60 Sharpe  1.80 ann +63.03% dd -26.48% | net100  1.75 | turn 0.26 | maxW 10.0% | n 42
+[A1_CS3] done 2619.4s ¡X val_ic 0.03704
+
+===== B1_MT3 (B1) ¡X joint aux heads on rank_5/rank_10 (flag mt_aux, weights 1.0/0.3/0.3 pre-registered) regula
+[B1_MT3] [wf 1/7] 2023-01-03 train 162233 val_ic +0.0553 (161s elapsed)
+[B1_MT3] [wf 2/7] 2023-07-20 train 174099 val_ic +0.0801 (311s elapsed)
+[B1_MT3] [wf 3/7] 2024-01-19 train 186137 val_ic +0.0513 (409s elapsed)
+[B1_MT3] [wf 4/7] 2024-08-02 train 198124 val_ic +0.0316 (499s elapsed)
+[B1_MT3] [wf 5/7] 2025-02-13 train 210142 val_ic +0.0333 (623s elapsed)
+[B1_MT3] [wf 6/7] 2025-08-15 train 222235 val_ic +0.0228 (794s elapsed)
+[B1_MT3] [wf 7/7] 2026-02-26 train 234230 val_ic +0.0776 (956s elapsed)
+  [lo band10]                      IC +0.0654 | net60 Sharpe  1.52 ann +39.25% dd -16.26% | net100  1.36 | turn 0.35 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0654 | net60 Sharpe  1.63 ann +57.51% dd -29.74% | net100  1.57 | turn 0.30 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0743 | net60 Sharpe  1.92 ann +51.68% dd  -9.94% | net100  1.78 | turn 0.32 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0743 | net60 Sharpe  1.94 ann +68.88% dd -25.14% | net100  1.89 | turn 0.26 | maxW 10.0% | n 42
+[B1_MT3] done 969.0s ¡X val_ic 0.05026
+
+===== D1_NOISE_s012 (D1) ¡X feature-noise augmentation (sigma 0.1) halves cross-seed-set val-IC spread at flat-or-bett
+[D1_NOISE_s012] [wf 1/7] 2023-01-03 train 162233 val_ic +0.0128 (126s elapsed)
+[D1_NOISE_s012] [wf 2/7] 2023-07-20 train 174099 val_ic +0.1003 (276s elapsed)
+[D1_NOISE_s012] [wf 3/7] 2024-01-19 train 186137 val_ic +0.0482 (372s elapsed)
+[D1_NOISE_s012] [wf 4/7] 2024-08-02 train 198124 val_ic +0.0545 (448s elapsed)
+[D1_NOISE_s012] [wf 5/7] 2025-02-13 train 210142 val_ic +0.0357 (562s elapsed)
+[D1_NOISE_s012] [wf 6/7] 2025-08-15 train 222235 val_ic +0.0264 (654s elapsed)
+[D1_NOISE_s012] [wf 7/7] 2026-02-26 train 234230 val_ic +0.0736 (787s elapsed)
+  [lo band10]                      IC +0.0591 | net60 Sharpe  1.47 ann +34.23% dd -15.45% | net100  1.28 | turn 0.37 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0591 | net60 Sharpe  1.57 ann +49.40% dd -26.21% | net100  1.50 | turn 0.33 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0718 | net60 Sharpe  1.64 ann +41.02% dd -15.10% | net100  1.49 | turn 0.30 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0718 | net60 Sharpe  1.74 ann +60.59% dd -28.29% | net100  1.69 | turn 0.27 | maxW 10.0% | n 42
+[D1_NOISE_s012] done 800.1s ¡X val_ic 0.05021
+
+===== D1_NOISE_s101112 (D1) ¡X feature-noise augmentation, seed-set B
+[D1_NOISE_s101112] [wf 1/7] 2023-01-03 train 162233 val_ic +0.0177 (165s elapsed)
+[D1_NOISE_s101112] [wf 2/7] 2023-07-20 train 174099 val_ic +0.1009 (338s elapsed)
+[D1_NOISE_s101112] [wf 3/7] 2024-01-19 train 186137 val_ic +0.0483 (432s elapsed)
+[D1_NOISE_s101112] [wf 4/7] 2024-08-02 train 198124 val_ic +0.0270 (515s elapsed)
+[D1_NOISE_s101112] [wf 5/7] 2025-02-13 train 210142 val_ic +0.0355 (596s elapsed)
+[D1_NOISE_s101112] [wf 6/7] 2025-08-15 train 222235 val_ic +0.0131 (709s elapsed)
+[D1_NOISE_s101112] [wf 7/7] 2026-02-26 train 234230 val_ic +0.0910 (901s elapsed)
+  [lo band10]                      IC +0.0567 | net60 Sharpe  1.54 ann +37.92% dd -11.34% | net100  1.37 | turn 0.38 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0567 | net60 Sharpe  1.70 ann +56.54% dd -25.55% | net100  1.64 | turn 0.32 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0689 | net60 Sharpe  2.01 ann +47.08% dd -10.90% | net100  1.85 | turn 0.30 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0689 | net60 Sharpe  1.93 ann +65.26% dd -25.45% | net100  1.88 | turn 0.26 | maxW 10.0% | n 42
+[D1_NOISE_s101112] done 913.4s ¡X val_ic 0.04764
+
+===== D1_DROP_s012 (D1) ¡X date-block dropout (10% of train dates per epoch) halves cross-seed-set spread (seed-set A
+[D1_DROP_s012] [wf 1/7] 2023-01-03 train 162233 val_ic +0.0289 (133s elapsed)
+[D1_DROP_s012] [wf 2/7] 2023-07-20 train 174099 val_ic +0.0780 (259s elapsed)
+[D1_DROP_s012] [wf 3/7] 2024-01-19 train 186137 val_ic +0.0483 (341s elapsed)
+[D1_DROP_s012] [wf 4/7] 2024-08-02 train 198124 val_ic +0.0448 (417s elapsed)
+[D1_DROP_s012] [wf 5/7] 2025-02-13 train 210142 val_ic +0.0334 (529s elapsed)
+[D1_DROP_s012] [wf 6/7] 2025-08-15 train 222235 val_ic +0.0313 (642s elapsed)
+[D1_DROP_s012] [wf 7/7] 2026-02-26 train 234230 val_ic +0.0750 (753s elapsed)
+  [lo band10]                      IC +0.0718 | net60 Sharpe  1.94 ann +47.31% dd -17.46% | net100  1.77 | turn 0.34 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0718 | net60 Sharpe  1.88 ann +65.33% dd -28.16% | net100  1.82 | turn 0.29 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0751 | net60 Sharpe  1.78 ann +42.89% dd -13.28% | net100  1.63 | turn 0.31 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0751 | net60 Sharpe  1.67 ann +59.42% dd -29.22% | net100  1.63 | turn 0.26 | maxW 10.0% | n 42
+[D1_DROP_s012] done 765.7s ¡X val_ic 0.04852
+
+===== D1_DROP_s101112 (D1) ¡X date-block dropout, seed-set B
+[D1_DROP_s101112] [wf 1/7] 2023-01-03 train 162233 val_ic +0.0100 (220s elapsed)
+[D1_DROP_s101112] [wf 2/7] 2023-07-20 train 174099 val_ic +0.1062 (375s elapsed)
+[D1_DROP_s101112] [wf 3/7] 2024-01-19 train 186137 val_ic +0.0509 (463s elapsed)
+[D1_DROP_s101112] [wf 4/7] 2024-08-02 train 198124 val_ic +0.0328 (545s elapsed)
+[D1_DROP_s101112] [wf 5/7] 2025-02-13 train 210142 val_ic +0.0384 (625s elapsed)
+[D1_DROP_s101112] [wf 6/7] 2025-08-15 train 222235 val_ic +0.0123 (730s elapsed)
+[D1_DROP_s101112] [wf 7/7] 2026-02-26 train 234230 val_ic +0.0765 (848s elapsed)
+  [lo band10]                      IC +0.0568 | net60 Sharpe  1.62 ann +41.51% dd -18.36% | net100  1.44 | turn 0.37 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0568 | net60 Sharpe  1.81 ann +63.19% dd -26.68% | net100  1.75 | turn 0.33 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0698 | net60 Sharpe  1.76 ann +43.68% dd -11.43% | net100  1.62 | turn 0.30 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0698 | net60 Sharpe  1.79 ann +61.43% dd -26.70% | net100  1.74 | turn 0.27 | maxW 10.0% | n 42
+[D1_DROP_s101112] done 860.8s ¡X val_ic 0.04671
+
+===== C1_REV_CPU (C1) ¡X 5d-reversal third blend leg (45/45/10 and 40/40/20 z-weights, pre-registered) beats the 50
+[panel] SCHED_A8_seeds7_full.csv.gz: 91168 rows, 2023-01-03..2026-07-23
+[panel] SCHED_BEAR_A8_seeds7_full.csv.gz: 142775 rows, 2021-01-04..2026-07-23
+[C1_REV_CPU] done 40.9s ¡X REJECT ¡X no reversal cell beats the two-way blend on both windows; GPU branch not justified
+
+===== PROMOTE (promotion) ¡X PRE-REGISTERED RULE (PROMOTE_TOP_K=1): winner = argmax val IC among {A1_CS3, B1_MT3} IFF v
+[promote] running P7_B1_MT3_champ_2023 (7 seeds)
+[P7_B1_MT3_champ_2023] [wf 1/7] 2023-01-03 train 162233 val_ic +0.0409 (407s elapsed)
+[P7_B1_MT3_champ_2023] [wf 2/7] 2023-07-20 train 174099 val_ic +0.0865 (729s elapsed)
+[P7_B1_MT3_champ_2023] [wf 3/7] 2024-01-19 train 186137 val_ic +0.0497 (956s elapsed)
+[P7_B1_MT3_champ_2023] [wf 4/7] 2024-08-02 train 198124 val_ic +0.0295 (1176s elapsed)
+[P7_B1_MT3_champ_2023] [wf 5/7] 2025-02-13 train 210142 val_ic +0.0327 (1440s elapsed)
+[P7_B1_MT3_champ_2023] [wf 6/7] 2025-08-15 train 222235 val_ic +0.0210 (1776s elapsed)
+[P7_B1_MT3_champ_2023] [wf 7/7] 2026-02-26 train 234230 val_ic +0.0802 (2168s elapsed)
+  [lo band10]                      IC +0.0639 | net60 Sharpe  1.64 ann +41.59% dd -15.52% | net100  1.48 | turn 0.36 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0639 | net60 Sharpe  1.71 ann +60.54% dd -28.49% | net100  1.66 | turn 0.31 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0730 | net60 Sharpe  2.01 ann +48.99% dd -11.42% | net100  1.86 | turn 0.31 | maxW 10.0% | n 42
+  [lo band10]                      IC +0.0730 | net60 Sharpe  1.85 ann +64.84% dd -25.28% | net100  1.80 | turn 0.25 | maxW 10.0% | n 42
+[promote] running P7_B1_MT3_bear_2021 (7 seeds)
+[P7_B1_MT3_bear_2021] [wf 1/11] 2021-01-04 train 115852 val_ic +0.1396 (179s elapsed)
+[P7_B1_MT3_bear_2021] [wf 2/11] 2021-07-15 train 127692 val_ic +0.1573 (351s elapsed)
+[P7_B1_MT3_bear_2021] [wf 3/11] 2022-01-13 train 139724 val_ic -0.0022 (650s elapsed)
+[P7_B1_MT3_bear_2021] [wf 4/11] 2022-07-26 train 151622 val_ic -0.0755 (852s elapsed)
+[P7_B1_MT3_bear_2021] [wf 5/11] 2023-02-02 train 163490 val_ic -0.0019 (1229s elapsed)
+[P7_B1_MT3_bear_2021] [wf 6/11] 2023-08-10 train 175464 val_ic +0.0973 (1560s elapsed)
+[P7_B1_MT3_bear_2021] [wf 7/11] 2024-02-19 train 187409 val_ic +0.0667 (1827s elapsed)
+[P7_B1_MT3_bear_2021] [wf 8/11] 2024-08-22 train 199512 val_ic +0.0436 (2046s elapsed)
+[P7_B1_MT3_bear_2021] [wf 9/11] 2025-03-06 train 211533 val_ic +0.0057 (3898s elapsed)
+[P7_B1_MT3_bear_2021] [wf 10/11] 2025-09-04 train 223500 val_ic +0.0125 (4600s elapsed)
+[P7_B1_MT3_bear_2021] [wf 11/11] 2026-03-19 train 235621 val_ic +0.1049 (4818s elapsed)
+  [lo band10]                      IC +0.0298 | net60 Sharpe  1.19 ann +27.33% dd -20.37% | net100  1.02 | turn 0.35 | maxW 10.0% | n 67
+  [lo band10]                      IC +0.0298 | net60 Sharpe  1.35 ann +41.16% dd -28.11% | net100  1.29 | turn 0.30 | maxW 10.0% | n 67
+  [lo band10]                      IC +0.0362 | net60 Sharpe  1.51 ann +35.08% dd -13.01% | net100  1.36 | turn 0.31 | maxW 10.0% | n 67
+  [lo band10]                      IC +0.0362 | net60 Sharpe  1.44 ann +45.03% dd -28.14% | net100  1.39 | turn 0.26 | maxW 10.0% | n 67
+[PROMOTE] done 7009.2s ¡X PROMOTED B1_MT3: blend 2.011 / 1.515 ¡X within/above seed-robust ranges; ADOPTION DECISION TO USER
+
+[v10-short] queue complete: 10 done, 0 failed

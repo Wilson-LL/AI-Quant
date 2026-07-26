@@ -1,0 +1,19 @@
+{
+  "id": "BASE3_s101112",
+  "exp": "baseline",
+  "status": "running",
+  "phase": "v10screen",
+  "hypothesis": "plain preset-B 3-seed baseline (seeds 10-12): seed-set B for the D1 spread metric",
+  "feature_set": "close_only",
+  "target": "tgt_rank_20",
+  "seq_len": 60,
+  "preset_base": "B",
+  "seeds": [
+    10,
+    11,
+    12
+  ],
+  "eval_blend": true,
+  "panel": "SCHED_BASE3_s101112.csv.gz",
+  "runtime_s": 838.1
+}

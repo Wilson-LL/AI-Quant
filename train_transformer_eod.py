@@ -64,6 +64,83 @@ def param_count(net):
     return sum(p.numel() for p in net.parameters())
 
 
+# ---------------------------------------------------------------------------
+# Queue v10 flag-gated extensions (default OFF — absent from PRESETS A/B/C).
+# model.py is untouched: wrappers replicate its forward minus the head to
+# reach the pre-head embedding. Activated only via preset keys
+# cs_attn / mt_aux / aug_noise / aug_datedrop; with none set, fit_one and
+# walkforward take the byte-identical champion path (verified by anchor).
+# ---------------------------------------------------------------------------
+def _embed(base, x):
+    """LSTM_CondTransformer forward, minus the fc head -> (B, trans_hidden)."""
+    lstm_out, _ = base.lstm(x)
+    h = base.trans_input_proj(lstm_out) + base.pos_emb
+    kv = base.cross_kv_proj(x)
+    attn_out, _ = base.cross_attn(query=h, key=kv, value=kv)
+    h = h + attn_out
+    h = base.transformer(h)
+    return h[:, -1, :]
+
+
+class CSAttnNet(torch.nn.Module):
+    """v10-A1: one cross-sectional attention block over the names of a single
+    date, applied to the pre-head embeddings, residual + LayerNorm, then the
+    base head. Callers MUST pass same-date batches (train: date-grouped
+    chunks; inference: predict_idx_cs)."""
+
+    def __init__(self, base, hidden, heads):
+        super().__init__()
+        self.base = base
+        self.cs_attn = torch.nn.MultiheadAttention(hidden, heads, batch_first=True)
+        self.cs_norm = torch.nn.LayerNorm(hidden)
+
+    def forward(self, x):
+        e = _embed(self.base, x)                      # (B, H), B = one date
+        a, _ = self.cs_attn(e.unsqueeze(0), e.unsqueeze(0), e.unsqueeze(0))
+        e = self.cs_norm(e + a.squeeze(0))
+        return self.base.fc(e).squeeze(-1)
+
+
+class MTNet(torch.nn.Module):
+    """v10-B1: shared trunk + aux heads for tgt_rank_5 / tgt_rank_10.
+    Default forward returns the main head only, so prediction/inference
+    paths are unchanged."""
+
+    def __init__(self, base, hidden, dropout):
+        super().__init__()
+        self.base = base
+
+        def head():
+            return torch.nn.Sequential(
+                torch.nn.Linear(hidden, 32), torch.nn.ReLU(),
+                torch.nn.Dropout(dropout), torch.nn.Linear(32, 1))
+        self.aux5, self.aux10 = head(), head()
+
+    def forward(self, x, aux=False):
+        e = _embed(self.base, x)
+        main = self.base.fc(e).squeeze(-1)
+        if aux:
+            return main, self.aux5(e).squeeze(-1), self.aux10(e).squeeze(-1)
+        return main
+
+
+@torch.no_grad()
+def predict_idx_cs(net, Xg, idx, dranks):
+    """Date-grouped prediction for CSAttnNet: attention must see exactly the
+    names of one date. Returns scores aligned with idx order."""
+    net.eval()
+    idx = idx.cpu().numpy() if torch.is_tensor(idx) else np.asarray(idx)
+    dranks = dranks.cpu().numpy() if torch.is_tensor(dranks) else np.asarray(dranks)
+    out = torch.empty(len(idx), device=Xg.device)
+    order = np.argsort(dranks, kind="stable")
+    bounds = np.flatnonzero(np.diff(dranks[order])) + 1
+    for g in np.split(order, bounds):
+        b = torch.as_tensor(idx[g], device=Xg.device)
+        with torch.amp.autocast("cuda", enabled=Xg.is_cuda):
+            out[torch.as_tensor(g, device=Xg.device)] = net(Xg[b]).float()
+    return out
+
+
 def _rank_ic(scores, targets, date_ranks):
     """Mean per-date Spearman IC. Returns (mean_ic, per-date series)."""
     df = pd.DataFrame({"d": date_ranks, "s": scores, "t": targets}).dropna()
@@ -91,12 +168,13 @@ def predict_idx(net, Xg, idx, batch=8192):
 def fit_one(Xg, yg, tr_idx, va_idx, va_dates, cfg, seed, weights=None,
             lr=3e-4, weight_decay=1e-4, batch=1024, warm_state=None,
             max_epochs=None, min_epochs=2, verbose=False,
-            loss="mse", date_ranks=None):
+            loss="mse", date_ranks=None, aux_targets=None):
     """Train one model on GPU-resident tensors; early-stop on val rank IC.
 
     weights: per-sample weights aligned with tr_idx (recency weighting), or None.
     loss: "mse" (default, unchanged path) or "pairwise" — same-date pairwise
     logistic ranking loss; requires date_ranks (per-sample date rank array).
+    aux_targets: {horizon: tensor} for mt_aux (v10-B1), else None.
     Returns (net, best_val_ic, info).
     """
     torch.manual_seed(seed)
@@ -104,6 +182,15 @@ def fit_one(Xg, yg, tr_idx, va_idx, va_dates, cfg, seed, weights=None,
     net = build_net(Xg.shape[2], cfg).to(Xg.device)
     if warm_state is not None:
         net.load_state_dict(warm_state)
+    # v10 flags (all default OFF; wrappers consume RNG only when active)
+    cs_mode = bool(cfg.get("cs_attn"))
+    mt_mode = bool(cfg.get("mt_aux")) and aux_targets is not None
+    aug_sigma = float(cfg.get("aug_noise") or 0.0)
+    aug_drop = float(cfg.get("aug_datedrop") or 0.0)
+    if cs_mode:
+        net = CSAttnNet(net, cfg["hidden"], cfg["heads"]).to(Xg.device)
+    elif mt_mode:
+        net = MTNet(net, cfg["hidden"], cfg["dropout"]).to(Xg.device)
     opt = torch.optim.AdamW(net.parameters(), lr=lr, weight_decay=weight_decay)
     scaler = torch.amp.GradScaler("cuda", enabled=Xg.is_cuda)
 
@@ -117,10 +204,10 @@ def fit_one(Xg, yg, tr_idx, va_idx, va_dates, cfg, seed, weights=None,
         # normalize so the mean train weight is 1 (keeps lr scale comparable)
         w_full[tr] /= w_full[tr].mean().clamp_min(1e-8)
 
-    # pairwise/listwise modes: pre-group train indices by date
+    # pairwise/listwise modes (and v10 cs_attn) pre-group train indices by date
     date_groups = None
-    if loss in ("pairwise", "listwise"):
-        assert date_ranks is not None, f"{loss} loss needs date_ranks"
+    if loss in ("pairwise", "listwise") or cs_mode:
+        assert date_ranks is not None, f"{loss}/cs_attn needs date_ranks"
         drt = np.asarray(date_ranks)[np.asarray(tr_idx)]
         order = np.argsort(drt, kind="stable")
         tr_np = np.asarray(tr_idx)[order]
@@ -161,12 +248,18 @@ def fit_one(Xg, yg, tr_idx, va_idx, va_dates, cfg, seed, weights=None,
                 opt.zero_grad(set_to_none=True)
                 with torch.amp.autocast("cuda", enabled=Xg.is_cuda):
                     b_all = torch.cat(chunk)
-                    pred = net(Xg[b_all])
-                    parts, off = [], 0
-                    for c in chunk:
-                        parts.append(_group_loss(pred[off:off + len(c)], yg[c]))
-                        off += len(c)
-                    loss_t = torch.stack(parts).mean()
+                    if cs_mode:
+                        # per-date forwards (attention within one date only),
+                        # plain MSE over the concatenated chunk
+                        pred = torch.cat([net(Xg[c]) for c in chunk])
+                        loss_t = ((pred - yg[b_all]) ** 2).mean()
+                    else:
+                        pred = net(Xg[b_all])
+                        parts, off = [], 0
+                        for c in chunk:
+                            parts.append(_group_loss(pred[off:off + len(c)], yg[c]))
+                            off += len(c)
+                        loss_t = torch.stack(parts).mean()
                 scaler.scale(loss_t).backward()
                 scaler.unscale_(opt)
                 torch.nn.utils.clip_grad_norm_(net.parameters(), 1.0)
@@ -175,14 +268,32 @@ def fit_one(Xg, yg, tr_idx, va_idx, va_dates, cfg, seed, weights=None,
                 tot += loss_t.item() * len(b_all)
                 ns += len(b_all)
         else:
-            perm = tr[torch.randperm(len(tr), device=Xg.device)]
+            ep_tr = tr
+            if aug_drop > 0:
+                # v10-D1: drop a fraction of distinct train DATES this epoch
+                dr_tr = np.asarray(date_ranks)[tr.cpu().numpy()]
+                uniq = np.unique(dr_tr)
+                kept = np.random.choice(uniq, size=int(len(uniq) * (1 - aug_drop)),
+                                        replace=False)
+                mask = np.isin(dr_tr, kept)
+                ep_tr = tr[torch.as_tensor(mask, device=Xg.device)]
+            perm = ep_tr[torch.randperm(len(ep_tr), device=Xg.device)]
             for i in range(0, len(perm), batch):
                 b = perm[i:i + batch]
                 opt.zero_grad(set_to_none=True)
                 with torch.amp.autocast("cuda", enabled=Xg.is_cuda):
-                    pred = net(Xg[b])
-                    per = (pred - yg[b]) ** 2
-                    loss_t = (per * w_full[b]).mean() if w_full is not None else per.mean()
+                    xb = Xg[b]
+                    if aug_sigma > 0:
+                        xb = xb + aug_sigma * torch.randn_like(xb)  # v10-D1
+                    if mt_mode:
+                        m_out, a5, a10 = net(xb, aux=True)  # v10-B1
+                        loss_t = (((m_out - yg[b]) ** 2).mean()
+                                  + 0.3 * ((a5 - aux_targets[5][b]) ** 2).mean()
+                                  + 0.3 * ((a10 - aux_targets[10][b]) ** 2).mean())
+                    else:
+                        pred = net(xb)
+                        per = (pred - yg[b]) ** 2
+                        loss_t = (per * w_full[b]).mean() if w_full is not None else per.mean()
                 scaler.scale(loss_t).backward()
                 scaler.unscale_(opt)
                 torch.nn.utils.clip_grad_norm_(net.parameters(), 1.0)
@@ -190,7 +301,8 @@ def fit_one(Xg, yg, tr_idx, va_idx, va_dates, cfg, seed, weights=None,
                 scaler.update()
                 tot += loss_t.item() * len(b)
                 ns += len(b)
-        vs = predict_idx(net, Xg, va).cpu().numpy()
+        vs = (predict_idx_cs(net, Xg, va, va_dates) if cs_mode
+              else predict_idx(net, Xg, va)).cpu().numpy()
         vic, _ = _rank_ic(vs, yg[va].cpu().numpy(), va_dates)
         hist.append({"epoch": ep, "train_loss": round(tot / max(ns, 1), 5),
                      "val_ic": round(vic, 5)})
@@ -258,6 +370,11 @@ def walkforward(data, Xg, target="tgt_rank_20", horizon=20, preset="A",
         # clip so fat-tailed excess-return targets can't dominate the MSE
         yg = torch.as_tensor(np.nan_to_num(np.clip(data["targets"][target], -1, 1)),
                              device=Xg.device)
+        aux_t = None
+        if cfg.get("mt_aux"):  # v10-B1: joint aux heads on rank_5 / rank_10
+            aux_t = {h: torch.as_tensor(
+                np.nan_to_num(np.clip(data["targets"][f"tgt_rank_{h}"], -1, 1)),
+                device=Xg.device) for h in (5, 10)}
 
         nets = []
         for s in seeds:
@@ -270,7 +387,8 @@ def walkforward(data, Xg, target="tgt_rank_20", horizon=20, preset="A",
                                      lr=lr if warm is None else lr * 0.3,
                                      weight_decay=weight_decay,
                                      warm_state=warm, max_epochs=max_ep,
-                                     loss=loss, date_ranks=data["date_rank"])
+                                     loss=loss, date_ranks=data["date_rank"],
+                                     aux_targets=aux_t)
             nets.append(net)
             fit_infos.append({"refit_date": str(dates[r0])[:10], "seed": s,
                               "val_ic": info["best_val_ic"],
@@ -283,7 +401,10 @@ def walkforward(data, Xg, target="tgt_rank_20", horizon=20, preset="A",
         # score every sample in the OOS block (ensemble mean)
         in_block = np.nonzero((dr >= r0) & (dr <= block_end))[0]
         if len(in_block):
-            pstack = torch.stack([predict_idx(n, Xg, in_block) for n in nets])
+            pstack = torch.stack([
+                predict_idx_cs(n, Xg, in_block, dr[in_block])
+                if isinstance(n, CSAttnNet) else predict_idx(n, Xg, in_block)
+                for n in nets])
             preds = pstack.mean(0).cpu().numpy()
             pstd = (pstack.std(0, unbiased=False) if len(nets) > 1
                     else torch.zeros_like(pstack[0])).cpu().numpy()

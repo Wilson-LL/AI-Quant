@@ -1,0 +1,22 @@
+{
+  "id": "D1_DROP_s101112",
+  "exp": "D1",
+  "status": "running",
+  "phase": "v10screen",
+  "hypothesis": "date-block dropout, seed-set B",
+  "feature_set": "close_only",
+  "target": "tgt_rank_20",
+  "seq_len": 60,
+  "preset_base": "B",
+  "overrides": {
+    "aug_datedrop": 0.1
+  },
+  "seeds": [
+    10,
+    11,
+    12
+  ],
+  "eval_blend": true,
+  "panel": "SCHED_D1_DROP_s101112.csv.gz",
+  "runtime_s": 860.8
+}
