@@ -375,9 +375,12 @@ def write_outputs(root, ov, total_value, universe_src, strategy, date,
                   medium_gap, large_gap):
     out_dir = os.path.join(root, "reports", "user_holdings")
     os.makedirs(out_dir, exist_ok=True)
-    csv_p = os.path.join(out_dir, f"{date}_user_holdings_overlay.csv")
-    md_p = os.path.join(out_dir, f"{date}_user_holdings_overlay.md")
-    json_p = os.path.join(out_dir, f"{date}_user_holdings_summary.json")
+    # default strategy keeps the plain dated name; other strategies get a
+    # suffix so same-day runs against several books don't overwrite each other
+    sfx = "" if strategy == "blend50_band10" else f"_{strategy}"
+    csv_p = os.path.join(out_dir, f"{date}_user_holdings_overlay{sfx}.csv")
+    md_p = os.path.join(out_dir, f"{date}_user_holdings_overlay{sfx}.md")
+    json_p = os.path.join(out_dir, f"{date}_user_holdings_summary{sfx}.json")
 
     out = ov.copy()
     for c in ("my_current_weight", "model_target_weight",
