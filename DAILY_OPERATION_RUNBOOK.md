@@ -29,10 +29,41 @@ step completed.
 
 # 6. Daily diff report (entries/exits, weight deltas, anomalies)
 .venv\Scripts\python.exe research\daily_diff_report.py
+
+# 7. (optional) User holdings overlay — compares my_holdings.csv against the
+#    latest decision book. Skipped automatically if my_holdings.csv is absent.
+.venv\Scripts\python.exe research\user_holdings_overlay.py --strategy blend50_band10
 ```
 
 Steps 2–6 are pointless when step 1 reports `+0 rows` (weekend/holiday/EOD
-not yet published) — stop after step 1 in that case.
+not yet published) — stop after step 1 in that case (step 7 can still run
+against the latest existing book).
+
+`daily_ops.bat` at the repo root runs this whole cycle (including the `+0
+rows` early stop and the optional overlay step).
+
+## User holdings overlay (step 7)
+
+Compares actual holdings against the model book — review tool only; it never
+generates orders.
+- Enable: copy `my_holdings.example.csv` → `my_holdings.csv` (repo root) and
+  fill in `symbol,shares[,avg_cost,current_price,current_value,account,notes]`.
+  Missing prices fall back to the latest data_cache close. Keep symbols as
+  strings (`0050` keeps its leading zero).
+- If `my_holdings.csv` does not exist the step prints a skip message and the
+  daily run continues — it never fails the cycle.
+- Outputs: `reports/user_holdings/<asof>_user_holdings_overlay.{csv,md}` +
+  `latest_user_holdings_overlay.{csv,md}` + a summary JSON. Same-day reruns
+  overwrite deterministically.
+- Read the md: High-priority table first (SELL/REDUCE on names held, |gap| >
+  5pp, large uncovered positions), then not-covered / not-selected lists.
+  `NOT_IN_MODEL_UNIVERSE` = no coverage, not bearish; `REDUCE` compares to
+  the model's previous paper book, not the real portfolio.
+- Options: `--strategy blend50_band10|blend50|d12|tf` (d7b has no daily
+  books), `--date YYYY-MM-DD`, `--large-gap 0.05 --medium-gap 0.02`,
+  `--dry-run`.
+- Privacy: `my_holdings.csv` and `reports/user_holdings/` are gitignored —
+  never commit them.
 
 ## How to check whether TWSE data landed
 

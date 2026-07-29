@@ -20,3 +20,7 @@ checkpoints/
 # Bulk OOS score panels (regenerable from experiments; keep summary JSONs only)
 reports/transformer_gpu/panels/
 reports/transformer_gpu/logs/
+
+# Personal financial data — never commit (my_holdings.example.csv IS committed)
+my_holdings.csv
+reports/user_holdings/

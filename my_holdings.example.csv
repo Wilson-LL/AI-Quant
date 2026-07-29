@@ -1,0 +1,6 @@
+symbol,shares,avg_cost,current_price,current_value,account,notes
+2330,1000,580,,,CTBC,core semi position
+2317,2000,105.5,,,CTBC,
+1303,3000,,,,long_term,
+0050,500,,,,long_term,ETF - in data cache but not in model universe
+6505,1000,55,60,60000,short_term,example symbol not covered by AI-Quant
