@@ -1,0 +1,125 @@
+{
+  "queue": "v11_gpu_model_size_sweep",
+  "created": "2026-07-30 00:35:18",
+  "branch": "research/v11-gpu-model-size-sweep",
+  "commit": "795e13c",
+  "protocol": {
+    "feature_set": "close_only",
+    "target": "tgt_rank_20",
+    "horizon": 20,
+    "refit_every": 126,
+    "loss": "mse",
+    "lr": 0.0003,
+    "weight_decay": 0.0001,
+    "batch": 1024,
+    "windows": {
+      "CH": "2023-01-01",
+      "BR": "2021-01-01"
+    },
+    "screen_seeds": [
+      0,
+      1,
+      2
+    ],
+    "full_seeds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "battery_seeds": [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+    ]
+  },
+  "phase0_ranges": {
+    "CH": [
+      1.85,
+      2.3
+    ],
+    "BR": [
+      1.3,
+      1.55
+    ]
+  },
+  "candidates": {
+    "V11_A_baseline": {
+      "seq_len": 60,
+      "overrides": null
+    },
+    "V11_B_wider96": {
+      "seq_len": 60,
+      "overrides": {
+        "hidden": 96,
+        "ff": 192
+      }
+    },
+    "V11_C_wider128": {
+      "seq_len": 60,
+      "overrides": {
+        "hidden": 128,
+        "ff": 256,
+        "heads": 8
+      }
+    },
+    "V11_D_deeper64": {
+      "seq_len": 60,
+      "overrides": {
+        "trans_layers": 3
+      }
+    },
+    "V11_E_longer90": {
+      "seq_len": 90,
+      "overrides": null
+    },
+    "V11_F_wider96_longer90": {
+      "seq_len": 90,
+      "overrides": {
+        "hidden": 96,
+        "ff": 192
+      }
+    },
+    "V11_G_wider128_deeper3": {
+      "seq_len": 60,
+      "overrides": {
+        "hidden": 128,
+        "ff": 256,
+        "heads": 8,
+        "trans_layers": 3
+      }
+    }
+  },
+  "gates": "see queue_v11_gpu_model_size_sweep_plan.md \u00a76 (pre-registered)",
+  "baseline_refs": {
+    "blend_CH": 2.147,
+    "blend_BR": 1.443,
+    "ranges_CH": [
+      1.85,
+      2.15
+    ],
+    "ranges_BR": [
+      1.3,
+      1.45
+    ]
+  },
+  "closed": {
+    "date": "2026-07-30",
+    "verdict": "KEEP_CURRENT_PRODUCTION / REJECT_ALL_CHALLENGERS",
+    "phase2": "cancelled by user (B margin +0.002 = seed noise)",
+    "items_run": "P0 2/2, P1 7/7, 0 failed, 0 OOM",
+    "baseline_reproduction": {
+      "CH": 2.147,
+      "BR": 1.443,
+      "note": "exact match to standing references"
+    },
+    "gpu_finding": "batch 1024 remains the recipe; epoch time flat from batch 2048 (launch-bound); 9GB alloc reached only at batch 16384 with degraded 1-epoch val IC; VRAM targeting recorded, NOT adopted"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "ok": true,
+  "val_ic": 0.06757358816641461,
+  "epochs_run": 2,
+  "train_s": 26.5,
+  "amp_enabled": true,
+  "gpu": "NVIDIA GeForce RTX 4060 Ti",
+  "total_vram_gb": 16.0,
+  "max_alloc_gb": 2.004,
+  "max_reserved_gb": 2.736,
+  "checkpoint": "C:\\Users\\wilso\\source\\code\\AI-Quant\\checkpoints\\v11_sweep\\smoke_V11_A_seed0.pt",
+  "checkpoint_mb": 0.45,
+  "reload_and_score_ok": true,
+  "n_scored_latest_date": 108,
+  "total_s": 38.4
+}

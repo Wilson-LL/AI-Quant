@@ -50,3 +50,12 @@
 {"id": "C2_RES3", "start": "2026-07-26 21:42:59", "elapsed_s": 755.2, "peak_vram_mb": 2153.8, "val_ic": 0.03246, "seeds": 3, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
 {"id": "P7_B2_Q_champ_2023", "start": "2026-07-26 21:57:37", "elapsed_s": 2022.0, "peak_vram_mb": 2156.3, "val_ic": 0.05613, "seeds": 7, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
 {"id": "P7_B2_Q_bear_2021", "start": "2026-07-26 22:31:19", "elapsed_s": 2725.0, "peak_vram_mb": 2155.9, "val_ic": 0.06061, "seeds": 7, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "P0_A_CH_7s", "start": "2026-07-30 00:49:43", "elapsed_s": 3942.4, "peak_vram_mb": 2157.7, "val_ic": 0.04824, "seeds": 7, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "P0_A_BR_7s", "start": "2026-07-30 01:55:25", "elapsed_s": 3516.3, "peak_vram_mb": 2157.2, "val_ic": 0.04976, "seeds": 7, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "P1_V11_A_baseline_CH_3s", "start": "2026-07-30 02:54:01", "elapsed_s": 743.6, "peak_vram_mb": 2153.8, "val_ic": 0.04813, "seeds": 3, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "P1_V11_B_wider96_CH_3s", "start": "2026-07-30 03:06:25", "elapsed_s": 954.4, "peak_vram_mb": 2859.1, "val_ic": 0.05178, "seeds": 3, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "P1_V11_C_wider128_CH_3s", "start": "2026-07-30 03:22:19", "elapsed_s": 1384.4, "peak_vram_mb": 3566.2, "val_ic": 0.05366, "seeds": 3, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "P1_V11_D_deeper64_CH_3s", "start": "2026-07-30 03:45:24", "elapsed_s": 1063.5, "peak_vram_mb": 2155.0, "val_ic": 0.04268, "seeds": 3, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "P1_V11_E_longer90_CH_3s", "start": "2026-07-30 04:03:07", "elapsed_s": 1284.5, "peak_vram_mb": 3393.9, "val_ic": 0.05191, "seeds": 3, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "P1_V11_F_wider96_longer90_CH_3s", "start": "2026-07-30 04:24:32", "elapsed_s": 1663.6, "peak_vram_mb": 4244.8, "val_ic": 0.05569, "seeds": 3, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
+{"id": "P1_V11_G_wider128_deeper3_CH_3s", "start": "2026-07-30 04:58:01", "elapsed_s": 2006.8, "peak_vram_mb": 3571.1, "val_ic": 0.05018, "seeds": 3, "gpu": "NVIDIA GeForce RTX 4060 Ti"}
