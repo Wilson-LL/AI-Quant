@@ -83,14 +83,39 @@ def _stock_features(df, feature_set):
         illiq = lr.abs() / (turn / 1e9 + 1e-9)
         f["illiq_z"] = (illiq - illiq.rolling(252).mean()) / (illiq.rolling(252).std() + 1e-9)
 
+    def v13_block():
+        # v13 feature-rich research (research-only sets; all causal).
+        # Self-contained: does not depend on other blocks having run.
+        f["mom_10"] = c.pct_change(10)
+        f["mom_252"] = c.pct_change(252)
+        f["vol_5"] = lr.rolling(5).std()
+        f["px_over_ma60"] = c / c.rolling(60).mean() - 1.0
+        f["dd_252"] = c / c.rolling(252, min_periods=60).max() - 1.0
+        f["down_mom_20"] = np.minimum(c.pct_change(20), 0.0)
+        f["vol_expand"] = lr.rolling(5).std() / (lr.rolling(60).std() + 1e-9) - 1.0
+        f["maxret_20"] = lr.rolling(20).max()
+        f["squeeze_flag"] = (c.pct_change(20) > 0.30).astype(float)
+        # helper level for per-date liquidity rank (not a model input itself)
+        f["adv20l"] = np.log(turn.rolling(20).median() + 1.0)
+        f["adv_shock"] = turn / (turn.rolling(20).median() + 1e-9) - 1.0
+        f["adv_trend"] = (turn.rolling(20).median()
+                          / (turn.rolling(60).median() + 1e-9) - 1.0)
+        f["vol_z60"] = (v - v.rolling(60).mean()) / (v.rolling(60).std() + 1e-9)
+
     fs = feature_set
+    v13 = fs.startswith("v13_f")
     if fs in ("close_only", "close_d12", "curated_full", "full_d12",
-              "sector_rel", "close_regime", "close_range", "close_liq"):
+              "sector_rel", "close_regime", "close_range", "close_liq") \
+            or (v13 and fs != "v13_f1"):
         close_block()
-    if fs in ("ohlc_range", "curated_full", "full_d12", "close_range"):
+    if fs in ("ohlc_range", "curated_full", "full_d12", "close_range") or v13:
         range_block()
-    if fs in ("volume_block", "curated_full", "full_d12", "close_liq"):
+    if fs in ("volume_block", "curated_full", "full_d12", "close_liq") or v13:
         volume_block()
+    if v13:
+        v13_block()
+        if fs == "v13_f1":
+            f["log_ret_1"] = lr
     if fs == "ohlc_range":
         # range-only set still needs a return anchor
         f["log_ret_1"] = lr
@@ -113,6 +138,37 @@ def _panel_xs(panel, feature_set):
     """Add cross-sectional / sector-relative columns (per-date only)."""
     for src, dst in _XS_SPECS.get(feature_set, []):
         panel[dst] = panel.groupby("date")[src].rank(pct=True) - 0.5
+
+    # ---- v13 feature-rich sets (research-only; per-date/causal only)
+    if feature_set.startswith("v13_f"):
+        tier = int(feature_set[-1])
+        if tier >= 3:
+            for src, dst in [("mom_20", "xs_mom20_rank"),
+                             ("mom_126_5", "xs_d12_rank"),
+                             ("vol_20", "xs_vol20_rank"),
+                             ("adv20l", "xs_adv_rank")]:
+                panel[dst] = panel.groupby("date")[src].rank(pct=True) - 0.5
+            vam = panel["mom_126_5"] / (panel["vol_60"] + 1e-9)
+            gm = vam.groupby(panel["date"])
+            panel["xs_voladj_mom_z"] = ((vam - gm.transform("mean"))
+                                        / (gm.transform("std") + 1e-9)).clip(-5, 5)
+        if tier >= 4:
+            g = panel.groupby(["date", "sector"])
+            gu = panel.groupby("date")
+            for col, dst in [("log_ret_1", "ret_vs_sector"),
+                             ("mom_20", "mom20_vs_sector"),
+                             ("mom_60", "mom60_vs_sector")]:
+                sec = g[col].transform("mean")
+                uni = gu[col].transform("mean")
+                nsec = g[col].transform("count")
+                panel[dst] = panel[col] - sec.where(nsec >= 3, uni)
+            panel["vol20_vs_sector"] = (panel["vol_20"]
+                                        - g["vol_20"].transform("mean"))
+            sec_m = g["mom_20"].transform("mean")
+            nsec = g["mom_20"].transform("count")
+            panel["sec_mom20"] = sec_m.where(
+                nsec >= 3, gu["mom_20"].transform("mean"))
+        return FEATURE_COLS[feature_set]
 
     if feature_set == "close_regime":
         # market-state conditioning columns (per-date, causal, broadcast to all
@@ -149,9 +205,25 @@ def _panel_xs(panel, feature_set):
     return None
 
 
+_V13_F1 = ["log_ret_1", "oc_ret", "overnight_gap", "hl_range", "true_range",
+           "atr_ratio", "close_loc", "range_z", "vol_z", "turn_z",
+           "vol_ma_ratio", "log_vol_chg", "illiq_z"]
+_V13_F2 = _V13_F1 + ["mom_5", "mom_10", "mom_20", "mom_60", "mom_126_5",
+                     "mom_252", "vol_5", "vol_20", "vol_60", "dist_hi_60",
+                     "dist_lo_60", "px_over_ma20", "px_over_ma60", "dd_252"]
+_V13_F3 = _V13_F2 + ["xs_mom20_rank", "xs_d12_rank", "xs_vol20_rank",
+                     "xs_adv_rank", "xs_voladj_mom_z"]
+_V13_F4 = _V13_F3 + ["ret_vs_sector", "mom20_vs_sector", "mom60_vs_sector",
+                     "vol20_vs_sector", "sec_mom20"]
+_V13_F5 = _V13_F4 + ["adv_shock", "adv_trend", "vol_z60"]
+_V13_F6 = _V13_F5 + ["down_mom_20", "squeeze_flag", "vol_expand", "maxret_20"]
+
 FEATURE_COLS = {
     "close_only": ["log_ret_1", "mom_5", "mom_20", "mom_60", "mom_126_5",
                    "vol_20", "vol_60", "dist_hi_60", "dist_lo_60", "px_over_ma20"],
+    # v13 feature-rich research sets (research-only; see v13 plan docs)
+    "v13_f1": _V13_F1, "v13_f2": _V13_F2, "v13_f3": _V13_F3,
+    "v13_f4": _V13_F4, "v13_f5": _V13_F5, "v13_f6": _V13_F6,
     "close_d12": ["log_ret_1", "mom_5", "mom_20", "mom_60", "mom_126_5",
                   "vol_20", "vol_60", "dist_hi_60", "dist_lo_60", "px_over_ma20",
                   "xs_d12_rank"],
@@ -381,14 +453,24 @@ def build_dataset(feature_set="close_only", seq_len=40, horizons=(5, 10, 20),
 # ---------------------------------------------------------------------------
 # Recency weights + matured-label split
 # ---------------------------------------------------------------------------
-def recency_weights(label_end_rank, ref_rank, halflife=None, window=None):
+def recency_weights(label_end_rank, ref_rank, halflife=None, window=None,
+                    bands=None):
     """Per-sample weight relative to the latest matured-label rank (<= ref_rank).
 
     halflife / window are in trading days. Samples outside `window` get weight 0.
+    bands (v12, research-only): [[age_max_days, weight], ...] step function,
+    ages beyond the last band get 0; overrides halflife when given.
     """
     age = ref_rank - label_end_rank.astype(np.float64)
     w = np.ones_like(age)
-    if halflife:
+    if bands:
+        w = np.zeros_like(age)
+        prev = 0.0
+        for age_max, wt in bands:
+            w[(age > prev) & (age <= age_max)] = wt
+            prev = age_max
+        w[age <= 0] = bands[0][1]
+    elif halflife:
         w = np.power(0.5, age / float(halflife))
     if window:
         w[age > window] = 0.0
@@ -418,7 +500,8 @@ def matured_train_val(data, target, refit_rank, horizon, val_frac=0.10,
     ref = int(le[idx].max())
     w = np.ones(len(tr), np.float32)
     if recency:
-        w = recency_weights(le[tr], ref, recency.get("halflife"), recency.get("window"))
+        w = recency_weights(le[tr], ref, recency.get("halflife"),
+                            recency.get("window"), recency.get("bands"))
         keep = w > 1e-4
         tr, w = tr[keep], w[keep]
     # leakage assertions

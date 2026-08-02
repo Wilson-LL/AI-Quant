@@ -1,0 +1,10 @@
+feature_set,f1,f2,corr,duplicate
+v13_f1,hl_range,true_range,0.9226,False
+v13_f1,vol_z,turn_z,0.9957,False
+v13_f2,hl_range,true_range,0.9226,False
+v13_f2,vol_z,turn_z,0.9957,False
+v13_f2,mom_10,px_over_ma20,0.921,False
+v13_f3,hl_range,true_range,0.9226,False
+v13_f3,vol_z,turn_z,0.9957,False
+v13_f3,mom_10,px_over_ma20,0.921,False
+v13_f3,xs_d12_rank,xs_voladj_mom_z,0.9047,False

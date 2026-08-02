@@ -1,0 +1,5 @@
+feature_set,model,n_features,collapsed,blend_LS_net60,blend_LS_dd,val_ic_best,score_std,train_loss_last,ckpt_mb
+v13_f2,S_ref,27,False,1.57,-0.173,0.06376,0.11302,0.32089,
+v13_f2,XL,27,True,1.456,-0.1602,0.16744,0.0,0.33328,1190.3
+v13_f6,S_ref,44,False,1.549,-0.1818,0.08674,0.15958,0.3118,
+v13_f6,XL,44,True,1.456,-0.1602,-1000000000.0,0.0,0.33314,1190.6
