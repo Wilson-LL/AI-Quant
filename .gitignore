@@ -24,3 +24,20 @@ reports/transformer_gpu/logs/
 # Personal financial data — never commit (my_holdings.example.csv IS committed)
 my_holdings.csv
 reports/user_holdings/
+
+# v11 sweep logs (small but generated; summaries/queue JSONs are committed)
+reports/continuous_research/v11_gpu_model_size_sweep/logs/
+
+# v12 big-transformer research line — large generated artifacts
+# (checkpoints/ above already covers checkpoints/v12_big_transformer/)
+reports/transformer_gpu/v12_big_transformer/
+reports/continuous_research/v12_big_transformer/logs/
+reports/continuous_research/v12_big_transformer/**/*.csv.gz
+*.pt
+*.pth
+*.ckpt
+
+# v13 fixed-XL feature-rich research line (checkpoints/ covers its ckpts)
+reports/transformer_gpu/v13_fixed_xl_feature_rich/
+reports/continuous_research/v13_fixed_xl_feature_rich/logs/
+reports/continuous_research/v13_fixed_xl_feature_rich/**/*.csv.gz

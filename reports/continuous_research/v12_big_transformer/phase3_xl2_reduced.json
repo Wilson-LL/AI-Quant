@@ -1,0 +1,268 @@
+{
+  "S_ref": {
+    "val_ic": -0.04462,
+    "blend_band10": {
+      "long_short": {
+        "net60": {
+          "sharpe": 1.418,
+          "ann_ret": 0.3792,
+          "max_dd": -0.1525,
+          "calmar": 2.49,
+          "hit": 0.571,
+          "n": 42
+        },
+        "net100": {
+          "sharpe": 1.287,
+          "ann_ret": 0.3391,
+          "max_dd": -0.1963,
+          "calmar": 1.73,
+          "hit": 0.571,
+          "n": 42
+        },
+        "avg_turnover": 0.2994379460136694
+      },
+      "long_only": {
+        "net60": {
+          "sharpe": 1.743,
+          "ann_ret": 0.6538,
+          "max_dd": -0.2664,
+          "calmar": 2.45,
+          "hit": 0.714,
+          "n": 42
+        },
+        "net100": {
+          "sharpe": 1.693,
+          "ann_ret": 0.6309,
+          "max_dd": -0.2747,
+          "calmar": 2.3,
+          "hit": 0.69,
+          "n": 42
+        },
+        "avg_turnover": 0.28779306307924135
+      }
+    },
+    "curves": [
+      {
+        "epoch": 0,
+        "train_loss": 0.33447,
+        "val_ic": -0.04462,
+        "grad_norm_mean": 0.107,
+        "epoch_s": 10.0,
+        "peak_vram_gb": 1.16,
+        "micro_batch": 1024,
+        "eff_batch": 1024,
+        "lr": 0.0003
+      },
+      {
+        "epoch": 1,
+        "train_loss": 0.33317,
+        "val_ic": -0.05197,
+        "grad_norm_mean": 0.06,
+        "epoch_s": 10.3,
+        "peak_vram_gb": 1.16,
+        "micro_batch": 1024,
+        "eff_batch": 1024,
+        "lr": 0.0003
+      },
+      {
+        "epoch": 2,
+        "train_loss": 0.33288,
+        "val_ic": -0.08352,
+        "grad_norm_mean": 0.051,
+        "epoch_s": 9.1,
+        "peak_vram_gb": 1.16,
+        "micro_batch": 1024,
+        "eff_batch": 1024,
+        "lr": 0.0003
+      },
+      {
+        "epoch": 3,
+        "train_loss": 0.33256,
+        "val_ic": -0.08782,
+        "grad_norm_mean": 0.06,
+        "epoch_s": 8.2,
+        "peak_vram_gb": 1.16,
+        "micro_batch": 1024,
+        "eff_batch": 1024,
+        "lr": 0.0003
+      },
+      {
+        "epoch": 4,
+        "train_loss": 0.33208,
+        "val_ic": -0.07624,
+        "grad_norm_mean": 0.053,
+        "epoch_s": 7.4,
+        "peak_vram_gb": 1.16,
+        "micro_batch": 1024,
+        "eff_batch": 1024,
+        "lr": 0.0003
+      },
+      {
+        "epoch": 5,
+        "train_loss": 0.33187,
+        "val_ic": -0.07154,
+        "grad_norm_mean": 0.053,
+        "epoch_s": 6.9,
+        "peak_vram_gb": 1.16,
+        "micro_batch": 1024,
+        "eff_batch": 1024,
+        "lr": 0.0003
+      },
+      {
+        "epoch": 6,
+        "train_loss": 0.33146,
+        "val_ic": -0.07026,
+        "grad_norm_mean": 0.049,
+        "epoch_s": 8.9,
+        "peak_vram_gb": 1.16,
+        "micro_batch": 1024,
+        "eff_batch": 1024,
+        "lr": 0.0003
+      },
+      {
+        "epoch": 7,
+        "train_loss": 0.3313,
+        "val_ic": -0.06914,
+        "grad_norm_mean": 0.056,
+        "epoch_s": 7.1,
+        "peak_vram_gb": 1.16,
+        "micro_batch": 1024,
+        "eff_batch": 1024,
+        "lr": 0.0003
+      }
+    ]
+  },
+  "XL2": {
+    "val_ic": -1000000000.0,
+    "blend_band10": {
+      "long_short": {
+        "net60": {
+          "sharpe": 1.443,
+          "ann_ret": 0.4583,
+          "max_dd": -0.1714,
+          "calmar": 2.67,
+          "hit": 0.643,
+          "n": 42
+        },
+        "net100": {
+          "sharpe": 1.316,
+          "ann_ret": 0.4107,
+          "max_dd": -0.2008,
+          "calmar": 2.05,
+          "hit": 0.595,
+          "n": 42
+        },
+        "avg_turnover": 0.3388647573964106
+      },
+      "long_only": {
+        "net60": {
+          "sharpe": 1.678,
+          "ann_ret": 0.6545,
+          "max_dd": -0.308,
+          "calmar": 2.12,
+          "hit": 0.786,
+          "n": 42
+        },
+        "net100": {
+          "sharpe": 1.624,
+          "ann_ret": 0.6293,
+          "max_dd": -0.3172,
+          "calmar": 1.98,
+          "hit": 0.786,
+          "n": 42
+        },
+        "avg_turnover": 0.3159131911497548
+      }
+    },
+    "curves": [
+      {
+        "epoch": 0,
+        "train_loss": 0.35532,
+        "val_ic": NaN,
+        "grad_norm_mean": 0.528,
+        "epoch_s": 1348.8,
+        "peak_vram_gb": 6.46,
+        "micro_batch": 64,
+        "eff_batch": 1024,
+        "lr": 0.0003
+      },
+      {
+        "epoch": 1,
+        "train_loss": 0.33322,
+        "val_ic": NaN,
+        "grad_norm_mean": 0.028,
+        "epoch_s": 1345.2,
+        "peak_vram_gb": 6.46,
+        "micro_batch": 64,
+        "eff_batch": 1024,
+        "lr": 0.0003
+      },
+      {
+        "epoch": 2,
+        "train_loss": 0.33321,
+        "val_ic": NaN,
+        "grad_norm_mean": 0.028,
+        "epoch_s": 1346.0,
+        "peak_vram_gb": 6.46,
+        "micro_batch": 64,
+        "eff_batch": 1024,
+        "lr": 0.0003
+      },
+      {
+        "epoch": 3,
+        "train_loss": 0.33321,
+        "val_ic": NaN,
+        "grad_norm_mean": 0.03,
+        "epoch_s": 1450.2,
+        "peak_vram_gb": 6.46,
+        "micro_batch": 64,
+        "eff_batch": 1024,
+        "lr": 0.0003
+      },
+      {
+        "epoch": 4,
+        "train_loss": 0.33321,
+        "val_ic": NaN,
+        "grad_norm_mean": 0.032,
+        "epoch_s": 1357.1,
+        "peak_vram_gb": 6.46,
+        "micro_batch": 64,
+        "eff_batch": 1024,
+        "lr": 0.0003
+      },
+      {
+        "epoch": 5,
+        "train_loss": 0.33321,
+        "val_ic": NaN,
+        "grad_norm_mean": 0.028,
+        "epoch_s": 1329.9,
+        "peak_vram_gb": 6.46,
+        "micro_batch": 64,
+        "eff_batch": 1024,
+        "lr": 0.0003
+      },
+      {
+        "epoch": 6,
+        "train_loss": 0.33321,
+        "val_ic": NaN,
+        "grad_norm_mean": 0.029,
+        "epoch_s": 1344.8,
+        "peak_vram_gb": 6.46,
+        "micro_batch": 64,
+        "eff_batch": 1024,
+        "lr": 0.0003
+      },
+      {
+        "epoch": 7,
+        "train_loss": 0.33321,
+        "val_ic": NaN,
+        "grad_norm_mean": 0.029,
+        "epoch_s": 1351.5,
+        "peak_vram_gb": 6.46,
+        "micro_batch": 64,
+        "eff_batch": 1024,
+        "lr": 0.0003
+      }
+    ]
+  }
+}

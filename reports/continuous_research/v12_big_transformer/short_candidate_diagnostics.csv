@@ -1,0 +1,23 @@
+asof,stock,blend_z,sector,close,ret20,adv20_twd,proxy_flags,eligible_under_proxy,note
+2026-07-30,9910,-0.96,industrial,70.4,0.020289855072463947,108289946.1,LOW_LIQUIDITY,False,REVIEW ONLY - not a trade list; borrow/shortability NOT verified
+2026-07-30,1707,-0.861,biotech,91.1,0.0,42086337.599999994,LOW_LIQUIDITY,False,REVIEW ONLY - not a trade list; borrow/shortability NOT verified
+2026-07-30,9904,-0.819,industrial,24.0,-0.040000000000000036,468701150.75,LOW_LIQUIDITY,False,REVIEW ONLY - not a trade list; borrow/shortability NOT verified
+2026-07-30,1476,-0.783,industrial,352.0,0.130016051364366,513608067.5,none,True,REVIEW ONLY - not a trade list; borrow/shortability NOT verified
+2026-07-30,1215,-0.759,consumer,107.0,-0.06140350877192979,140804885.0,LOW_LIQUIDITY,False,REVIEW ONLY - not a trade list; borrow/shortability NOT verified
+2026-07-30,1201,-0.752,consumer,12.4,0.004048582995951566,5503188.625,LOW_LIQUIDITY,False,REVIEW ONLY - not a trade list; borrow/shortability NOT verified
+2026-07-30,2207,-0.727,auto,551.0,0.1849462365591399,166454505.0,LOW_LIQUIDITY,False,REVIEW ONLY - not a trade list; borrow/shortability NOT verified
+2026-07-30,2201,-0.721,auto,27.15,0.009293680297397744,60033004.05,LOW_LIQUIDITY,False,REVIEW ONLY - not a trade list; borrow/shortability NOT verified
+2026-07-30,1102,-0.697,materials,33.2,-0.054131054131054124,443552121.6,LOW_LIQUIDITY,False,REVIEW ONLY - not a trade list; borrow/shortability NOT verified
+2026-07-30,9945,-0.678,construction,26.7,0.003759398496240518,164575969.075,LOW_LIQUIDITY,False,REVIEW ONLY - not a trade list; borrow/shortability NOT verified
+2026-07-30,1229,-0.676,consumer,40.45,-0.05820721769499415,125018653.8,LOW_LIQUIDITY,False,REVIEW ONLY - not a trade list; borrow/shortability NOT verified
+2026-07-30,2609,-0.666,shipping,50.0,-0.013806706114398493,880615380.3,none,True,REVIEW ONLY - not a trade list; borrow/shortability NOT verified
+2026-07-30,1789,-0.666,biotech,19.1,-0.08173076923076916,14493462.049999999,LOW_LIQUIDITY,False,REVIEW ONLY - not a trade list; borrow/shortability NOT verified
+2026-07-30,2723,-0.665,consumer,61.3,-0.08507462686567169,12181701.6,LOW_LIQUIDITY,False,REVIEW ONLY - not a trade list; borrow/shortability NOT verified
+2026-07-30,2548,-0.662,construction,99.1,-0.028431372549019618,150768382.25,LOW_LIQUIDITY,False,REVIEW ONLY - not a trade list; borrow/shortability NOT verified
+2026-07-30,1231,-0.643,consumer,82.0,-0.07029478458049887,38070433.2,LOW_LIQUIDITY,False,REVIEW ONLY - not a trade list; borrow/shortability NOT verified
+2026-07-30,5522,-0.642,construction,65.4,0.012383900928792713,58441872.5,LOW_LIQUIDITY,False,REVIEW ONLY - not a trade list; borrow/shortability NOT verified
+2026-07-30,1227,-0.626,consumer,29.95,0.029209621993127044,37994028.8,LOW_LIQUIDITY,False,REVIEW ONLY - not a trade list; borrow/shortability NOT verified
+2026-07-30,5903,-0.626,retail,189.0,0.0026525198938991412,5474000.0,LOW_LIQUIDITY,False,REVIEW ONLY - not a trade list; borrow/shortability NOT verified
+2026-07-30,2385,-0.624,electronics,104.5,-0.02336448598130836,466399851.75,LOW_LIQUIDITY,False,REVIEW ONLY - not a trade list; borrow/shortability NOT verified
+2026-07-30,9921,-0.62,auto,86.1,0.11240310077519355,179551581.75,LOW_LIQUIDITY,False,REVIEW ONLY - not a trade list; borrow/shortability NOT verified
+2026-07-30,4133,-0.617,biotech,20.9,0.01703163017031617,6216774.425,LOW_LIQUIDITY,False,REVIEW ONLY - not a trade list; borrow/shortability NOT verified

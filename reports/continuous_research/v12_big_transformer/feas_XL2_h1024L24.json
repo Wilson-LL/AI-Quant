@@ -1,0 +1,45 @@
+{
+  "band": "XL2_h1024L24",
+  "ok": true,
+  "params": 311906369,
+  "val_ic_2ep": -1000000000.0,
+  "ckpt_mb": 1189.9,
+  "epoch_s": [
+    221.6,
+    220.7
+  ],
+  "peak_vram_gb": 6.45,
+  "max_reserved_gb": 7.53,
+  "micro_batch_final": 64,
+  "accum_steps": 16,
+  "grad_ckpt": true,
+  "grad_norm": 0.037,
+  "infer_s_latest_date": 0.09,
+  "n_scored": 108,
+  "total_s": 456.0,
+  "gpu": "NVIDIA GeForce RTX 4060 Ti",
+  "curves": [
+    {
+      "epoch": 0,
+      "train_loss": 0.67183,
+      "val_ic": NaN,
+      "grad_norm_mean": Infinity,
+      "epoch_s": 221.6,
+      "peak_vram_gb": 6.45,
+      "micro_batch": 64,
+      "eff_batch": 1024,
+      "lr": 0.0003
+    },
+    {
+      "epoch": 1,
+      "train_loss": 0.33277,
+      "val_ic": NaN,
+      "grad_norm_mean": 0.037,
+      "epoch_s": 220.7,
+      "peak_vram_gb": 6.45,
+      "micro_batch": 64,
+      "eff_batch": 1024,
+      "lr": 0.0003
+    }
+  ]
+}

@@ -234,6 +234,11 @@ def fit_one(Xg, yg, tr_idx, va_idx, va_dates, cfg, seed, weights=None,
     q_mode = bool(cfg.get("quantile"))
     aug_sigma = float(cfg.get("aug_noise") or 0.0)
     aug_drop = float(cfg.get("aug_datedrop") or 0.0)
+    # v11: research batch-size override via preset key (absent from A/B/C ->
+    # default 1024 path is byte-identical; used only by run_queue_v11)
+    batch = int(cfg.get("batch") or batch)
+    # v12: research min-epochs floor via preset key (absent from A/B/C)
+    min_epochs = int(cfg.get("min_epochs") or min_epochs)
     if cfg.get("tcn"):
         net = TCNNet(Xg.shape[2], cfg["hidden"], cfg["dropout"]).to(Xg.device)
     else:
@@ -451,7 +456,11 @@ def walkforward(data, Xg, target="tgt_rank_20", horizon=20, preset="A",
                               "val_ic": info["best_val_ic"],
                               "epochs": info["epochs_run"],
                               "train_s": info["train_s"],
-                              "n_train": int(len(tr)), "warm": warm is not None})
+                              "n_train": int(len(tr)), "warm": warm is not None,
+                              # v12: per-epoch curves, only when the (derived)
+                              # preset opts in — absent from A/B/C
+                              **({"history": info["history"]}
+                                 if cfg.get("keep_history") else {})})
         if cadence == "warm":
             warm_states = {s: copy.deepcopy(n.state_dict()) for s, n in zip(seeds, nets)}
 

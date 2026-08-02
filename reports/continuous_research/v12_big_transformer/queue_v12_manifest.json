@@ -1,0 +1,56 @@
+{
+  "queue": "v12_big_transformer",
+  "created": "2026-07-30 21:54:36",
+  "branch": "research/v12-big-transformer-recency-short",
+  "plan": "queue_v12_plan.md (pre-registered)",
+  "anchor": {
+    "date": "2026-07-29",
+    "CH": 2.147,
+    "BR": 1.443,
+    "source": "v11 P0 (exact reproduction of standing refs, 2026-07-30)"
+  },
+  "phase1_bands": {
+    "M2_h256L4": {
+      "micro_batch": 1024,
+      "accum_steps": 1,
+      "grad_ckpt": false
+    },
+    "L1_h512L8": {
+      "micro_batch": 512,
+      "accum_steps": 2,
+      "grad_ckpt": false
+    },
+    "XL1_h1024L16": {
+      "micro_batch": 256,
+      "accum_steps": 4,
+      "grad_ckpt": true
+    },
+    "XL2_h1024L24": {
+      "micro_batch": 128,
+      "accum_steps": 8,
+      "grad_ckpt": true
+    }
+  },
+  "phase2_recipes": [
+    "Wall_baseline",
+    "W1y",
+    "W2y",
+    "W3y",
+    "HL63",
+    "HL126",
+    "HL252",
+    "HL504",
+    "HY3y126",
+    "HY3y252",
+    "CAL_bands"
+  ],
+  "phase3_models": [
+    "M2_h256L4",
+    "M3_h256L6",
+    "L1_h512L8",
+    "L3_h768L8",
+    "XL1_h1024L16",
+    "XL2_h1024L24"
+  ],
+  "gates": "plan \u00a75; +1% relative book Sharpe minimum; no val-IC-only adoption"
+}
