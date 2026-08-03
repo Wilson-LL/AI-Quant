@@ -1,0 +1,11 @@
+{
+  "data_quality": "DAILY_BAR_PROXY_ONLY",
+  "live_trading_allowed": false,
+  "plan": "rule_search_plan.md (pre-registered)",
+  "splits": {
+    "train": "2021..2023",
+    "val": "2024",
+    "oos": "2025..2026-07"
+  },
+  "rules": []
+}

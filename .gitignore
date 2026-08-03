@@ -41,3 +41,10 @@ reports/continuous_research/v12_big_transformer/**/*.csv.gz
 reports/transformer_gpu/v13_fixed_xl_feature_rich/
 reports/continuous_research/v13_fixed_xl_feature_rich/logs/
 reports/continuous_research/v13_fixed_xl_feature_rich/**/*.csv.gz
+
+# v14 intraday playbook research — raw/derived intraday data and daily
+# playbook outputs stay local (summary docs under continuous_research ARE
+# committed on approval)
+research/intraday_cache/
+reports/intraday_playbook/
+reports/continuous_research/v14_intraday_playbook/logs/
