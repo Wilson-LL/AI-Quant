@@ -48,3 +48,12 @@ reports/continuous_research/v13_fixed_xl_feature_rich/**/*.csv.gz
 research/intraday_cache/
 reports/intraday_playbook/
 reports/continuous_research/v14_intraday_playbook/logs/
+
+# v15 intraday collector — raw data, databases, logs, generated quality
+# reports stay local; design docs are committed on approval
+*.sqlite
+*.sqlite3
+*.sqlite-wal
+*.sqlite-shm
+reports/continuous_research/v15_intraday_collector/quality/
+reports/continuous_research/v15_intraday_collector/logs/
