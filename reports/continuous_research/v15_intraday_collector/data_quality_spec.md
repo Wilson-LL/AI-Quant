@@ -5,13 +5,30 @@ Checks run INLINE during collection (events land in
 
 | event_type | trigger | smoke-verified |
 |---|---|---|
-| MISSING_QUOTE | symbol absent from batch response / success=false | ✔ (mock, 5×) |
-| INVALID_PRICE | non-numeric / "-" / ≤0 latest price (row still stored with NULL price so gaps are analyzable) | ✔ (mock) |
-| STALE_QUOTE | exchange timestamp unchanged > 180 s during collection | logic in place; needs real session duration to fire (mock runs are sub-second) |
-| CUMVOL_DECREASE | cumulative volume decreases (feed glitch) | logic in place |
-| VOLUME_JUMP | tick volume z-score > 6 vs session history (≥10 obs) | logic in place; needs ≥10 real cycles |
+| MISSING_QUOTE | symbol absent from batch response / success=false | ✔ (mock) |
+| NO_TRADE_TICK (v15.1, informational) | latest_trade_price='-' — NORMAL TWSE MIS behavior when no trade matched in the latest window (87.8% of day-1 snapshots). Counted per run as ONE summary event (symbol='*'); per-row granularity lives in intraday_quotes (price NULL, bid/ask live) so it never drowns true anomalies | ✔ (mock + day 1) |
+| INVALID_PRICE | truly malformed: non-positive or unparseable-and-not-'-' | ✔ (mock) |
+| STALE_QUOTE | exchange timestamp unchanged > 180 s during collection | ✔ (day 1: closing-auction freeze 13:25-13:30, expected) |
+| CUMVOL_DECREASE | cumulative volume decreases (feed glitch) | ✔ (mock + day 1) |
+| VOLUME_JUMP | tick volume z-score > 6 vs session history (≥10 obs) | ✔ (mock + day 1) |
 | FETCH_ERROR | request/HTTP failure for a chunk | wraps every request |
 | STORE_ERROR | unexpected per-symbol storage failure | wraps every insert |
+
+## v15.1 bar price basis
+
+1m bars carry `price_basis`: **TRADE_PRICE** (all constituent snapshots had
+trade prints) · **MIDQUOTE_FALLBACK** (all bid/ask-mid) · **MIXED**.
+Midquote bars are STATE PROXIES, not execution prices — any decision-grade
+use requires explicit spread/slippage assumptions; never treat the mid as
+a fill.
+
+## v15.1 cadence statistics
+
+The collector paces on target times (next_target += interval; sleep the
+remainder), absorbing request/throttle time — day-1's 66.8 s drift at a
+nominal 60 s is fixed. Measured cadence (mean/median/p95/min/max cycle
+seconds) is stored per run in `collector_runs.cadence_json` and surfaced
+in the daily quality report.
 
 ## Daily quality report (per symbol × source)
 

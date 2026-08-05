@@ -32,33 +32,66 @@ def main():
         if not row or not row[0]:
             sys.exit("no quotes in DB")
         a.date = row[0]
+    try:  # v15.1 migration for pre-patch DBs
+        con.execute("ALTER TABLE intraday_1m_bars ADD COLUMN price_basis TEXT")
+    except sqlite3.OperationalError:
+        pass
+    # TWSE MIS serves latest_trade_price='-' when no trade matched in the
+    # most recent window; bid/ask stay live. Bars fall back to the midquote
+    # BUT carry price_basis so consumers can distinguish TRADE_PRICE bars
+    # from MIDQUOTE_FALLBACK/MIXED state proxies. Midquote bars are NOT
+    # execution prices and must never be used as fills without explicit
+    # spread/slippage assumptions.
     rows = con.execute(
-        "SELECT symbol, timestamp, price, cumulative_volume, source "
-        "FROM intraday_quotes WHERE substr(timestamp,1,10)=? AND price>0 "
-        "ORDER BY symbol, timestamp", (a.date,)).fetchall()
+        "SELECT symbol, timestamp, price, bid_price, ask_price, "
+        "cumulative_volume, source FROM intraday_quotes "
+        "WHERE substr(timestamp,1,10)=? ORDER BY symbol, timestamp",
+        (a.date,)).fetchall()
     now = datetime.now().isoformat(timespec="seconds")
     bars = {}
     last_cum = {}
-    for sym, ts, px, cum, src in rows:
+    n_used = 0
+    for sym, ts, px, bid, ask, cum, src in rows:
+        if px is not None and px > 0:
+            eff, from_trade = px, True
+        elif bid and ask and bid > 0 and ask > 0:
+            eff, from_trade = (bid + ask) / 2.0, False
+        else:
+            continue
+        n_used += 1
         minute = ts[:16]  # YYYY-MM-DD HH:MM
         key = (sym, minute, src)
         b = bars.get(key)
         if b is None:
-            bars[key] = b = {"o": px, "h": px, "l": px, "c": px, "v": 0.0}
-        b["h"], b["l"], b["c"] = max(b["h"], px), min(b["l"], px), px
+            bars[key] = b = {"o": eff, "h": eff, "l": eff, "c": eff,
+                             "v": 0.0, "n_trade": 0, "n_mid": 0}
+        b["h"], b["l"], b["c"] = max(b["h"], eff), min(b["l"], eff), eff
+        b["n_trade" if from_trade else "n_mid"] += 1
         prev = last_cum.get((sym, src))
         if cum is not None:
             if prev is not None:
                 b["v"] += max(0.0, cum - prev)
             last_cum[(sym, src)] = cum
+    def basis(b):
+        if b["n_mid"] == 0:
+            return "TRADE_PRICE"
+        if b["n_trade"] == 0:
+            return "MIDQUOTE_FALLBACK"
+        return "MIXED"
     con.executemany(
-        "INSERT OR REPLACE INTO intraday_1m_bars VALUES (?,?,?,?,?,?,?,?,?,?)",
-        [(sym, minute, b["o"], b["h"], b["l"], b["c"], b["v"], None, src, now)
-         for (sym, minute, src), b in bars.items()])
+        "INSERT OR REPLACE INTO intraday_1m_bars (symbol, bar_time, open, "
+        "high, low, close, volume_delta, amount_delta, source, created_at, "
+        "price_basis) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+        [(sym, minute, b["o"], b["h"], b["l"], b["c"], b["v"], None, src,
+          now, basis(b)) for (sym, minute, src), b in bars.items()])
     con.commit()
     n_sym = len({k[0] for k in bars})
+    counts = {}
+    for b in bars.values():
+        counts[basis(b)] = counts.get(basis(b), 0) + 1
     print(f"[bars] {a.date}: {len(bars)} 1m bars across {n_sym} symbols "
-          f"from {len(rows)} snapshots")
+          f"from {n_used} usable snapshots; basis {counts} "
+          "(midquote bars are state proxies, not execution prices)")
     con.close()
 
 

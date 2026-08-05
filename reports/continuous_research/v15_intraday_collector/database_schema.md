@@ -13,16 +13,19 @@ PK (symbol, timestamp, source) → idempotent re-collection.
 
 ## intraday_1m_bars — derived, idempotent (INSERT OR REPLACE)
 symbol · bar_time ("YYYY-MM-DD HH:MM") · open/high/low/close (snapshot
-prices within the minute) · volume_delta (cumulative-volume diff, clipped
-≥0) · amount_delta (NULL until the endpoint's value-traded field is
-wired) · source · created_at.
+prices within the minute; bid/ask-mid fallback when no trade print) ·
+volume_delta (cumulative-volume diff, clipped ≥0) · amount_delta (NULL
+until the endpoint's value-traded field is wired) · source · created_at ·
+**price_basis (v15.1: TRADE_PRICE | MIDQUOTE_FALLBACK | MIXED — midquote
+bars are state proxies, not execution prices)**.
 PK (symbol, bar_time, source).
 
 ## collector_runs — one row per process run
 run_id PK AUTOINCREMENT · started_at · ended_at · mode
 ('session'|'once'|'mock') · universe · n_symbols · interval_s · cycles ·
 quotes_written · events · status ('running'→'completed'/'interrupted';
-stale 'running' rows become 'aborted' on next startup).
+stale 'running' rows become 'aborted' on next startup) · **cadence_json
+(v15.1: measured mean/median/p95/min/max cycle seconds)**.
 
 ## data_quality_events
 event_id PK · run_id · symbol · event_time · event_type (see

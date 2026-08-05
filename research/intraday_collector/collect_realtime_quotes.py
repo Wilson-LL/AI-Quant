@@ -45,13 +45,13 @@ CREATE TABLE IF NOT EXISTS intraday_quotes (
 CREATE TABLE IF NOT EXISTS intraday_1m_bars (
   symbol TEXT NOT NULL, bar_time TEXT NOT NULL, open REAL, high REAL,
   low REAL, close REAL, volume_delta REAL, amount_delta REAL,
-  source TEXT NOT NULL, created_at TEXT NOT NULL,
+  source TEXT NOT NULL, created_at TEXT NOT NULL, price_basis TEXT,
   PRIMARY KEY (symbol, bar_time, source));
 CREATE TABLE IF NOT EXISTS collector_runs (
   run_id INTEGER PRIMARY KEY AUTOINCREMENT, started_at TEXT, ended_at TEXT,
   mode TEXT, universe TEXT, n_symbols INTEGER, interval_s REAL,
   cycles INTEGER DEFAULT 0, quotes_written INTEGER DEFAULT 0,
-  events INTEGER DEFAULT 0, status TEXT);
+  events INTEGER DEFAULT 0, status TEXT, cadence_json TEXT);
 CREATE TABLE IF NOT EXISTS data_quality_events (
   event_id INTEGER PRIMARY KEY AUTOINCREMENT, run_id INTEGER, symbol TEXT,
   event_time TEXT, event_type TEXT, detail TEXT, source TEXT);
@@ -65,6 +65,13 @@ def connect(db_path):
     con = sqlite3.connect(db_path, timeout=30)
     con.execute("PRAGMA journal_mode=WAL")
     con.executescript(SCHEMA)
+    # v15.1 migrations for pre-patch DBs (no-ops on fresh databases)
+    for ddl in ("ALTER TABLE intraday_1m_bars ADD COLUMN price_basis TEXT",
+                "ALTER TABLE collector_runs ADD COLUMN cadence_json TEXT"):
+        try:
+            con.execute(ddl)
+        except sqlite3.OperationalError:
+            pass
     # restart safety: mark crashed runs
     con.execute("UPDATE collector_runs SET status='aborted', "
                 "ended_at=COALESCE(ended_at, datetime('now','localtime')) "
@@ -129,13 +136,25 @@ def store_snapshot(con, run_id, sym, snap, pc, state, source="TWSE_MIS"):
         return 0
     rt = snap.get("realtime", {})
     ts = snap.get("info", {}).get("time") or ""
-    price = _num(rt.get("latest_trade_price"))
+    raw_px = rt.get("latest_trade_price")
+    price = _num(raw_px)
     cumv = _num(rt.get("accumulate_trade_volume"))
     tickv = _num(rt.get("trade_volume"))
-    if price is None or price <= 0:
+    if price is not None and price <= 0:
+        price = None
         _event(con, run_id, sym, "INVALID_PRICE",
-               f"price={rt.get('latest_trade_price')!r}", source)
-        # still record the row (price NULL) so gaps are analyzable
+               f"non-positive price={raw_px!r}", source)
+    elif price is None:
+        # TWSE MIS serves '-' when no trade matched in the latest window —
+        # normal microstructure, counted (not per-row event-logged) as
+        # NO_TRADE_TICK; anything else unparseable is a true INVALID_PRICE
+        if str(raw_px).strip() in ("-", "", "None", "null"):
+            c = state.setdefault("_counters", {})
+            c["no_trade"] = c.get("no_trade", 0) + 1
+        else:
+            _event(con, run_id, sym, "INVALID_PRICE",
+                   f"unparseable price={raw_px!r}", source)
+        # row is still recorded (price NULL, bid/ask live) for analyzability
     st = state.setdefault(sym, {})
     if ts and st.get("ts") == ts and time.time() - st.get("wall", 0) > STALE_S:
         _event(con, run_id, sym, "STALE_QUOTE",
@@ -178,23 +197,32 @@ def in_session(now=None):
 
 
 def mock_snapshot(sym, cycle, base=100.0):
-    """Deterministic synthetic snapshot; injects anomalies for testing:
-    symbol ending '1' -> zero price at cycle 2; ending '2' -> frozen
-    timestamp; ending '3' -> volume spike at cycle 3."""
+    """Deterministic synthetic snapshot; injects the v15.1 test matrix:
+    ending '1' -> '-' no-trade price (valid bid/ask) at cycle 2, malformed
+    '0.00' at cycle 3; ending '2' -> frozen timestamp (stale logic is
+    wall-time gated so it cannot fire in sub-second mocks); ending '3' ->
+    volume spike at cycle 11 (needs >=10 history) and cumulative-volume
+    decrease at cycle 12; other symbols normal."""
     import numpy as np
     rng = np.random.default_rng(abs(hash((sym, cycle))) % (2 ** 31))
     px = base * (1 + 0.001 * cycle + float(rng.normal(0, 0.002)))
     tick = 50 + float(rng.integers(0, 50))
     ts_cycle = 0 if sym.endswith("2") else cycle
+    px_s = f"{px:.2f}"
     if sym.endswith("1") and cycle == 2:
-        px = 0.0
-    if sym.endswith("3") and cycle == 3:
-        tick = 99999
+        px_s = "-"                       # normal no-trade marker
+    if sym.endswith("1") and cycle == 3:
+        px_s = "0.00"                    # malformed -> true INVALID_PRICE
+    if sym.endswith("3") and cycle == 11:
+        tick = 99999                     # volume jump
+    cum = (cycle + 1) * 500
+    if sym.endswith("3") and cycle == 12:
+        cum = 100                        # cumulative-volume decrease
     return {"success": True,
             "info": {"time": f"2026-01-01 09:{ts_cycle:02d}:00"},
-            "realtime": {"latest_trade_price": f"{px:.2f}",
+            "realtime": {"latest_trade_price": px_s,
                          "trade_volume": f"{tick:.0f}",
-                         "accumulate_trade_volume": f"{(cycle + 1) * 500:.0f}",
+                         "accumulate_trade_volume": f"{cum:.0f}",
                          "best_bid_price": [f"{px - 0.05:.2f}"],
                          "best_ask_price": [f"{px + 0.05:.2f}"],
                          "open": f"{base:.2f}", "high": f"{px + 1:.2f}",
@@ -230,6 +258,7 @@ def main():
     print(f"[collector] run {run_id} mode={mode} symbols={len(symbols)}")
 
     state, cycles, written, t0 = {}, 0, 0, time.time()
+    cycle_starts = []
     try:
         if a.mock:
             for cyc in range(a.mock):
@@ -243,12 +272,14 @@ def main():
                 con.commit()
         else:
             import twstock
+            next_target = time.time()
             while True:
                 if not a.once and not in_session():
                     print("[collector] outside session window "
                           "(08:55-13:35 TW weekdays) — exiting; session "
                           "loop requires user approval to schedule")
                     break
+                cycle_starts.append(time.time())
                 for i in range(0, len(symbols), CHUNK):
                     chunk = symbols[i:i + CHUNK]
                     try:
@@ -276,22 +307,46 @@ def main():
                 con.commit()
                 if a.once or (a.max_cycles and cycles >= a.max_cycles):
                     break
-                time.sleep(max(0.0, a.interval - THROTTLE_S))
+                # elapsed-time-compensated pacing: one cycle per interval,
+                # request/throttle time absorbed (v15.1 — measured 66.8s
+                # actual cadence at nominal 60s before this fix)
+                next_target += a.interval
+                time.sleep(max(0.0, next_target - time.time()))
         status = "completed"
     except KeyboardInterrupt:
         status = "interrupted"
     finally:
+        no_trade = state.get("_counters", {}).get("no_trade", 0)
+        if no_trade:
+            # ONE informational summary event per run — per-row granularity
+            # lives in intraday_quotes (price NULL, bid/ask populated), so
+            # NO_TRADE_TICK never drowns true anomalies in the event table
+            _event(con, run_id, "*", "NO_TRADE_TICK",
+                   f"n={no_trade} no-trade snapshots this run (normal TWSE "
+                   "MIS behavior; counted, not per-row logged)", "TWSE_MIS"
+                   if mode != "mock" else "MOCK")
+        cadence = None
+        if len(cycle_starts) >= 2:
+            import numpy as np
+            d = np.diff(cycle_starts)
+            cadence = {"mean_cycle_s": round(float(d.mean()), 2),
+                       "median_cycle_s": round(float(np.median(d)), 2),
+                       "p95_cycle_s": round(float(np.percentile(d, 95)), 2),
+                       "min_cycle_s": round(float(d.min()), 2),
+                       "max_cycle_s": round(float(d.max()), 2)}
         nev = con.execute("SELECT COUNT(*) FROM data_quality_events WHERE "
                           "run_id=?", (run_id,)).fetchone()[0]
         con.execute("UPDATE collector_runs SET ended_at="
                     "datetime('now','localtime'), cycles=?, quotes_written=?,"
-                    " events=?, status=? WHERE run_id=?",
-                    (cycles, written, nev, status, run_id))
+                    " events=?, status=?, cadence_json=? WHERE run_id=?",
+                    (cycles, written, nev, status,
+                     json.dumps(cadence) if cadence else None, run_id))
         con.commit()
         con.close()
     print(f"[collector] run {run_id} {status}: {cycles} cycle(s), "
-          f"{written} quotes, {nev} quality events, "
-          f"{time.time() - t0:.1f}s")
+          f"{written} quotes, {nev} quality events, {no_trade} no-trade "
+          f"ticks, {time.time() - t0:.1f}s"
+          + (f", cadence mean {cadence['mean_cycle_s']}s" if cadence else ""))
 
 
 if __name__ == "__main__":
