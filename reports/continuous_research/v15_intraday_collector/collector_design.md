@@ -46,6 +46,18 @@ build_1m_bars.py (minute OHLC + cumulative-volume deltas, idempotent) →
 quality_report.py (per-day per-symbol coverage/events md, gitignored) →
 status.py (runs/coverage/events overview).
 
+## Scheduling (user-approved 2026-08-06)
+
+Two Windows Scheduled Tasks (current user, weekdays):
+- `AIQuant-IntradayCollector` 08:54 → `collect_realtime_quotes.py
+  --universe book --interval 60` (session gate self-terminates at 13:35)
+- `AIQuant-IntradayPostClose` 13:40 → `research/intraday_collector/
+  postclose.bat` (bars + quality report)
+
+Limitations: PC must be on/logged-in at 08:54 (no wake configured);
+non-trading holidays yield short dedupe-heavy runs (visible in the daily
+quality report; trading-calendar guard is a possible refinement).
+
 ## Operational notes
 
 - Run on the same box as daily ops is fine (CPU-trivial); the existing
