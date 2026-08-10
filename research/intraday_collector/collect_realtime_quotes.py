@@ -272,6 +272,18 @@ def main():
                 con.commit()
         else:
             import twstock
+            # The scheduled task fires slightly before the open (08:54);
+            # wait for the gate instead of exiting. Bounded to 15 min so a
+            # genuinely off-session launch still exits immediately below.
+            now = datetime.now()
+            if (not a.once and now.weekday() < 5
+                    and now.time() < SESSION_START):
+                wait = (datetime.combine(now.date(), SESSION_START)
+                        - now).total_seconds()
+                if wait <= 900:
+                    print(f"[collector] {wait:.0f}s before session open "
+                          "- waiting for gate")
+                    time.sleep(wait)
             next_target = time.time()
             while True:
                 if not a.once and not in_session():

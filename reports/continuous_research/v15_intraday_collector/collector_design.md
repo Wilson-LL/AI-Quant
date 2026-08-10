@@ -50,7 +50,10 @@ status.py (runs/coverage/events overview).
 
 Two Windows Scheduled Tasks (current user, weekdays):
 - `AIQuant-IntradayCollector` 08:54 → `collect_realtime_quotes.py
-  --universe book --interval 60` (session gate self-terminates at 13:35)
+  --universe book --interval 60` (session gate self-terminates at 13:35).
+  The collector waits (≤15 min) for the 08:55 gate when launched early —
+  without this the 08:54 task exited before the open (found 2026-08-10:
+  run 6 recorded 0 cycles; the day was salvaged with a 09:36 manual start)
 - `AIQuant-IntradayPostClose` 13:40 → `research/intraday_collector/
   postclose.bat` (bars + quality report)
 
