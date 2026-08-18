@@ -1,0 +1,21 @@
+window,mode,point,lag,net0,net60,net100,net150
+CH,long_short,A/E: T+1 close -> T+21 close,1,2.371,2.147,1.997,1.81
+CH,long_short,B: T+1 open -> T+21 open,1,2.387,2.158,2.005,1.813
+CH,long_short,D: T+2 open -> T+22 open,2,2.254,2.048,1.91,1.737
+CH,long_short,F (diagnostic): T close -> T+20 close,0,2.333,2.115,1.97,1.787
+CH,long_short,decay: T+2 close -> T+22 close,2,2.11,1.921,1.794,1.636
+CH,long_only,A/E: T+1 close -> T+21 close,1,2.058,1.989,1.943,1.885
+CH,long_only,B: T+1 open -> T+21 open,1,1.985,1.918,1.873,1.816
+CH,long_only,D: T+2 open -> T+22 open,2,1.932,1.87,1.829,1.777
+CH,long_only,F (diagnostic): T close -> T+20 close,0,1.776,1.719,1.68,1.632
+CH,long_only,decay: T+2 close -> T+22 close,2,1.984,1.921,1.878,1.826
+BR,long_short,A/E: T+1 close -> T+21 close,1,1.653,1.443,1.302,1.125
+BR,long_short,B: T+1 open -> T+21 open,1,1.669,1.463,1.324,1.15
+BR,long_short,D: T+2 open -> T+22 open,2,1.551,1.348,1.212,1.041
+BR,long_short,F (diagnostic): T close -> T+20 close,0,1.639,1.438,1.303,1.134
+BR,long_short,decay: T+2 close -> T+22 close,2,1.664,1.447,1.301,1.119
+BR,long_only,A/E: T+1 close -> T+21 close,1,1.53,1.455,1.405,1.343
+BR,long_only,B: T+1 open -> T+21 open,1,1.581,1.505,1.454,1.39
+BR,long_only,D: T+2 open -> T+22 open,2,1.464,1.392,1.345,1.285
+BR,long_only,F (diagnostic): T close -> T+20 close,0,1.548,1.474,1.425,1.364
+BR,long_only,decay: T+2 close -> T+22 close,2,1.527,1.452,1.402,1.339
