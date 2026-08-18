@@ -136,5 +136,141 @@ class TestOverlay(unittest.TestCase):
         self.assertEqual(rc, 0)  # graceful, no crash
 
 
+class TestStageA(unittest.TestCase):
+    """v16 Stage A end-to-end: LONG/SHORT schema, denominator safety,
+    duplicate-lot aggregation, conflicts, user_action wiring."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.root = tempfile.mkdtemp(prefix="uho_stageA_")
+        r = cls.root
+        for sym, px in (("2330", 500.0), ("1303", 100.0), ("2887", 40.0),
+                        ("0050", 50.0)):
+            _write(os.path.join(r, "research", "data_cache", f"{sym}.csv"),
+                   "date,open,high,low,close,volume\n"
+                   f"2026-07-28,{px},{px},{px},{px},1000\n")
+        _write(os.path.join(r, "reports", "transformer_gpu",
+                            f"{DATE}_predictions.csv"),
+               "stock,score,score_std\n2330,0.1,0.01\n1303,0.2,0.01\n"
+               "2887,0.3,0.01\n2412,0.15,0.01\n")
+        _write(os.path.join(r, "reports", "paper_trading",
+                            f"{DATE}_blend50_band10_decision_book.csv"),
+               "symbol,model_score,rank,action,target_weight,previous_weight,"
+               "weight_change,sector,confidence\n"
+               "1303,3.5,1,HOLD,0.12,0.12,0.0,materials,low\n"
+               "2887,0.5,20,BUY,0.08,0.0,0.08,financials,low\n"
+               "2412,0.4,21,HOLD,0.05,0.05,0.0,telecom,low\n")
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.root, ignore_errors=True)
+
+    def _run_file(self, text, expect_rc=0):
+        p = os.path.join(self.root, "holdings_case.csv")
+        _write(p, text)
+        rc = uho.run(self.root, p, "blend50_band10", None,
+                     medium_gap=0.02, large_gap=0.05)
+        self.assertEqual(rc, expect_rc)
+        if expect_rc != 0:
+            return None
+        out = os.path.join(self.root, "reports", "user_holdings",
+                           "latest_user_holdings_overlay.csv")
+        return pd.read_csv(out, dtype={"symbol": str})
+
+    def test_a_legacy_negative_shares_denominator_safety(self):
+        # 2330 LONG 100 (50,000) + 1303 legacy -100 (SHORT 10,000).
+        ov = self._run_file("symbol,shares\n2330,100\n1303,-100\n")
+        ov = ov.set_index("symbol")
+        # SHORT normalized, never negative qty
+        self.assertEqual(ov.loc["1303", "position_side"], "SHORT")
+        self.assertEqual(ov.loc["1303", "position_qty"], 100.0)
+        self.assertAlmostEqual(ov.loc["1303", "signed_exposure_value"],
+                               -10000.0)
+        # REGRESSION: gross denominator (60,000), not net (40,000) — the
+        # old code gave 2330 weight 50,000/40,000 = 125%
+        self.assertAlmostEqual(ov.loc["2330", "my_current_weight"],
+                               50000.0 / 60000.0, places=4)
+        self.assertTrue((ov["my_current_weight"].dropna() <= 1.0).all())
+        # long-target comparison uses gross LONG only
+        self.assertAlmostEqual(ov.loc["2330", "my_long_cmp_weight"], 1.0)
+        # no silent NaN propagation: valued rows all have weights
+        self.assertFalse(ov["my_current_weight"].isna().any())
+        # SHORT vs bullish book HOLD (target 12%) -> cover review, not
+        # "underweight long"
+        self.assertEqual(ov.loc["1303", "user_action"], "BUY_TO_COVER")
+        self.assertEqual(ov.loc["1303", "user_action_priority"], "HIGH")
+        self.assertNotEqual(ov.loc["1303", "classification"],
+                            "UNDERWEIGHT_VS_MODEL")
+
+    def test_b_all_short_portfolio_no_nan_blankout(self):
+        # REGRESSION: old code -> total <= 0 -> every weight silently NaN.
+        ov = self._run_file("symbol,shares\n1303,-100\n").set_index("symbol")
+        self.assertAlmostEqual(ov.loc["1303", "my_current_weight"], 1.0)
+        self.assertEqual(ov.loc["1303", "position_side"], "SHORT")
+
+    def test_c_new_schema_short_vs_buy(self):
+        ov = self._run_file(
+            "symbol,side,shares,avg_cost,current_price,current_value,"
+            "account,notes\n"
+            "2330,LONG,100,450,,,CTBC,\n"
+            "2887,SHORT,100,38,,,CTBC,short test\n").set_index("symbol")
+        self.assertEqual(ov.loc["2887", "position_side"], "SHORT")
+        self.assertEqual(ov.loc["2887", "classification"],
+                         "ACTUAL_SHORT_POSITION")
+        self.assertEqual(ov.loc["2887", "user_action"], "BUY_TO_COVER")
+        # short never enters the long-comparison denominator
+        self.assertAlmostEqual(ov.loc["2330", "my_long_cmp_weight"], 1.0)
+        self.assertTrue(pd.isna(ov.loc["2887", "my_long_cmp_weight"]))
+        self.assertTrue(pd.isna(ov.loc["2887", "weight_gap"]))
+
+    def test_d_duplicate_lots_aggregate_sign_flip_regression(self):
+        # Two 1303 lots (50+50 @100 = 10,000) + 2330 (50,000):
+        # combined 1303 = 16.7% vs target 12% -> OVERWEIGHT. Per-lot the
+        # old code said 8.3% vs 12% -> UNDERWEIGHT on both rows (sign flip).
+        ov = self._run_file("symbol,side,shares,avg_cost,current_price,"
+                            "current_value,account,notes\n"
+                            "2330,LONG,100,,,,a,\n"
+                            "1303,LONG,50,90,,,a,\n"
+                            "1303,LONG,50,110,,,b,\n")
+        self.assertEqual(int((ov["symbol"] == "1303").sum()), 1)  # one row
+        r = ov.set_index("symbol").loc["1303"]
+        self.assertEqual(r["position_qty"], 100.0)
+        self.assertAlmostEqual(r["my_avg_cost"], 100.0)   # qty-weighted
+        self.assertEqual(r["classification"], "OVERWEIGHT_VS_MODEL")
+        self.assertEqual(r["user_action"], "REDUCE_LONG")
+
+    def test_e_long_short_conflict_not_netted(self):
+        ov = self._run_file("symbol,side,shares\n"
+                            "2887,LONG,100\n2887,SHORT,40\n")
+        rows = ov[ov["symbol"] == "2887"]
+        self.assertEqual(len(rows), 2)                      # NOT netted
+        self.assertTrue((rows["classification"] == "POSITION_CONFLICT").all())
+        self.assertTrue(
+            (rows["user_action"] == "POSITION_CONFLICT_REVIEW").all())
+        self.assertTrue((rows["user_action_priority"] == "HIGH").all())
+
+    def test_f_validation_errors_rc2(self):
+        self._run_file("symbol,side,shares\n2330,LNG,100\n", expect_rc=2)
+        self._run_file("symbol,side,shares\n2330,SHORT,-100\n", expect_rc=2)
+
+    def test_g_zero_shares_dropped(self):
+        ov = self._run_file("symbol,shares\n2330,100\n2887,0\n")
+        self.assertNotIn("2887", set(ov["symbol"]))
+
+    def test_h_outside_universe_short_no_model_opinion(self):
+        ov = self._run_file("symbol,side,shares\n"
+                            "2330,LONG,100\n0050,SHORT,100\n"
+                            ).set_index("symbol")
+        self.assertEqual(ov.loc["0050", "user_action"], "NO_MODEL_OPINION")
+
+    def test_i_no_generic_hold_output(self):
+        # the bare label HOLD must never appear as a user_action
+        for text in ("symbol,shares\n2330,100\n1303,100\n",
+                     "symbol,side,shares\n1303,SHORT,10\n"):
+            ov = self._run_file(text)
+            self.assertNotIn("HOLD", set(ov["user_action"]))
+            self.assertNotIn("SELL", set(ov["user_action"]))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

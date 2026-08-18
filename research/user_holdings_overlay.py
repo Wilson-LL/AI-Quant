@@ -62,6 +62,8 @@ import pandas as pd
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "research"))
 
+import holdings as hold  # noqa: E402  (v16 Stage A normalization module)
+
 STRATEGIES = ("blend50_band10", "blend50", "d12", "tf", "d7b")
 BOOK_ACTIONS = ("BUY", "HOLD", "REDUCE", "SELL", "WATCH")
 CAVEATS = [
@@ -72,35 +74,41 @@ CAVEATS = [
     "IN_UNIVERSE_NOT_SELECTED means covered but not currently targeted.",
     "REDUCE compares against the model's previous paper book, not necessarily "
     "my real portfolio.",
+    "model_action SELL means the model exits its paper long — it is NEVER a "
+    "short signal.",
+    "OPEN_SHORT is disabled: no validated short-side model exists (v12); "
+    "actual short positions are risk-tracked only.",
+    "Long-target comparisons use gross LONG value as the denominator; short "
+    "positions can never distort a long weight.",
 ]
 
 OUT_COLUMNS = [
-    "symbol", "my_shares", "my_avg_cost", "latest_price", "my_current_value",
-    "my_current_weight", "in_data_cache", "in_model_universe",
-    "in_latest_decision_book", "model_strategy_used", "model_action",
-    "model_target_weight", "model_previous_weight", "model_weight_change",
-    "weight_gap", "model_rank", "model_score", "model_confidence", "sector",
-    "classification", "review_priority", "interpretation", "notes",
+    "symbol", "position_side", "position_qty", "my_shares", "my_avg_cost",
+    "latest_price", "market_value_abs", "signed_exposure_value",
+    "my_current_value", "my_current_weight", "my_long_cmp_weight",
+    "in_data_cache", "in_model_universe", "in_latest_decision_book",
+    "model_strategy_used", "model_action", "model_target_weight",
+    "model_previous_weight", "model_weight_change", "weight_gap",
+    "model_rank", "model_score", "model_confidence", "sector",
+    "classification", "review_priority", "interpretation",
+    "user_action", "user_action_priority", "user_action_reason",
+    "account", "notes",
 ]
 
 
 # ---------------------------------------------------------------- inputs
 
 def read_holdings(path):
-    df = pd.read_csv(path, dtype=str, keep_default_na=False)
-    need = {"symbol", "shares"}
-    missing = need - set(df.columns)
-    if missing:
-        sys.exit(f"holdings file {path} missing required columns: {sorted(missing)}")
-    for c in ("avg_cost", "current_price", "current_value", "account", "notes"):
-        if c not in df.columns:
-            df[c] = ""
-    df["symbol"] = df["symbol"].str.strip()
-    df = df[df["symbol"] != ""].reset_index(drop=True)
-    for c in ("shares", "avg_cost", "current_price", "current_value"):
-        df[c + "_num"] = pd.to_numeric(df[c].str.replace(",", "", regex=False),
-                                       errors="coerce")
-    return df
+    """Load + normalize holdings via research/holdings.py (v16 Stage A).
+
+    Returns (positions, lots, warnings). positions = one row per
+    (symbol, side), positive quantities only; simultaneous LONG+SHORT is
+    kept un-netted and flagged both_sides. Raises holdings.HoldingsError
+    on contents that must not be silently repaired (invalid side value,
+    explicit side with negative shares)."""
+    lots, w1 = hold.load_lots(path)
+    positions, w2 = hold.aggregate_positions(lots)
+    return positions, lots, w1 + w2
 
 
 def cache_symbols(root):
@@ -126,17 +134,28 @@ def latest_close(root, sym):
 
 
 def model_universe(root):
-    """(set of symbols, human-readable source description)."""
+    """(set of symbols, source description, {symbol: rank_pct 0=best}).
+
+    rank_pct is the tf-score percentile rank over the scored universe from
+    the latest predictions file — used only for the documented unselected/
+    short risk rules (the book's own blend rank is used wherever a book
+    row exists); empty dict in fallback modes."""
     pred_dir = os.path.join(root, "reports", "transformer_gpu")
     preds = sorted(glob.glob(os.path.join(pred_dir, "*_predictions.csv")))
     if preds:
         df = pd.read_csv(preds[-1], dtype={"stock": str})
-        return set(df["stock"]), f"latest predictions {os.path.basename(preds[-1])}"
+        ranks = {}
+        if "score" in df.columns and len(df):
+            r = df["score"].rank(ascending=False, method="min")
+            ranks = dict(zip(df["stock"], (r / len(df)).round(4)))
+        return (set(df["stock"]),
+                f"latest predictions {os.path.basename(preds[-1])}", ranks)
     dbs = sorted(glob.glob(os.path.join(root, "reports", "paper_trading",
                                         "*_blend50_band10_decision_book.csv")))
     if dbs:
         df = pd.read_csv(dbs[-1], dtype={"symbol": str})
-        return set(df["symbol"]), f"fallback: decision book {os.path.basename(dbs[-1])}"
+        return (set(df["symbol"]),
+                f"fallback: decision book {os.path.basename(dbs[-1])}", {})
     books = glob.glob(os.path.join(root, "reports", "paper_trading", "books", "*.csv"))
     syms = set()
     for p in books:
@@ -144,7 +163,8 @@ def model_universe(root):
             syms |= set(pd.read_csv(p, dtype={"stock": str})["stock"])
         except Exception:
             pass
-    return syms, "fallback: union of paper-trading books" if syms else "none found"
+    return (syms, "fallback: union of paper-trading books" if syms
+            else "none found", {})
 
 
 def available_books(root):
@@ -239,6 +259,15 @@ def classify(row, medium_gap, large_gap):
     if pd.isna(row["my_shares"]):
         return ("REVIEW_MANUALLY", "INFO",
                 "shares missing or unparseable — row not classifiable.")
+    if row.get("both_sides"):
+        return ("POSITION_CONFLICT", "HIGH",
+                "simultaneous LONG and SHORT lots for this symbol — not "
+                "netted; resolve the position before acting.")
+    if row.get("position_side") == "SHORT" and row["in_data_cache"] \
+            and row["in_model_universe"]:
+        return ("ACTUAL_SHORT_POSITION", "MEDIUM",
+                "actual short position (risk-tracked only — the model has "
+                "no validated short signal; see user_action).")
     if not row["in_data_cache"]:
         pri = "HIGH" if big_holding else "INFO"
         return ("NOT_IN_DATA_CACHE", pri,
@@ -315,29 +344,37 @@ def classify(row, medium_gap, large_gap):
 
 # ------------------------------------------------------------------ core
 
-def build_overlay(root, holdings, strategy, date, medium_gap, large_gap):
+def build_overlay(root, positions, strategy, date, medium_gap, large_gap):
     cache = cache_symbols(root)
-    universe, universe_src = model_universe(root)
+    universe, universe_src, rank_pct = model_universe(root)
     book = load_book(root, strategy, date)
     in_book_syms = set(book.index)
 
     rows = []
-    for _, h in holdings.iterrows():
+    for _, h in positions.iterrows():
         sym = h["symbol"]
-        price, price_date = (h["current_price_num"], "holdings file")
+        side = h["position_side"]
+        price = h["current_price"]
         if pd.isna(price):
-            price, price_date = latest_close(root, sym)
+            price, _ = latest_close(root, sym)
             price = np.nan if price is None else price
-        value = h["current_value_num"]
-        if pd.isna(value) and pd.notna(h["shares_num"]) and pd.notna(price):
-            value = h["shares_num"] * price
+        value = h["current_value"]
+        if pd.isna(value) and pd.notna(h["position_qty"]) and pd.notna(price):
+            value = h["position_qty"] * price
         b = book.loc[sym] if sym in in_book_syms else None
         rows.append({
             "symbol": sym,
-            "my_shares": h["shares_num"],
-            "my_avg_cost": h["avg_cost_num"],
+            "position_side": side,
+            "position_qty": h["position_qty"],
+            "my_shares": h["position_qty"],   # back-compat alias (abs qty)
+            "my_avg_cost": h["avg_cost"],
             "latest_price": price if pd.notna(price) else np.nan,
-            "my_current_value": value,
+            "market_value_abs": value,
+            "my_current_value": value,        # back-compat alias (abs value)
+            "signed_exposure_value": (value if side == "LONG" else
+                                      -value if side == "SHORT" else np.nan),
+            "both_sides": bool(h["both_sides"]),
+            "n_lots": int(h["n_lots"]) if pd.notna(h.get("n_lots")) else 1,
             "in_data_cache": sym in cache,
             "in_model_universe": sym in universe,
             "in_latest_decision_book": b is not None,
@@ -350,29 +387,63 @@ def build_overlay(root, holdings, strategy, date, medium_gap, large_gap):
             "model_score": b["score"] if b is not None else np.nan,
             "model_confidence": b["confidence"] if b is not None else "",
             "sector": b["sector"] if b is not None else "",
+            "universe_rank_pct": rank_pct.get(sym, np.nan),
             "notes": h["notes"],
             "account": h["account"],
         })
     ov = pd.DataFrame(rows)
 
-    total_value = ov["my_current_value"].sum(skipna=True)
-    ov["my_current_weight"] = (ov["my_current_value"] / total_value
-                               if total_value and total_value > 0 else np.nan)
-    # gap vs model target; target counts as 0 for covered-but-not-selected,
-    # and stays undefined (NaN) where the model has no coverage at all
+    # Exposure conventions (holdings_schema_design.md): informational weight
+    # uses GROSS exposure (always >= 0, shorts cannot shrink or flip it);
+    # LONG-target comparisons use GROSS LONG value only.
+    exp = hold.exposure_metrics(ov)
+    ge, gl = exp["gross_exposure"], exp["gross_long_value"]
+    ov["my_current_weight"] = (ov["market_value_abs"] / ge if ge > 0
+                               else np.nan)
+    long_cmp = (ov["market_value_abs"] / gl if gl > 0 else np.nan)
+    ov["my_long_cmp_weight"] = pd.Series(long_cmp).where(
+        ov["position_side"] == "LONG", np.nan)
+    # gap vs model target (LONG rows only); target counts as 0 for covered-
+    # but-not-selected, stays NaN where the model has no coverage at all
     tgt = ov["model_target_weight"].where(ov["in_latest_decision_book"], 0.0)
     tgt = tgt.where(ov["in_model_universe"], np.nan)
-    ov["weight_gap"] = ov["my_current_weight"] - tgt
+    ov["weight_gap"] = ov["my_long_cmp_weight"] - tgt
 
     cls = ov.apply(lambda r: classify(r, medium_gap, large_gap), axis=1)
     ov["classification"] = [c[0] for c in cls]
     ov["review_priority"] = [c[1] for c in cls]
     ov["interpretation"] = [c[2] for c in cls]
-    return ov, total_value, universe_src
+
+    def _ua(r):
+        if r["position_side"] not in ("LONG", "SHORT"):
+            side = "NONE"
+        else:
+            side = r["position_side"]
+        if pd.isna(r["my_shares"]):
+            return ("NO_ACTION", "INFO",
+                    "shares unparseable — see REVIEW_MANUALLY")
+        rp = r["universe_rank_pct"]
+        return hold.map_user_action(
+            position_side=side,
+            model_action=r["model_action"],
+            model_target=r["model_target_weight"],
+            in_universe=bool(r["in_model_universe"]) and bool(r["in_data_cache"]),
+            in_book=bool(r["in_latest_decision_book"]),
+            cmp_weight=r["my_long_cmp_weight"],
+            universe_rank_pct=None if pd.isna(rp) else float(rp),
+            conflict=bool(r["both_sides"]),
+            material=(pd.notna(r["my_current_weight"])
+                      and r["my_current_weight"] > large_gap))
+    ua = ov.apply(_ua, axis=1)
+    ov["user_action"] = [u[0] for u in ua]
+    ov["user_action_priority"] = [u[1] for u in ua]
+    ov["user_action_reason"] = [u[2] for u in ua]
+    return ov, exp, universe_src
 
 
-def write_outputs(root, ov, total_value, universe_src, strategy, date,
+def write_outputs(root, ov, exp, warnings, universe_src, strategy, date,
                   medium_gap, large_gap):
+    total_value = exp["gross_exposure"]
     out_dir = os.path.join(root, "reports", "user_holdings")
     os.makedirs(out_dir, exist_ok=True)
     # default strategy keeps the plain dated name; other strategies get a
@@ -383,8 +454,9 @@ def write_outputs(root, ov, total_value, universe_src, strategy, date,
     json_p = os.path.join(out_dir, f"{date}_user_holdings_summary{sfx}.json")
 
     out = ov.copy()
-    for c in ("my_current_weight", "model_target_weight",
-              "model_previous_weight", "model_weight_change", "weight_gap"):
+    for c in ("my_current_weight", "my_long_cmp_weight",
+              "model_target_weight", "model_previous_weight",
+              "model_weight_change", "weight_gap"):
         out[c] = out[c].round(5)
     out[OUT_COLUMNS].to_csv(csv_p, index=False)
 
@@ -399,20 +471,28 @@ def write_outputs(root, ov, total_value, universe_src, strategy, date,
     fmt_w = lambda v: "n/a" if pd.isna(v) else f"{v:.1%}"
     fmt_g = lambda v: "n/a" if pd.isna(v) else f"{v * 100:+.1f}pp"
 
+    shorts = ov[ov["position_side"] == "SHORT"]
+    conflicts = ov[ov["both_sides"]]
     md = [f"# User Holdings Overlay — {date}", "",
           f"Strategy compared: **{strategy}** · model universe source: "
           f"{universe_src} · thresholds: medium {medium_gap:.0%} / large "
           f"{large_gap:.0%}", "",
           "## Portfolio summary", "",
-          f"- holdings: {len(ov)}",
-          f"- total known portfolio value: "
-          f"{total_value:,.0f}" if total_value else
-          "- total known portfolio value: n/a (no values computable)",
+          f"- positions: {len(ov)} ({int((ov['position_side'] == 'LONG').sum())} "
+          f"LONG, {len(shorts)} SHORT)",
+          (f"- gross exposure: {exp['gross_exposure']:,.0f} "
+           f"(long {exp['gross_long_value']:,.0f} / short "
+           f"{exp['gross_short_value']:,.0f}; net "
+           f"{exp['net_exposure']:,.0f})") if exp["gross_exposure"] else
+          "- gross exposure: n/a (no values computable)",
           f"- covered by model universe: {len(covered)}",
           f"- not covered: {len(not_covered)}",
           f"- in target/decision book: {len(in_book)}",
           f"- in universe but not selected: {len(not_sel)}",
           f"- missing prices: {len(missing_px)}"]
+    if warnings:
+        md += ["", "## Holdings-file warnings", ""]
+        md += [f"- {w}" for w in warnings]
     if len(gaps):
         top_o = gaps.loc[gaps["weight_gap"].idxmax()]
         top_u = gaps.loc[gaps["weight_gap"].idxmin()]
@@ -437,6 +517,35 @@ def write_outputs(root, ov, total_value, universe_src, strategy, date,
     for label, g in groups:
         syms = ", ".join(g["symbol"]) if len(g) else "—"
         md.append(f"- **{label}** ({len(g)}): {syms}")
+
+    md += ["", "## User actions (position-aware, v16)", "",
+           "model_action describes the model's paper book; user_action is "
+           "what applies to MY actual position. Never confuse the two.", ""]
+    order = {a: i for i, a in enumerate(hold.USER_ACTIONS)}
+    ua_sorted = ov.sort_values(["user_action"],
+                               key=lambda s: s.map(order).fillna(99))
+    for act in [a for a in hold.USER_ACTIONS
+                if a in set(ov["user_action"])]:
+        g = ua_sorted[ua_sorted["user_action"] == act]
+        md.append(f"- **{act}** ({len(g)}): "
+                  + ", ".join(f"{r['symbol']} [{r['user_action_priority']}]"
+                              for _, r in g.iterrows()))
+
+    if len(conflicts):
+        md += ["", "## Position conflicts (LONG + SHORT same symbol)", ""]
+        for _, r in conflicts.iterrows():
+            md.append(f"- **{r['symbol']}** {r['position_side']} "
+                      f"qty {r['position_qty']:g} "
+                      f"({r['n_lots']} lot(s)) — not netted; "
+                      "POSITION_CONFLICT_REVIEW")
+    if len(shorts):
+        md += ["", "## Actual short positions (risk-tracked only)", ""]
+        for _, r in shorts.iterrows():
+            md.append(
+                f"- **{r['symbol']}** SHORT qty {r['position_qty']:g}, "
+                f"value {r['market_value_abs']:,.0f} → "
+                f"{r['user_action']} [{r['user_action_priority']}]: "
+                f"{r['user_action_reason']}")
 
     hi = ov[ov["review_priority"] == "HIGH"]
     md += ["", "## High priority review", ""]
@@ -514,11 +623,16 @@ def write_outputs(root, ov, total_value, universe_src, strategy, date,
         "date": date, "strategy": strategy, "universe_source": universe_src,
         "n_holdings": int(len(ov)),
         "total_known_value": float(total_value) if total_value else None,
+        "exposure": {k: float(v) for k, v in exp.items()},
+        "n_short_positions": int(len(shorts)),
+        "n_position_conflicts": int(ov["both_sides"].sum()),
         "n_covered": int(len(covered)), "n_not_covered": int(len(not_covered)),
         "n_in_book": int(len(in_book)), "n_not_selected": int(len(not_sel)),
         "n_missing_price": int(len(missing_px)),
         "priority_counts": ov["review_priority"].value_counts().to_dict(),
         "classification_counts": ov["classification"].value_counts().to_dict(),
+        "user_action_counts": ov["user_action"].value_counts().to_dict(),
+        "holdings_warnings": warnings,
         "thresholds": {"medium_gap": medium_gap, "large_gap": large_gap},
     }
     with open(json_p, "w", encoding="utf-8") as f:
@@ -557,7 +671,7 @@ def run(root, holdings_path, strategy, date, medium_gap, large_gap,
         return 0
 
     if dry_run:
-        universe, universe_src = model_universe(root)
+        universe, universe_src, _ = model_universe(root)
         out_dir = os.path.join(root, "reports", "user_holdings")
         pt = os.path.join(root, "reports", "paper_trading")
         book_p = (os.path.join(pt, f"{date}_blend50_band10_decision_book.csv")
@@ -578,20 +692,29 @@ def run(root, holdings_path, strategy, date, medium_gap, large_gap,
         print("[dry-run] no files written.")
         return 0
 
-    holdings = read_holdings(holdings_path)
-    if holdings.empty:
-        print(f"holdings file {holdings_path} has no rows — nothing to "
-              "overlay. Add your positions to it first.")
+    try:
+        positions, lots, warnings = read_holdings(holdings_path)
+    except hold.HoldingsError as e:
+        print(f"HOLDINGS VALIDATION ERROR: {e}")
+        print("Nothing written. Fix my_holdings.csv and re-run — invalid "
+              "rows are never silently repaired.")
+        return 2
+    for w in warnings:
+        print(f"[holdings warning] {w}")
+    if positions.empty:
+        print(f"holdings file {holdings_path} has no usable rows — nothing "
+              "to overlay. Add your positions to it first.")
         return 0
-    ov, total_value, universe_src = build_overlay(
-        root, holdings, strategy, date, medium_gap, large_gap)
+    ov, exp, universe_src = build_overlay(
+        root, positions, strategy, date, medium_gap, large_gap)
     csv_p, md_p, json_p = write_outputs(
-        root, ov, total_value, universe_src, strategy, date,
+        root, ov, exp, warnings, universe_src, strategy, date,
         medium_gap, large_gap)
     n_hi = int((ov["review_priority"] == "HIGH").sum())
-    print(f"[overlay {date} vs {strategy}] {len(ov)} holdings, "
-          f"{int(ov['in_latest_decision_book'].sum())} in book, "
-          f"{n_hi} HIGH priority -> {csv_p}")
+    n_short = int((ov["position_side"] == "SHORT").sum())
+    print(f"[overlay {date} vs {strategy}] {len(ov)} positions "
+          f"({n_short} short), {int(ov['in_latest_decision_book'].sum())} "
+          f"in book, {n_hi} HIGH priority -> {csv_p}")
     return 0
 
 

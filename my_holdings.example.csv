@@ -1,6 +1,7 @@
-symbol,shares,avg_cost,current_price,current_value,account,notes
-2330,1000,580,,,CTBC,core semi position
-2317,2000,105.5,,,CTBC,
-1303,3000,,,,long_term,
-0050,500,,,,long_term,ETF - in data cache but not in model universe
-6505,1000,55,60,60000,short_term,example symbol not covered by AI-Quant
+symbol,side,shares,avg_cost,current_price,current_value,account,notes
+2330,LONG,1000,580,,,CTBC,core semi position
+2317,LONG,2000,105.5,,,CTBC,
+1303,LONG,3000,,,,long_term,
+0050,LONG,500,,,,long_term,ETF - in data cache but not in model universe
+6505,LONG,1000,55,60,60000,short_term,example symbol not covered by AI-Quant
+2376,SHORT,1000,350.00,,,CTBC,example actual short position (risk-tracked only)
