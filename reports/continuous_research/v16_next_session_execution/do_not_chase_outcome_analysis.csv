@@ -1,0 +1,7 @@
+kind,bucket,n,mean_fwd_pct,median_fwd_pct,hit_rate,sharpe_ann_approx,median_max_adverse_pct
+existing,ceiling<open<=chase,158,5.72,1.8,0.557,1.15,-6.37
+existing,open<=ceiling,676,2.77,0.66,0.522,0.66,-6.72
+existing,open>chase,301,4.48,0.54,0.522,0.79,-6.82
+fresh,ceiling<open<=chase,39,1.33,0.16,0.513,0.36,-6.12
+fresh,open<=ceiling,238,1.45,0.0,0.496,0.36,-6.95
+fresh,open>chase,22,3.47,5.57,0.682,1.25,-3.42

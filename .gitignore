@@ -24,6 +24,7 @@ reports/transformer_gpu/logs/
 # Personal financial data — never commit (my_holdings.example.csv IS committed)
 my_holdings.csv
 reports/user_holdings/
+reports/user_actions/
 
 # v11 sweep logs (small but generated; summaries/queue JSONs are committed)
 reports/continuous_research/v11_gpu_model_size_sweep/logs/
