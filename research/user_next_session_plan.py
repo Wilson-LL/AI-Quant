@@ -133,7 +133,8 @@ def signal_freshness(model_action, position_side, in_universe):
     return "WATCH_ONLY" if model_action == "" else "EXISTING_MODEL_POSITION"
 
 
-def build_plan(root, holdings_path, date=None, use_panel=True):
+def build_plan(root, holdings_path, date=None, use_panel=True,
+               intended_override=None):
     books = uho.available_books(root)
     if STRATEGY not in books:
         sys.exit(f"no {STRATEGY} decision books found")
@@ -230,6 +231,7 @@ def build_plan(root, holdings_path, date=None, use_panel=True):
     # -------- symbol union: positions + book rows (all actions)
     syms = list(dict.fromkeys(list(pos["symbol"]) + list(book.index)))
     n_uni = max(len(universe), 1)
+    intended = intended_override or next_twse_session(date)
     rows, curve_rows = [], []
     for sym in syms:
         b = book.loc[sym] if sym in book.index else None
@@ -317,7 +319,7 @@ def build_plan(root, holdings_path, date=None, use_panel=True):
                 "symbol": sym, "sector": (b["sector"] if b is not None
                                           else ""),
                 "signal_date": date,
-                "intended_execution_date": next_twse_session(date),
+                "intended_execution_date": intended,
                 "model_action": act,
                 "model_rank": b["rank"] if b is not None else np.nan,
                 "model_score": b["score"] if b is not None else np.nan,
@@ -411,7 +413,12 @@ def build_plan(root, holdings_path, date=None, use_panel=True):
     meta = {
         "signal_date": date, "data_asof": f"{date} CLOSE",
         "generated_at": _dt.datetime.now().strftime("%Y-%m-%d %H:%M"),
-        "intended_execution_date": next_twse_session(date),
+        "intended_execution_date": (intended_override
+                                    or next_twse_session(date)),
+        # patch B (option C): the date is a weekday estimate — no TWSE
+        # holiday calendar exists in this repo or its dependencies.
+        "intended_execution_date_source": "WEEKDAY_CALENDAR_ESTIMATE",
+        "intended_execution_date_confidence": "UNVERIFIED_FOR_HOLIDAYS",
         "intended_execution_session": "NEXT_TWSE_SESSION",
         "timing_validation": TIMING_VALIDATION,
         "book_age_sessions": book_age, "book_stale": book_stale,
@@ -760,14 +767,240 @@ def write_report(plan, meta, out_dir=OUT_DIR):
     return csv_p, md_p
 
 
+# ---------------------------------------------------- nightly (C2) mode
+
+# Partial-publication DATA-INTEGRITY gate (C2-5; tightened to 0.99 by
+# explicit user policy 2026-08-19 after review — NOT an alpha parameter,
+# never optimized from returns). Rationale: the production model is
+# CROSS-SECTIONAL — multi-name partial publication can materially alter
+# top-book membership, rank percentiles, z-scores, and target weights.
+# Policy for the ~108-name universe: 108/108 PASS, 107/108 (~99.07%)
+# PASS (tolerates one idiosyncratic missing/suspended name), 106/108
+# (~98.15%) BLOCK.
+PARTIAL_COVERAGE_MIN = 0.99
+
+
+def newest_cache_coverage(root, universe):
+    """(newest_date, n_at_newest, ratio) over the model universe."""
+    last = {}
+    for sym in universe:
+        p = os.path.join(root, "research", "data_cache", f"{sym}.csv")
+        if not os.path.isfile(p):
+            continue
+        try:
+            d = pd.read_csv(p, usecols=["date"])["date"]
+            if len(d):
+                last[sym] = str(d.iloc[-1])[:10]
+        except Exception:
+            continue
+    if not last:
+        return None, 0, 0.0
+    newest = max(last.values())
+    n_at = sum(1 for v in last.values() if v == newest)
+    return newest, n_at, n_at / max(len(universe), 1)
+
+
+def _nightly_status(out_dir, status, lines):
+    os.makedirs(out_dir, exist_ok=True)
+    p = os.path.join(out_dir, "latest_nightly_status.md")
+    with open(p, "w", encoding="utf-8") as f:
+        f.write(f"# Nightly next-session plan status — "
+                f"{_dt.datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n"
+                f"Status: **{status}**\n\n"
+                + "\n".join(f"- {ln}" for ln in lines) + "\n")
+    return p
+
+
+def nightly(root, holdings_path, out_dir=OUT_DIR,
+            eod_refresh_status="UNKNOWN", allow_recovery=False):
+    """daily_ops step 9: generate a NEW actionable plan only for a
+    genuinely new, complete EOD session. Never overwrites the latest
+    actionable plan with a stale or partial regeneration. Exit 0 covers
+    operational warnings (printed loudly); nonzero = genuine failure.
+
+    eod_refresh_status (patch A — explicit contract from daily_ops.bat):
+      NEW_SESSION_DATA     refresh pulled new EOD rows -> generation may
+                           proceed through the normal gates
+      NO_NEW_SESSION_DATA  refresh reported +0 rows -> HARD generation
+                           gate, independent of which output files exist
+      UNKNOWN              direct/manual invocation -> refused unless
+                           allow_recovery (explicit manual/diagnostic
+                           mode, never used by daily_ops.bat)
+    """
+    books = uho.available_books(root)
+    if STRATEGY not in books:
+        print("[9/9] FAILED: no decision books found")
+        return 1
+    book_date = books[STRATEGY][-1]
+
+    def _standing_plan_lines():
+        latest = os.path.join(out_dir,
+                              "latest_next_session_action_plan.csv")
+        if os.path.isfile(latest):
+            try:
+                prev = pd.read_csv(latest, nrows=1)
+                return [f"standing plan: signal date "
+                        f"{prev['signal_date'].iloc[0]}, intended "
+                        f"execution "
+                        f"{prev['intended_execution_date'].iloc[0]}",
+                        "standing plan left byte-unchanged"]
+            except Exception:
+                return ["standing latest plan exists but is unreadable "
+                        "— left untouched"]
+        return ["NO_STANDING_ACTION_PLAN — no actionable plan exists "
+                "and none was generated",
+                "recovery (manual only): research/user_next_session_"
+                "plan.py --nightly --allow-current-book-recovery"]
+
+    # ---- patch A hard gates: the refresh outcome decides FIRST,
+    # independent of which plan files happen to exist on disk
+    recovery = False
+    if eod_refresh_status == "NO_NEW_SESSION_DATA":
+        lines = ["refresh_data reported +0 rows — no newly published "
+                 "EOD session"] + _standing_plan_lines()
+        _nightly_status(out_dir, "NO_NEW_SESSION_DATA", lines)
+        print("[9/9] NO_NEW_SESSION_DATA:")
+        for ln in lines:
+            print(f"   {ln}")
+        return 0
+    if eod_refresh_status == "UNKNOWN":
+        if not allow_recovery:
+            lines = ["EOD_REFRESH_STATUS_UNKNOWN — this invocation did "
+                     "not come from daily_ops.bat and no refresh result "
+                     "was supplied",
+                     "normal production-plan generation refused "
+                     "(conservative default)",
+                     "manual recovery: add --allow-current-book-recovery "
+                     "(clearly-labeled diagnostic/recovery mode)"]
+            _nightly_status(out_dir, "EOD_REFRESH_STATUS_UNKNOWN", lines)
+            print("[9/9] EOD_REFRESH_STATUS_UNKNOWN:")
+            for ln in lines:
+                print(f"   {ln}")
+            return 0
+        recovery = True
+    universe, _, _ = uho.model_universe(root)
+    newest, n_at, ratio = newest_cache_coverage(root, universe)
+    if newest is not None and ratio < PARTIAL_COVERAGE_MIN:
+        lines = [f"newest cache date {newest} covers only {n_at}/"
+                 f"{len(universe)} universe names "
+                 f"(ratio {ratio:.0%} < {PARTIAL_COVERAGE_MIN:.0%})",
+                 "the newest EOD session looks PARTIALLY PUBLISHED — "
+                 "no new actionable plan was generated",
+                 "the previous latest_next_session_action_plan.* files "
+                 "were left untouched",
+                 "re-run daily_ops after TWSE publication completes"]
+        _nightly_status(out_dir, "PARTIAL_PUBLICATION_SUSPECTED", lines)
+        print("[9/9] WARNING - PARTIAL_PUBLICATION_SUSPECTED:")
+        for ln in lines:
+            print(f"   {ln}")
+        return 0
+    if newest is not None and book_date < newest:
+        lines = [f"latest decision book {book_date} is older than the "
+                 f"newest cache date {newest} — the book was not "
+                 "regenerated for the newest session",
+                 "no new actionable plan was generated; latest plan "
+                 "left untouched"]
+        _nightly_status(out_dir, "STALE_BOOK", lines)
+        print("[9/9] WARNING - STALE_BOOK:")
+        for ln in lines:
+            print(f"   {ln}")
+        return 0
+    dated = os.path.join(out_dir,
+                         f"{book_date}_next_session_action_plan.csv")
+    if os.path.isfile(dated) and not recovery:
+        try:
+            prev = pd.read_csv(dated, nrows=1)
+            sig = str(prev["signal_date"].iloc[0])
+            intend = str(prev["intended_execution_date"].iloc[0])
+        except Exception:
+            sig, intend = book_date, "?"
+        lines = [f"a plan for signal date {sig} already exists "
+                 f"(intended execution {intend})",
+                 "no new completed EOD session since it was generated "
+                 "(+0 rows / same-session rerun)",
+                 "latest_next_session_action_plan.* left UNCHANGED — "
+                 "the standing plan remains the actionable one"]
+        _nightly_status(out_dir, "NO_NEW_SESSION_DATA", lines)
+        print("[9/9] NO_NEW_SESSION_DATA:")
+        for ln in lines:
+            print(f"   {ln}")
+        return 0
+    intended_override = None
+    if recovery:
+        # recovery re-issues the standing book's plan for the NEXT
+        # session from TODAY (weekday estimate) — e.g. after a holiday
+        # invalidated the original intended date. Signal date stays the
+        # book's date; the age is visible in the report.
+        yesterday = (_dt.date.today()
+                     - _dt.timedelta(days=1)).isoformat()
+        intended_override = next_twse_session(yesterday)
+    try:
+        plan, meta = build_plan(root, holdings_path, book_date,
+                                intended_override=intended_override)
+    except hold.HoldingsError as e:
+        print(f"[9/9] HOLDINGS VALIDATION ERROR: {e}")
+        return 2
+    csv_p, md_p = write_report(plan, meta, out_dir)
+    counts = plan["user_action"].value_counts()
+    status = ("RECOVERY_PLAN_GENERATED" if recovery
+              else "FRESH_PLAN_GENERATED")
+    _nightly_status(out_dir, status, [
+        f"signal date {meta['signal_date']}, intended execution "
+        f"{meta['intended_execution_date']} (weekday estimate, "
+        "unverified for holidays)",
+        f"book stale: {meta['book_stale']}",
+        f"actions: {counts.to_dict()}"]
+        + (["RECOVERY MODE: plan re-issued from the standing book with "
+            "a re-derived intended session — manual/diagnostic path, "
+            "never used by daily_ops.bat"] if recovery else []))
+    bar = "=" * 60
+    print(bar)
+    print("NEXT SESSION PLAN" + (" (RECOVERY MODE)" if recovery else ""))
+    print(bar)
+    print(f"Signal date:        {meta['signal_date']}")
+    print(f"Intended execution: {meta['intended_execution_date']} "
+          "(weekday estimate; unverified for TWSE holidays)")
+    print(f"Timing:             {meta['timing_validation']}")
+    print(f"Book:               "
+          f"{'STALE' if meta['book_stale'] else 'FRESH'}")
+    if not meta["user_position_known"]:
+        print("Holdings:           USER_POSITION_UNKNOWN")
+    print("Actions:")
+    for act in hold.USER_ACTIONS:
+        if act in counts:
+            print(f"  {act:28s} {counts[act]:3d}")
+    print(f"Main report: {md_p}")
+    print("Reference prices are historical conditional execution "
+          "estimates. No orders are placed.")
+    print(bar)
+    return 0
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--holdings", default="my_holdings.csv")
     ap.add_argument("--date", default=None)
     ap.add_argument("--out-dir", default=OUT_DIR)
+    ap.add_argument("--nightly", action="store_true",
+                    help="daily_ops step-9 mode: new-session/partial-"
+                         "publication gates; never overwrites the latest "
+                         "actionable plan on a same-session rerun")
+    ap.add_argument("--eod-refresh-status", default="UNKNOWN",
+                    choices=("NEW_SESSION_DATA", "NO_NEW_SESSION_DATA",
+                             "UNKNOWN"),
+                    help="explicit refresh outcome passed by "
+                         "daily_ops.bat (patch A contract)")
+    ap.add_argument("--allow-current-book-recovery", action="store_true",
+                    help="MANUAL recovery/diagnostic: re-issue a plan "
+                         "from the standing book with a re-derived "
+                         "intended session; never used by daily_ops.bat")
     a = ap.parse_args(argv)
     hp = a.holdings if os.path.isabs(a.holdings) \
         else os.path.join(ROOT, a.holdings)
+    if a.nightly:
+        return nightly(ROOT, hp, a.out_dir,
+                       eod_refresh_status=a.eod_refresh_status,
+                       allow_recovery=a.allow_current_book_recovery)
     try:
         plan, meta = build_plan(ROOT, hp, a.date)
     except hold.HoldingsError as e:

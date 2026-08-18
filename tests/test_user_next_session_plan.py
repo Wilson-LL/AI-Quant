@@ -355,5 +355,187 @@ class TestPlan(unittest.TestCase):
                             <= set(hold.USER_ACTIONS))
 
 
+class TestNightly(TestPlan):
+    """C2 --nightly gates. Inherits the TestPlan fixture (and re-runs its
+    tests harmlessly under this class name)."""
+
+    def _nightly(self, holdings_text, out_name,
+                 status="NEW_SESSION_DATA", recovery=False):
+        hp = os.path.join(self.root, "holdings_case.csv")
+        if holdings_text is None:
+            if os.path.isfile(hp):
+                os.unlink(hp)
+        else:
+            _write(hp, holdings_text)
+        out = os.path.join(self.root, "reports", out_name)
+        rc = unsp.nightly(self.root, hp, out, eod_refresh_status=status,
+                          allow_recovery=recovery)
+        return rc, out
+
+    def _hash(self, path):
+        with open(path, "rb") as f:
+            return hash(f.read())
+
+    # C2-20.1/2: fresh session -> plan; same-session rerun -> untouched
+    def test_n1_fresh_then_no_new_data(self):
+        rc, out = self._nightly("symbol,shares\n2330,100\n", "n1")
+        self.assertEqual(rc, 0)
+        latest = os.path.join(out, "latest_next_session_action_plan.csv")
+        dated = os.path.join(out, f"{DATE}_next_session_action_plan.csv")
+        self.assertTrue(os.path.isfile(latest))
+        self.assertTrue(os.path.isfile(dated))
+        h1 = self._hash(latest)
+        with open(os.path.join(out, "latest_nightly_status.md"),
+                  encoding="utf-8") as f:
+            self.assertIn("FRESH_PLAN_GENERATED", f.read())
+        # rerun: latest actionable plan must NOT be overwritten
+        rc2, _ = self._nightly("symbol,shares\n2330,999\n", "n1")
+        self.assertEqual(rc2, 0)
+        self.assertEqual(self._hash(latest), h1)
+        with open(os.path.join(out, "latest_nightly_status.md"),
+                  encoding="utf-8") as f:
+            self.assertIn("NO_NEW_SESSION_DATA", f.read())
+
+    # C2-20.5: partial publication blocks the actionable plan
+    def test_n2_partial_publication_blocked(self):
+        extra = os.path.join(self.root, "research", "data_cache",
+                             "2330.csv")
+        with open(extra, "a", encoding="utf-8") as f:
+            f.write("2026-01-12,100,101,99,100,1000\n")
+        try:
+            rc, out = self._nightly("symbol,shares\n2330,100\n", "n2")
+            self.assertEqual(rc, 0)     # warning, not pipeline failure
+            self.assertFalse(os.path.isfile(os.path.join(
+                out, "latest_next_session_action_plan.csv")))
+            with open(os.path.join(out, "latest_nightly_status.md"),
+                      encoding="utf-8") as f:
+                s = f.read()
+            self.assertIn("PARTIAL_PUBLICATION_SUSPECTED", s)
+            self.assertIn("1/4", s)
+        finally:
+            df = pd.read_csv(extra)
+            df[df["date"] != "2026-01-12"].to_csv(extra, index=False)
+
+    # C2-20.4: stale book (full newer session, book not regenerated)
+    def test_n3_stale_book_blocked(self):
+        paths = [os.path.join(self.root, "research", "data_cache",
+                              f"{s}.csv") for s in ("2330", "1303",
+                                                    "2887", "2412")]
+        for p in paths:
+            with open(p, "a", encoding="utf-8") as f:
+                f.write("2026-01-12,100,101,99,100,1000\n")
+        try:
+            rc, out = self._nightly("symbol,shares\n2330,100\n", "n3")
+            self.assertEqual(rc, 0)
+            self.assertFalse(os.path.isfile(os.path.join(
+                out, "latest_next_session_action_plan.csv")))
+            with open(os.path.join(out, "latest_nightly_status.md"),
+                      encoding="utf-8") as f:
+                self.assertIn("STALE_BOOK", f.read())
+        finally:
+            for p in paths:
+                df = pd.read_csv(p)
+                df[df["date"] != "2026-01-12"].to_csv(p, index=False)
+
+    # C2-20.3: missing holdings file -> graceful model-only run
+    def test_n4_missing_holdings(self):
+        rc, out = self._nightly(None, "n4")
+        self.assertEqual(rc, 0)
+        with open(os.path.join(out, "latest_nightly_status.md"),
+                  encoding="utf-8") as f:
+            self.assertIn("FRESH_PLAN_GENERATED", f.read())
+
+    def test_n5_gate_policy(self):
+        # data-integrity policy (user-approved 2026-08-19): allow at
+        # most ~one missing name in a ~108-name cross-sectional universe
+        self.assertEqual(unsp.PARTIAL_COVERAGE_MIN, 0.99)
+        self.assertGreaterEqual(108 / 108, unsp.PARTIAL_COVERAGE_MIN)
+        self.assertGreaterEqual(107 / 108, unsp.PARTIAL_COVERAGE_MIN)
+        self.assertLess(106 / 108, unsp.PARTIAL_COVERAGE_MIN)
+        # generic ratio behavior (fixture-independent)
+        self.assertLess(0.75, unsp.PARTIAL_COVERAGE_MIN)   # 3/4 blocks
+        self.assertGreaterEqual(1.0, unsp.PARTIAL_COVERAGE_MIN)
+
+    # ---- patch A: explicit EOD refresh-status contract ----
+
+    # A5.1: +0 rows + existing standing plan -> byte-unchanged
+    def test_a1_no_new_with_standing_plan(self):
+        rc, out = self._nightly("symbol,shares\n2330,100\n", "a1")
+        latest = os.path.join(out, "latest_next_session_action_plan.csv")
+        h1 = self._hash(latest)
+        rc2, _ = self._nightly("symbol,shares\n2330,100\n", "a1",
+                               status="NO_NEW_SESSION_DATA")
+        self.assertEqual(rc2, 0)
+        self.assertEqual(self._hash(latest), h1)
+        with open(os.path.join(out, "latest_nightly_status.md"),
+                  encoding="utf-8") as f:
+            s = f.read()
+        self.assertIn("NO_NEW_SESSION_DATA", s)
+        self.assertIn("standing plan: signal date", s)
+
+    # A5.2: +0 rows + NO existing plan -> hard gate, nothing generated
+    def test_a2_no_new_without_standing_plan(self):
+        rc, out = self._nightly("symbol,shares\n2330,100\n", "a2",
+                                status="NO_NEW_SESSION_DATA")
+        self.assertEqual(rc, 0)
+        self.assertFalse(os.path.isfile(os.path.join(
+            out, "latest_next_session_action_plan.csv")))
+        self.assertFalse(os.path.isfile(os.path.join(
+            out, f"{DATE}_next_session_action_plan.csv")))
+        with open(os.path.join(out, "latest_nightly_status.md"),
+                  encoding="utf-8") as f:
+            s = f.read()
+        self.assertIn("NO_NEW_SESSION_DATA", s)
+        self.assertIn("NO_STANDING_ACTION_PLAN", s)
+
+    # A5.6: UNKNOWN status (direct manual run) -> refused by default
+    def test_a3_unknown_status_refused(self):
+        rc, out = self._nightly("symbol,shares\n2330,100\n", "a3",
+                                status="UNKNOWN")
+        self.assertEqual(rc, 0)
+        self.assertFalse(os.path.isfile(os.path.join(
+            out, "latest_next_session_action_plan.csv")))
+        with open(os.path.join(out, "latest_nightly_status.md"),
+                  encoding="utf-8") as f:
+            self.assertIn("EOD_REFRESH_STATUS_UNKNOWN", f.read())
+
+    # A5.7: explicit recovery mode -> clearly labeled, plan generated
+    def test_a4_recovery_mode(self):
+        rc, out = self._nightly("symbol,shares\n2330,100\n", "a4",
+                                status="UNKNOWN", recovery=True)
+        self.assertEqual(rc, 0)
+        latest = os.path.join(out, "latest_next_session_action_plan.csv")
+        self.assertTrue(os.path.isfile(latest))
+        with open(os.path.join(out, "latest_nightly_status.md"),
+                  encoding="utf-8") as f:
+            s = f.read()
+        self.assertIn("RECOVERY_PLAN_GENERATED", s)
+        self.assertIn("RECOVERY MODE", s)
+        # intended date re-derived from today, not from the old signal
+        plan = pd.read_csv(latest, dtype={"symbol": str})
+        import datetime as dtm
+        self.assertGreaterEqual(
+            str(plan["intended_execution_date"].iloc[0]),
+            dtm.date.today().isoformat())
+
+    # A5.8: daily_ops passes the explicit status in both branches
+    def test_a5_bat_contract(self):
+        with open(os.path.join(REPO, "daily_ops.bat"),
+                  encoding="utf-8") as f:
+            bat = f.read()
+        self.assertIn('set "EOD_REFRESH_STATUS=NEW_SESSION_DATA"', bat)
+        self.assertIn('set "EOD_REFRESH_STATUS=NO_NEW_SESSION_DATA"', bat)
+        self.assertIn("--eod-refresh-status %EOD_REFRESH_STATUS%", bat)
+        self.assertNotIn("--allow-current-book-recovery", bat)
+
+    # patch B: calendar-uncertainty labels on every plan
+    def test_b_calendar_estimate_labels(self):
+        plan, meta = self._plan("symbol,shares\n2330,100\n")
+        self.assertEqual(meta["intended_execution_date_source"],
+                         "WEEKDAY_CALENDAR_ESTIMATE")
+        self.assertEqual(meta["intended_execution_date_confidence"],
+                         "UNVERIFIED_FOR_HOLIDAYS")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

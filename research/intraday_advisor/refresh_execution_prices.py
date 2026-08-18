@@ -563,7 +563,34 @@ def write_report(live, meta, out_dir=OUT_DIR):
     return csv_p, md_p
 
 
+def terminal_summary(live, meta, md_p):
+    """Concise C2 console summary (never the full CSV)."""
+    n = {"act": int(live["action_valid_now"].sum()),
+         "exp": int((live["live_execution_state"]
+                     == "ABOVE_PREFERRED_EXECUTION_RANGE").sum()),
+         "risk": int(live["live_execution_state"].isin(
+             ("GAPPED_THROUGH_RISK_REVIEW", "URGENT_RISK_REVIEW")).sum()),
+         "sell": int(live["user_action"].isin(SELL_ACTIONS).sum()),
+         "hold": int(live["user_action"].isin(("HOLD_LONG",
+                                               "NO_ACTION")).sum()),
+         "data": int(((live["quote_freshness"].isin(("STALE", "MISSING")))
+                      | (live["errors"] != "")).sum())}
+    print("AI-Quant Live Execution Refresh")
+    print(f"  Session: {meta['session_date']}   Refresh: "
+          f"{meta['refresh_time']}   Mode: {meta['mode']}")
+    print(f"  Market data: {meta['market_data']}")
+    print(f"  ACTIONABLE NOW: {n['act']}")
+    print(f"  ABOVE PREFERRED EXECUTION RANGE: {n['exp']}")
+    print(f"  RISK REVIEW: {n['risk']}")
+    print(f"  REDUCE / EXIT: {n['sell']}")
+    print(f"  HOLD / NO ACTION: {n['hold']}")
+    print(f"  DATA ISSUES: {n['data']}")
+    print(f"  Main report: {md_p}")
+    print("  No automatic orders.")
+
+
 def main(argv=None):
+    import market_readiness as mr
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--plan", default=PLAN_DEFAULT)
     ap.add_argument("--db", default=lms.DB_DEFAULT)
@@ -572,6 +599,13 @@ def main(argv=None):
                     help='"YYYY-MM-DD HH:MM:SS" (tests/diagnostics)')
     ap.add_argument("--diagnostic", action="store_true")
     ap.add_argument("--out-dir", default=OUT_DIR)
+    ap.add_argument("--wait-until-ready", action="store_true",
+                    help="poll the session-level readiness gate before a "
+                         "normal actionable refresh")
+    ap.add_argument("--max-wait-seconds", type=int,
+                    default=mr.MAX_WAIT_SECONDS_DEFAULT)
+    ap.add_argument("--poll-seconds", type=int,
+                    default=mr.POLL_SECONDS_DEFAULT)
     a = ap.parse_args(argv)
     now = lms.parse_ts(a.now) if a.now else _dt.datetime.now()
     session = a.session_date or now.date().isoformat()
@@ -579,13 +613,46 @@ def main(argv=None):
         print(f"plan not found: {a.plan} — run "
               "research/user_next_session_plan.py first")
         return 2
+    intended = str(pd.read_csv(a.plan, nrows=1)
+                   ["intended_execution_date"].iloc[0])
+    if not a.diagnostic:
+        # session-level readiness gate (C2). Row-level gates stay in C1.
+        status, detail = mr.assess(a.db, intended, now=now)
+        if a.wait_until_ready and status in ("WAITING_FOR_MARKET_OPEN",
+                                             "WAITING_FOR_MARKET_DATA"):
+            import time as _time
+            deadline = _time.monotonic() + a.max_wait_seconds
+            while status in ("WAITING_FOR_MARKET_OPEN",
+                             "WAITING_FOR_MARKET_DATA") and \
+                    _time.monotonic() < deadline:
+                print(f"[wait] {status}: {detail} — polling every "
+                      f"{a.poll_seconds}s")
+                _time.sleep(a.poll_seconds)
+                now = _dt.datetime.now()
+                status, detail = mr.assess(a.db, intended, now=now)
+            session = now.date().isoformat() if a.session_date is None \
+                else session
+        if status != "MARKET_READY":
+            print(f"MARKET_DATA_NOT_READY ({status}): {detail}")
+            if status == "MARKET_CLOSED":
+                print("MARKET_CLOSED — normal actionable refresh refused; "
+                      "rerun with --diagnostic for a "
+                      "HISTORICAL_SESSION_DIAGNOSTIC.")
+            if status == "SESSION_MISMATCH":
+                print("The plan's intended date may have been a "
+                      "non-trading day (the intended date is a weekday "
+                      "ESTIMATE, unverified for TWSE holidays). The plan "
+                      "is never rolled forward automatically. To re-issue "
+                      "it for the next session, run: "
+                      "research/user_next_session_plan.py --nightly "
+                      "--allow-current-book-recovery (manual recovery), "
+                      "then rerun this refresh.")
+            print("No actionable report was generated.")
+            return 3
     live, meta = refresh(a.plan, a.db, session, now=now,
                          diagnostic=a.diagnostic)
     csv_p, md_p = write_report(live, meta, a.out_dir)
-    n_act = int(live["action_valid_now"].sum())
-    print(f"[live {meta['session_date']} mode={meta['mode']} "
-          f"market={meta['market_data']}] {len(live)} rows, "
-          f"{n_act} actionable now -> {md_p}")
+    terminal_summary(live, meta, md_p)
     return 0
 
 
