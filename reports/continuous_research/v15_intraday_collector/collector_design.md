@@ -61,6 +61,44 @@ Limitations: PC must be on/logged-in at 08:54 (no wake configured);
 non-trading holidays yield short dedupe-heavy runs (visible in the daily
 quality report; trading-calendar guard is a possible refinement).
 
+## Reliability hardening (2026-08-20)
+
+Motivating incidents: 2026-08-18 two collector instances polled
+concurrently (unknown system-python launcher + the scheduled venv task;
+one never registered a run row); 2026-08-19 the scheduled collector
+process died silently at ~09:44 with no captured traceback and no
+restart (37 min of session data lost until manual restart).
+
+- **Single-instance lock** (collect_realtime_quotes.py): per-DB OS
+  byte-range lock (`msvcrt.locking`) acquired before any DB write; a
+  second instance prints a clear message and exits with the distinct
+  code **EXIT_ALREADY_RUNNING = 75** (EX_TEMPFAIL — not a crash, not
+  success). The OS releases the lock on ANY process death — no
+  stale-lockfile recovery needed. Lock file `<db>.collector.lock`
+  (scratch-DB tests never collide).
+- **Supervisor watchdog** (collector_supervisor.py — the scheduled task
+  now runs THIS). Observability contract (precise): child stdout/stderr
+  are captured to `research/intraday_cache/supervisor_<date>.log`
+  whenever emitted, and every child launch and exit (with return code)
+  is always recorded — so an unexpected termination is observable even
+  when no Python traceback was produced (hard kill / interpreter
+  crash). Behavior inside the supervision window 08:50–13:34:
+  rc 75 → **STANDBY** (another collector owns the lock — the 2026-08-18
+  mode): retry every 60 s WITHOUT consuming the crash budget, until the
+  window ends or the rogue instance dies and this supervisor takes
+  over; any other rc → unexpected death: restart after 30 s, bounded by
+  **max 10 CONSECUTIVE failures** (a child that stayed alive ≥ 5 min
+  before dying resets the consecutive counter — the budget guards
+  against crashloops, not against unrelated failures spread over the
+  session). Child exit after 13:34 = normal completion. The supervisor
+  holds its own `<db>.supervisor.lock`. Run-ledger restart-safety is
+  unchanged (dead child's 'running' row → 'aborted' at next child
+  startup).
+- AIQuant-IntradayCollector task command updated 2026-08-20 to
+  `collector_supervisor.py --universe book --interval 60` (same 08:54
+  Mon–Fri trigger, same interactive-logon mode). Post-close task
+  unchanged.
+
 ## Operational notes
 
 - Run on the same box as daily ops is fine (CPU-trivial); the existing

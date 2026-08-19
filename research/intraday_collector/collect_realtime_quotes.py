@@ -29,6 +29,12 @@ sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(ROOT, "research"))
 
 DB_DEFAULT = os.path.join(ROOT, "research", "intraday_cache", "intraday.sqlite")
+# Distinct exit code for "another collector already holds the DB lock"
+# (v15 hardening review 2026-08-20). 75 = BSD EX_TEMPFAIL ("temporary
+# failure, retry later") — exactly the supervisor's standby semantics.
+# Non-zero and distinct from crash exits so the supervisor can tell
+# lock contention (standby, no crash budget) from real failures.
+EXIT_ALREADY_RUNNING = 75
 CHUNK = 20
 THROTTLE_S = 1.5
 SESSION_START, SESSION_END = dtime(8, 55), dtime(13, 35)
@@ -229,6 +235,35 @@ def mock_snapshot(sym, cycle, base=100.0):
                          "low": f"{base - 1:.2f}"}}
 
 
+def acquire_single_instance_lock(db_path, name="collector"):
+    """Per-DB single-instance lock (v15 hardening, 2026-08-20).
+
+    Motivation: on 2026-08-18 two collector instances polled the same DB
+    concurrently (an unknown system-python launcher + the scheduled venv
+    task); one never registered a run row. An OS byte-range lock
+    (msvcrt.locking) is used because Windows releases it automatically
+    when the process dies for ANY reason — no stale-lockfile problem
+    after crashes/kills. Returns an open handle to keep for the process
+    lifetime, or None when another instance already holds the lock.
+    Lock file is derived from the DB path so scratch-DB tests never
+    collide with production."""
+    import msvcrt
+    lock_path = db_path + f".{name}.lock"
+    os.makedirs(os.path.dirname(os.path.abspath(lock_path)), exist_ok=True)
+    fh = open(lock_path, "a+")
+    try:
+        fh.seek(0)
+        msvcrt.locking(fh.fileno(), msvcrt.LK_NBLCK, 1)
+    except OSError:
+        fh.close()
+        return None
+    fh.seek(0)
+    fh.truncate()
+    fh.write(f"{os.getpid()} {datetime.now().isoformat()}\n")
+    fh.flush()
+    return fh
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--universe", choices=["book", "full"], default="book")
@@ -240,6 +275,12 @@ def main():
     ap.add_argument("--db", default=DB_DEFAULT)
     a = ap.parse_args()
     a.interval = max(30.0, a.interval)
+
+    lock = acquire_single_instance_lock(a.db)
+    if lock is None:
+        print("[collector] another collector instance already holds the "
+              f"lock for {a.db} - exiting (single-instance hardening)")
+        return EXIT_ALREADY_RUNNING   # not a crash: supervisor stands by
 
     con = connect(a.db)
     mode = "mock" if a.mock else ("once" if a.once else "session")
@@ -362,4 +403,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
