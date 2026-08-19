@@ -21,7 +21,8 @@ if not exist reports\user_actions\latest_next_session_action_plan.csv (
 .venv\Scripts\python.exe research\intraday_advisor\refresh_execution_prices.py --wait-until-ready
 
 echo.
-echo Main report: reports\user_actions\latest_live_execution_plan.md
+echo Simplified summary: reports\user_actions\latest_live_execution_summary.md
+echo Technical report:   reports\user_actions\latest_live_execution_plan.md
 echo Manual review only - no orders are placed by this tool.
 
 :done

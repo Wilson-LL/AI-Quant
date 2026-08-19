@@ -764,6 +764,10 @@ def write_report(plan, meta, out_dir=OUT_DIR):
                     "latest_next_session_action_plan.csv"))
     shutil.copyfile(md_p, os.path.join(out_dir,
                     "latest_next_session_action_plan.md"))
+    # user-facing simplified summary (presentation layer only; the
+    # technical report above remains the auditable artifact)
+    import simplified_reports as sr
+    sr.write_night_summary(plan, meta, out_dir)
     return csv_p, md_p
 
 
@@ -965,13 +969,11 @@ def nightly(root, holdings_path, out_dir=OUT_DIR,
           f"{'STALE' if meta['book_stale'] else 'FRESH'}")
     if not meta["user_position_known"]:
         print("Holdings:           USER_POSITION_UNKNOWN")
-    print("Actions:")
-    for act in hold.USER_ACTIONS:
-        if act in counts:
-            print(f"  {act:28s} {counts[act]:3d}")
-    print(f"Main report: {md_p}")
-    print("Reference prices are historical conditional execution "
-          "estimates. No orders are placed.")
+    print("明日操作表: "
+          r"reports\user_actions\latest_next_session_summary.md")
+    print(r"完整技術報告: reports\user_actions"
+          r"\latest_next_session_action_plan.md")
+    print("No orders are placed.")
     print(bar)
     return 0
 

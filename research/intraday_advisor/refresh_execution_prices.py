@@ -164,9 +164,12 @@ def suggest_limit(side, state_label, price, source, row, domain):
         if state_label == "BELOW_RISK_BAND":
             return np.nan, "RISK_REVIEW_REQUIRED"
         if state_label in ("BELOW_IDEAL_ZONE", "IN_IDEAL_ZONE"):
-            ref, why = price, ("ASK_INSIDE_IDEAL_ZONE"
-                               if source == "BEST_ASK"
-                               else "TRADE_INSIDE_IDEAL_ZONE")
+            # presentation-only reason split (2026-08-19): a below-zone
+            # price must not be described as "inside" the ideal zone
+            inside = state_label == "IN_IDEAL_ZONE"
+            src_tag = "ASK" if source == "BEST_ASK" else "TRADE"
+            ref, why = price, (f"{src_tag}_INSIDE_IDEAL_ZONE" if inside
+                               else f"{src_tag}_BELOW_IDEAL_ZONE")
         elif state_label == "ABOVE_IDEAL_WITHIN_LIMIT":
             ref, why = min(price, _f(row.get("acceptable_ceiling"))), \
                 "ASK_WITHIN_ACCEPTABLE_LIMIT"
@@ -560,6 +563,9 @@ def write_report(live, meta, out_dir=OUT_DIR):
                     "latest_live_execution_plan.csv"))
     shutil.copyfile(md_p, os.path.join(out_dir,
                     "latest_live_execution_plan.md"))
+    # user-facing simplified summary (presentation layer only)
+    import simplified_reports as sr
+    sr.write_live_summary(live, meta, out_dir)
     return csv_p, md_p
 
 
@@ -585,7 +591,10 @@ def terminal_summary(live, meta, md_p):
     print(f"  REDUCE / EXIT: {n['sell']}")
     print(f"  HOLD / NO ACTION: {n['hold']}")
     print(f"  DATA ISSUES: {n['data']}")
-    print(f"  Main report: {md_p}")
+    print("  今日操作表: "
+          r"reports\user_actions\latest_live_execution_summary.md")
+    print(r"  完整技術報告: reports\user_actions"
+          r"\latest_live_execution_plan.md")
     print("  No automatic orders.")
 
 
