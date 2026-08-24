@@ -1,8 +1,15 @@
 @echo off
 REM AI-Quant daily operation cycle (mirrors DAILY_OPERATION_RUNBOOK.md).
 REM Run from the repo root after TWSE close (~14:30+ TW time).
-REM Torch teardown exit codes can be nonzero - steps are not gated on exit
-REM codes; judge each step by its logged output (see the runbook).
+REM
+REM FAIL-FAST (2026-08-24 incident fix): every critical step is gated.
+REM GPU steps (retrain/inference) are gated on their EXPECTED dated
+REM artifacts via research\pipeline_gate.py rather than ERRORLEVEL,
+REM because torch teardown exit codes can be nonzero on success; the
+REM artifact gate also blocks stale outputs from masquerading as fresh
+REM ones. Non-GPU steps are additionally ERRORLEVEL-gated. On any gate
+REM failure the pipeline ABORTS: no downstream step runs and the
+REM previous standing user plan is left untouched.
 setlocal
 cd /d "%~dp0"
 
@@ -20,24 +27,58 @@ if %errorlevel%==0 (
     set "EOD_REFRESH_STATUS=NO_NEW_SESSION_DATA"
     goto :overlay
 )
+REM Coverage gate BEFORE the GPU retrain: a partially published session
+REM (2026-08-24 incident: 34/108) must not reach model training.
+set "STEP=EOD refresh coverage"
+.venv\Scripts\python.exe research\pipeline_gate.py refresh
+if errorlevel 1 goto :pipefail
+
+REM Step-start markers let the gate require artifact mtimes AFTER the
+REM step began: a nonzero exit passes ONLY when every expected dated
+REM artifact was freshly written by this very run (the documented torch
+REM teardown case); any other nonzero exit, and any zero exit without
+REM fresh artifacts, aborts.
+set "STEP_MARKER=%TEMP%\aiquant_step_start.marker"
 
 echo === [2/9] daily retrain ===
+type nul > "%STEP_MARKER%"
 .venv\Scripts\python.exe train_transformer_eod.py --mode daily-retrain
+set "STEP_RC=%errorlevel%"
+set "STEP=daily retrain"
+.venv\Scripts\python.exe research\pipeline_gate.py retrain --exit-code %STEP_RC% --since-marker "%STEP_MARKER%"
+if errorlevel 1 goto :pipefail
 
 echo === [3/9] inference ===
+type nul > "%STEP_MARKER%"
 .venv\Scripts\python.exe inference_transformer_eod.py
+set "STEP_RC=%errorlevel%"
+set "STEP=inference"
+.venv\Scripts\python.exe research\pipeline_gate.py inference --exit-code %STEP_RC% --since-marker "%STEP_MARKER%"
+if errorlevel 1 goto :pipefail
 
 echo === [4/9] blended decision book ===
+set "STEP=blended decision book"
+type nul > "%STEP_MARKER%"
 .venv\Scripts\python.exe research\blended_decision_book.py
+set "STEP_RC=%errorlevel%"
+if not "%STEP_RC%"=="0" goto :pipefail
+.venv\Scripts\python.exe research\pipeline_gate.py book --exit-code %STEP_RC% --since-marker "%STEP_MARKER%"
+if errorlevel 1 goto :pipefail
 
 echo === [5/9] paper snapshot ===
+set "STEP=paper snapshot"
 .venv\Scripts\python.exe research\paper_trading.py snapshot
+if errorlevel 1 goto :pipefail
 
 echo === [6/9] paper evaluate ===
+set "STEP=paper evaluate"
 .venv\Scripts\python.exe research\paper_trading.py evaluate
+if errorlevel 1 goto :pipefail
 
 echo === [7/9] daily diff report ===
+set "STEP=daily diff report"
 .venv\Scripts\python.exe research\daily_diff_report.py
+if errorlevel 1 goto :pipefail
 
 :overlay
 echo === [8/9] user holdings overlay ===
@@ -56,3 +97,12 @@ REM The refresh outcome is passed EXPLICITLY (patch A contract).
 
 :done
 endlocal
+exit /b 0
+
+:pipefail
+echo.
+echo ERROR: %STEP% failed - daily pipeline aborted.
+echo No new decision book/user action plan generated.
+echo Previous standing plan remains untouched.
+endlocal
+exit /b 1

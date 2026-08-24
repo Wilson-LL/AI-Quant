@@ -75,6 +75,34 @@ def make_decision_book(pred, prev, top_frac, band, horizon, exec_date):
     n = len(pred)
     k = max(3, round(top_frac * n))
     band_k = max(1, round(band * n))
+    # Thin-universe guard (2026-08-24 incident review): reuse the SAME
+    # research assumption the validated backtests have always used —
+    # transformer_portfolio.backtest_scores(min_names=60) skips thin
+    # cross-sections as unrepresentative. Inference had no such guard,
+    # so a 34-name partial-publication cross-section reached book
+    # construction. Not a new tuned threshold; the documented existing
+    # one.
+    MIN_UNIVERSE_NAMES = 60
+    if n < MIN_UNIVERSE_NAMES:
+        raise RuntimeError(
+            f"scored universe too thin: {n} names < min_names="
+            f"{MIN_UNIVERSE_NAMES} (the research-standard thin-cross-"
+            "section floor used by backtest_scores) — likely partial "
+            "EOD publication. Inference aborted; no artifacts written. "
+            "Re-run refresh_data and retry.")
+    # Cap-feasibility guard (defense in depth; unreachable while
+    # MIN_UNIVERSE_NAMES=60 keeps k >= 12, kept in case selection
+    # parameters ever change): with k names in the book, the hard
+    # NAME_CAP is satisfiable only if k * NAME_CAP >= 1. cap_weights'
+    # documented infeasible-cap fallback returns EQUAL weights ABOVE the
+    # cap and relies on callers to guard. Never silently violate; never
+    # weaken the assertion below.
+    if k * NAME_CAP < 1.0 - 1e-9:
+        raise RuntimeError(
+            f"decision-book name cap infeasible: only {n} names scored "
+            f"-> book size k={k}, and k*NAME_CAP = {k * NAME_CAP:.2f} < 1 "
+            "(likely partial EOD publication). Inference aborted; no "
+            "artifacts written. Re-run refresh_data and retry.")
 
     prev_w = {}
     if prev is not None:
