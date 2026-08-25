@@ -2,47 +2,57 @@
 
 All commands from the repo root (`C:\Users\wilso\source\code\AI-Quant`),
 using the venv python: `.venv\Scripts\python.exe` (never system python;
-torch nightly + AMP live in the venv). Teardown exit codes from torch can be
-nonzero on process exit — ignore exit codes if the logged output says the
-step completed.
+torch nightly + AMP live in the venv).
 
-## Daily cycle (after TWSE close, ~14:30+ TW time; total ~12 min)
+**Run the whole cycle with `.\daily_ops.bat`** — it executes the 9 steps
+below with fail-fast integrity gates (2026-08-24 incident fix). Manual
+step-by-step runs are for debugging only.
 
-```powershell
-# 1. Refresh EOD cache (network-bound; appends missing months only)
-.venv\Scripts\python.exe research\refresh_data.py
-#    optional: --full-fields  (also accumulates turnover/transaction in
-#    research\data_cache_full for the ~2027-01 full-field revisit)
+## The 9-step nightly cycle (after TWSE close; bat-managed)
 
-# 2. Retrain the 7-seed ensemble (only if refresh added rows; ~5 min)
-.venv\Scripts\python.exe train_transformer_eod.py --mode daily-retrain
-
-# 3. Daily inference -> <asof>_predictions.csv
-.venv\Scripts\python.exe inference_transformer_eod.py
-
-# 4. Blended decision book (BUY/SELL/HOLD/REDUCE/WATCH)
-.venv\Scripts\python.exe research\blended_decision_book.py
-
-# 5. Paper book snapshots (4 strategies) + matured ledger update
-.venv\Scripts\python.exe research\paper_trading.py snapshot
-.venv\Scripts\python.exe research\paper_trading.py evaluate
-
-# 6. Daily diff report (entries/exits, weight deltas, anomalies)
-.venv\Scripts\python.exe research\daily_diff_report.py
-
-# 7. (optional) User holdings overlay — compares my_holdings.csv against the
-#    latest decision book. Skipped automatically if my_holdings.csv is absent.
-.venv\Scripts\python.exe research\user_holdings_overlay.py --strategy blend50_band10
+```text
+[1/9] research\refresh_data.py        EOD cache refresh (bounded retry
+      passes on empty/rate-limited responses; explicit PARTIAL warning)
+      -> +0 rows: steps 2-7 are skipped, step 9 reports
+         NO_NEW_SESSION_DATA and leaves the standing plan untouched
+      -> gate: newest-date coverage must be >= 99% of the cached
+         universe (partial TWSE publication aborts the pipeline here)
+[2/9] train_transformer_eod.py --mode daily-retrain   (7-seed ensemble)
+      -> gate: daily_manifest.json asof == newest cache date
+[3/9] inference_transformer_eod.py    (+ thin-universe guard: >= 60
+      scored names or inference aborts)
+      -> gate: dated predictions/target_book/metrics/report all present
+[4/9] research\blended_decision_book.py
+      -> gate: dated blend50_band10 decision book present
+[5/9] research\paper_trading.py snapshot
+[6/9] research\paper_trading.py evaluate
+[7/9] research\daily_diff_report.py
+[8/9] research\user_holdings_overlay.py --strategy blend50_band10
+      (skipped with a message when my_holdings.csv is absent)
+[9/9] research\user_next_session_plan.py --nightly
+      --eod-refresh-status <NEW_SESSION_DATA|NO_NEW_SESSION_DATA>
+      (the bat passes the refresh outcome explicitly; UNKNOWN status
+      refuses production generation)
 ```
 
-Steps 2–6 are pointless when step 1 reports `+0 rows` (weekend/holiday/EOD
-not yet published) — stop after step 1 in that case (step 7 can still run
-against the latest existing book).
+**Exit-code / gate contract (replaces the old "ignore exit codes"
+heuristic):** the bat writes a step-start marker before each GPU step
+and calls `research\pipeline_gate.py <stage> --exit-code <rc>
+--since-marker <marker>`. A step passes only when its expected
+current-asof artifacts exist **with mtimes after the step started**. A
+nonzero exit is tolerated in exactly one case — every expected artifact
+was freshly written and only the torch/CUDA teardown crashed. Any other
+nonzero exit, and any zero exit without fresh artifacts (silent no-op),
+aborts the pipeline: downstream steps do not run and the standing user
+plan is left untouched.
 
-`daily_ops.bat` at the repo root runs this whole cycle (including the `+0
-rows` early stop and the optional overlay step).
+The main outputs to read afterwards:
+`reports\user_actions\latest_next_session_summary.md` (simplified) and
+`latest_next_session_action_plan.md` (technical). The next morning,
+`.\morning_execution_plan.bat` refreshes live guidance (see
+`docs\operations\V16_OPERATION_RUNBOOK.md`).
 
-## User holdings overlay (step 7)
+## User holdings overlay (step 8)
 
 Compares actual holdings against the model book — review tool only; it never
 generates orders.
@@ -69,10 +79,13 @@ generates orders.
 
 Step 1's last log line: `Refresh done: +N rows across M stocks in Ss`.
 - `+0 rows` → no new session published yet (TWSE EOD can lag; retry later
-  or next day; the loop historically retried ×2 then moved on).
-- Expect roughly `+1 row × ~108 stocks` on a normal trading day. Partial
-  (+N ≪ 108) → exchange still publishing; re-run step 1 later before
-  proceeding.
+  or next day).
+- Expect roughly `+1 row × ~108 stocks` on a normal trading day.
+- Partial publication no longer needs a manual eye: empty/rate-limited
+  responses are retried in bounded passes, still-missing symbols are
+  listed in an explicit `WARNING`, and the coverage gate (≥99% of the
+  cached universe at the newest date) aborts the pipeline before the
+  model ever sees a partial cross-section.
 
 ## What to inspect each day
 
@@ -111,8 +124,10 @@ Open `<asof>_blend50_band10_decision_book.md`:
   previous_weight, weight_change, sector, confidence, holding_horizon_days.
 - BUY = new entry; SELL = exits book (rank fell below band); HOLD/REDUCE =
   incumbent weight maintenance; WATCH = inside the widened band, not held.
-- Sanity: ~22 names, 20d horizon, execution is NEXT session at close —
-  never same-day. Caveat line applies (survivorship-biased universe).
+- Sanity: ~22 names, 20d horizon, execution is the NEXT session — never
+  same-day. (Backtests use next close; executing at the next open is
+  validated equivalent — NEXT_OPEN_TIMING_VALIDATED, v16 timing audit.)
+  Caveat line applies (survivorship-biased universe).
 
 ## How to review matured returns (1d / 5d / 10d / 20d)
 
@@ -129,7 +144,8 @@ p5 1.61/p50 1.92, bear p5 1.14/p50 1.37).
 crash-safe — state files rewritten after every unit of work).
 
 **After a crash / unexpected shutdown:**
-1. Follow the recovery-audit pattern in `RECOVERY_AFTER_SHUTDOWN.md`
+1. Follow the recovery-audit pattern in
+   `docs\archive\RECOVERY_AFTER_SHUTDOWN.md`
    (2026-07-25 precedent): git status → inspect newest logs/queue JSONs →
    validate JSON/JSONL/gzip integrity → mark anything partial as invalid.
 2. Never trust partial metrics from an interrupted run; re-pend and re-run.

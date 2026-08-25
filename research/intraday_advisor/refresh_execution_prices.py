@@ -427,10 +427,12 @@ def _p(v, pat="{:.2f}"):
 
 
 def write_report(live, meta, out_dir=OUT_DIR):
+    import simplified_reports as sr
     os.makedirs(out_dir, exist_ok=True)
     d = meta["session_date"]
-    csv_p = os.path.join(out_dir, f"{d}_live_execution_plan.csv")
-    md_p = os.path.join(out_dir, f"{d}_live_execution_plan.md")
+    hist = sr.history_dir(out_dir, d)
+    csv_p = os.path.join(hist, f"{d}_live_execution_plan.csv")
+    md_p = os.path.join(hist, f"{d}_live_execution_plan.md")
     live[CSV_COLS].to_csv(csv_p, index=False)
 
     md = [f"# AI-Quant Live Execution Refresh — {d}", "",

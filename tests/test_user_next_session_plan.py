@@ -287,7 +287,8 @@ class TestPlan(unittest.TestCase):
         out = os.path.join(self.root, "reports", "user_actions")
         unsp.write_report(plan.reset_index(drop=True), meta, out)
         curve = pd.read_csv(os.path.join(
-            out, f"{DATE}_price_reach_curve.csv"), dtype={"symbol": str})
+            out, "history", DATE[:7], f"{DATE}_price_reach_curve.csv"),
+            dtype={"symbol": str})
         self.assertIn("BUY", set(curve["side"]))
         self.assertIn("SELL", set(curve["side"]))
         self.assertTrue(curve["range_reach_probability"].between(0, 1)
@@ -381,9 +382,10 @@ class TestNightly(TestPlan):
         rc, out = self._nightly("symbol,shares\n2330,100\n", "n1")
         self.assertEqual(rc, 0)
         latest = os.path.join(out, "latest_next_session_action_plan.csv")
-        dated = os.path.join(out, f"{DATE}_next_session_action_plan.csv")
+        dated = os.path.join(out, "history", DATE[:7],
+                             f"{DATE}_next_session_action_plan.csv")
         self.assertTrue(os.path.isfile(latest))
-        self.assertTrue(os.path.isfile(dated))
+        self.assertTrue(os.path.isfile(dated))     # dated -> history/YYYY-MM
         h1 = self._hash(latest)
         with open(os.path.join(out, "latest_nightly_status.md"),
                   encoding="utf-8") as f:
@@ -482,6 +484,9 @@ class TestNightly(TestPlan):
             out, "latest_next_session_action_plan.csv")))
         self.assertFalse(os.path.isfile(os.path.join(
             out, f"{DATE}_next_session_action_plan.csv")))
+        self.assertFalse(os.path.isfile(os.path.join(
+            out, "history", DATE[:7],
+            f"{DATE}_next_session_action_plan.csv")))
         with open(os.path.join(out, "latest_nightly_status.md"),
                   encoding="utf-8") as f:
             s = f.read()
@@ -529,6 +534,54 @@ class TestNightly(TestPlan):
         self.assertNotIn("--allow-current-book-recovery", bat)
 
     # patch B: calendar-uncertainty labels on every plan
+    # ---- 2026-08-25 cleanup: dedup-gate history migration (A-D) ----
+
+    def test_h1_history_dated_plan_blocks_duplicate(self):
+        # A: a dated plan in history/YYYY-MM blocks same-session regen
+        rc, out = self._nightly("symbol,shares\n2330,100\n", "h1")
+        latest = os.path.join(out, "latest_next_session_action_plan.csv")
+        h1 = self._hash(latest)
+        rc2, _ = self._nightly("symbol,shares\n2330,999\n", "h1")
+        self.assertEqual(rc2, 0)
+        self.assertEqual(self._hash(latest), h1)   # byte-unchanged
+        with open(os.path.join(out, "latest_nightly_status.md"),
+                  encoding="utf-8") as f:
+            self.assertIn("NO_NEW_SESSION_DATA", f.read())
+
+    def test_h2_legacy_root_dated_plan_still_blocks(self):
+        # B: transition safety — a legacy flat-root dated file is still
+        # recognized by the gate
+        out = os.path.join(self.root, "reports", "h2")
+        os.makedirs(out, exist_ok=True)
+        _write(os.path.join(out,
+                            f"{DATE}_next_session_action_plan.csv"),
+               f"signal_date,intended_execution_date\n{DATE},2026-01-12\n")
+        rc, out2 = self._nightly("symbol,shares\n2330,100\n", "h2")
+        self.assertEqual(rc, 0)
+        self.assertFalse(os.path.isfile(os.path.join(
+            out, "latest_next_session_action_plan.csv")))
+        with open(os.path.join(out, "latest_nightly_status.md"),
+                  encoding="utf-8") as f:
+            self.assertIn("NO_NEW_SESSION_DATA", f.read())
+
+    def test_h3_missing_dated_plan_generates(self):
+        # C: a genuinely missing dated plan does NOT falsely trigger the
+        # gate — generation proceeds (fresh fixture dir)
+        rc, out = self._nightly("symbol,shares\n2330,100\n", "h3")
+        self.assertEqual(rc, 0)
+        with open(os.path.join(out, "latest_nightly_status.md"),
+                  encoding="utf-8") as f:
+            self.assertIn("FRESH_PLAN_GENERATED", f.read())
+
+    def test_h4_latest_paths_unchanged(self):
+        # D: the four human-facing latest_* paths stay exactly in the
+        # user_actions root
+        rc, out = self._nightly("symbol,shares\n2330,100\n", "h4")
+        for n in ("latest_next_session_action_plan.csv",
+                  "latest_next_session_action_plan.md",
+                  "latest_next_session_summary.md"):
+            self.assertTrue(os.path.isfile(os.path.join(out, n)), n)
+
     def test_b_calendar_estimate_labels(self):
         plan, meta = self._plan("symbol,shares\n2330,100\n")
         self.assertEqual(meta["intended_execution_date_source"],

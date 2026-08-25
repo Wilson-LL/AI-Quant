@@ -26,6 +26,9 @@ my_holdings.csv
 reports/user_holdings/
 reports/user_actions/
 
+# Manual console-tee logs of daily runs (untracked, write-only, no reader)
+reports/paper_trading/daily_logs/
+
 # v11 sweep logs (small but generated; summaries/queue JSONs are committed)
 reports/continuous_research/v11_gpu_model_size_sweep/logs/
 

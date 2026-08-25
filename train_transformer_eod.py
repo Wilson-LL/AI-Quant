@@ -49,7 +49,7 @@ PRESETS = {
 def require_cuda(allow_cpu_smoke=False):
     if DEVICE != "cuda" and not allow_cpu_smoke:
         raise RuntimeError("CUDA unavailable — hard rule: no CPU full-scale training. "
-                           "Fix the environment first (see RTX4060TI_ENVIRONMENT_CHECK.md).")
+                           "Fix the environment first (see docs/operations/RTX4060TI_ENVIRONMENT_CHECK.md).")
 
 
 def build_net(input_dim, cfg):
@@ -549,7 +549,7 @@ def mode_daily_retrain(feature_set="close_only", preset="B", target="tgt_rank_20
     tr, va, w = matured_train_val(data, target, refit_rank, horizon, recency=recency)
     cfg = PRESETS[preset]
     # production spec (2026-07-24, A8/A9): 7-seed ensemble — the seed curve
-    # saturates at 7 (see RESEARCH_SCOREBOARD.md B4e/B4f)
+    # saturates at 7 (see docs/research/RESEARCH_SCOREBOARD.md B4e/B4f)
     seeds = seeds or list(range(7))
     asof = str(data["dates"][refit_rank])[:10]
 

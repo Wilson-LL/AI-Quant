@@ -253,9 +253,18 @@ def night_summary_md(plan, meta):
 
 # ------------------------------------------------------------ writers
 
+def history_dir(out_dir, date):
+    """Dated user-action outputs live under history/YYYY-MM/ (2026-08-25
+    cleanup) so the user-facing folder shows only the latest_* files.
+    Shared by every dated-report writer."""
+    p = os.path.join(out_dir, "history", str(date)[:7])
+    os.makedirs(p, exist_ok=True)
+    return p
+
+
 def _write(out_dir, dated_name, latest_name, text):
     os.makedirs(out_dir, exist_ok=True)
-    p = os.path.join(out_dir, dated_name)
+    p = os.path.join(history_dir(out_dir, dated_name[:10]), dated_name)
     with open(p, "w", encoding="utf-8") as f:
         f.write(text + "\n")
     shutil.copyfile(p, os.path.join(out_dir, latest_name))

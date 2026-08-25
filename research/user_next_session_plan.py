@@ -559,10 +559,12 @@ def _sell_block(r):
 
 
 def write_report(plan, meta, out_dir=OUT_DIR):
+    import simplified_reports as sr
     os.makedirs(out_dir, exist_ok=True)
     date = meta["signal_date"]
-    csv_p = os.path.join(out_dir, f"{date}_next_session_action_plan.csv")
-    md_p = os.path.join(out_dir, f"{date}_next_session_action_plan.md")
+    hist = sr.history_dir(out_dir, date)
+    csv_p = os.path.join(hist, f"{date}_next_session_action_plan.csv")
+    md_p = os.path.join(hist, f"{date}_next_session_action_plan.md")
     out = plan.copy()
     out["my_long_cmp_weight"] = out["my_long_cmp_weight"].round(5)
     out[CSV_COLS].to_csv(csv_p, index=False)
@@ -758,7 +760,7 @@ def write_report(plan, meta, out_dir=OUT_DIR):
         f.write("\n".join(md) + "\n")
     if meta.get("curve_rows"):
         pd.DataFrame(meta["curve_rows"]).to_csv(
-            os.path.join(out_dir, f"{date}_price_reach_curve.csv"),
+            os.path.join(hist, f"{date}_price_reach_curve.csv"),
             index=False)
     shutil.copyfile(csv_p, os.path.join(out_dir,
                     "latest_next_session_action_plan.csv"))
@@ -909,8 +911,14 @@ def nightly(root, holdings_path, out_dir=OUT_DIR,
         for ln in lines:
             print(f"   {ln}")
         return 0
-    dated = os.path.join(out_dir,
-                         f"{book_date}_next_session_action_plan.csv")
+    # Same-session dedup gate (NEVER weakened): a dated plan for the
+    # current book date means no regeneration. The dated file lives in
+    # history/YYYY-MM/ since the 2026-08-25 cleanup; the legacy flat
+    # location is still recognized for transition safety.
+    _name = f"{book_date}_next_session_action_plan.csv"
+    _hist = os.path.join(out_dir, "history", book_date[:7], _name)
+    _legacy = os.path.join(out_dir, _name)
+    dated = _hist if os.path.isfile(_hist) else _legacy
     if os.path.isfile(dated) and not recovery:
         try:
             prev = pd.read_csv(dated, nrows=1)

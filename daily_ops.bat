@@ -1,5 +1,5 @@
 @echo off
-REM AI-Quant daily operation cycle (mirrors DAILY_OPERATION_RUNBOOK.md).
+REM AI-Quant daily operation cycle (mirrors docs\operations\DAILY_OPERATION_RUNBOOK.md).
 REM Run from the repo root after TWSE close (~14:30+ TW time).
 REM
 REM FAIL-FAST (2026-08-24 incident fix): every critical step is gated.
