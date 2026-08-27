@@ -105,6 +105,21 @@ def build(asof=None):
         db[c] = db[c].round(5)
 
     os.makedirs(PT_DIR, exist_ok=True)
+
+    # Additive full-universe export (decision-support only): the complete
+    # blend cross-section that the top-quintile filter below hides. Never
+    # feeds back into book construction — the book above is already built.
+    uni = mm[["stock", "score", "score_std", "mom", "z_tf", "z_mom",
+              "blend", "confidence"]].copy()
+    uni.columns = ["symbol", "tf_score", "seed_score_std", "momentum",
+                   "z_tf", "z_momentum", "blend_score", "confidence"]
+    uni["rank"] = uni["symbol"].map(ranks)
+    uni["sector"] = uni["symbol"].map(lambda s: SECTOR_MAP.get(s, "other"))
+    uni["signal_date"] = asof
+    uni = uni.sort_values("rank").reset_index(drop=True)
+    uni.to_csv(os.path.join(
+        PT_DIR, f"{asof}_blend50_universe_scores.csv"), index=False)
+
     csv_p = os.path.join(PT_DIR, f"{asof}_blend50_band10_decision_book.csv")
     db.to_csv(csv_p, index=False)
     sec = db[db["target_weight"] > 0].groupby("sector")["target_weight"].sum().sort_values(ascending=False)

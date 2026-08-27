@@ -415,8 +415,44 @@ def refresh(plan_path, db_path, session_date, now=None, diagnostic=False):
             "session_date": session_date, "mode": mode,
             "refresh_time": now.strftime("%Y-%m-%d %H:%M:%S"),
             "market_data": market_data, "book_stale": book_stale,
-            "session_ok": session_ok}
+            "session_ok": session_ok,
+            "ranking_context": _ranking_context(plan_path, plan, states)}
     return live, meta
+
+
+def _ranking_context(plan_path, plan, states, k=5):
+    """Optional live decoration: a few top-ranked unowned NON-portfolio
+    names from the nightly universe ranking, with a live price where the
+    collector happens to cover them. Research context only — never an
+    entry action, and ranking alone never becomes a BUY here."""
+    rank_p = os.path.join(os.path.dirname(os.path.abspath(plan_path)),
+                          "latest_universe_ranking.csv")
+    if not os.path.isfile(rank_p):
+        return []
+    try:
+        rk = pd.read_csv(rank_p, dtype={"symbol": str})
+    except Exception:
+        return []
+    need = {"symbol", "universe_rank", "universe_size", "signal_strength",
+            "portfolio_member", "is_actual_holding", "user_action"}
+    if not need <= set(rk.columns):
+        return []
+    in_plan = set(plan["symbol"])
+    c = rk[(~rk["portfolio_member"]) & (~rk["is_actual_holding"])
+           & (~rk["symbol"].isin(in_plan))
+           & rk["signal_strength"].isin(("TOP_TIER", "STRONG"))
+           & pd.to_numeric(rk["universe_rank"], errors="coerce").notna()]
+    out = []
+    for _, r in c.nsmallest(k, "universe_rank").iterrows():
+        st = states.get(r["symbol"])
+        price, _src = lms.actionable_price(st, "state") if st \
+            else (None, "NONE")
+        out.append({"symbol": r["symbol"],
+                    "universe_rank": int(r["universe_rank"]),
+                    "universe_size": int(r["universe_size"]),
+                    "signal_strength": str(r["signal_strength"]),
+                    "live_price": price})
+    return out
 
 
 # ------------------------------------------------------------------ report

@@ -200,13 +200,41 @@ def live_summary_md(live, meta):
         for r in attention:
             md.append(f"- {r['symbol']}：{_attention_reason(r)}")
 
+    rc = meta.get("ranking_context") or []
+    if rc:
+        md += ["", "## 其他高排名候選", "",
+               "以下為全 universe 模型排名（研究候選），尚非正式買進訊號。",
+               ""]
+        for r in rc:
+            st = "極強" if r["signal_strength"] == "TOP_TIER" else "強"
+            px = (f"{r['live_price']:.2f}" if r.get("live_price")
+                  else "無即時報價")
+            md.append(f"- {r['symbol']}：排名 #{r['universe_rank']}"
+                      f"/{r['universe_size']}，訊號{st}，現價 {px}")
+
     md += ["", "---", "完整技術資訊：", "latest_live_execution_plan.md"]
     return "\n".join(md)
 
 
 # ------------------------------------------------------------ NIGHT
 
-def night_summary_md(plan, meta):
+def _universe_teaser(universe_top):
+    """Compact evening section: strongest non-portfolio research names.
+    NEVER promoted to a buy — descriptive ranking context only."""
+    if universe_top is None or not len(universe_top):
+        return []
+    md = ["", "## 全市場強勢候選摘要", "",
+          "以下為全 universe 模型排名，尚非正式買進訊號。", ""]
+    for _, r in universe_top.iterrows():
+        st = "極強" if r["signal_strength"] == "TOP_TIER" else "強"
+        tag = "（觀察中）" if r.get("watch_status") else ""
+        md.append(f"- {r['symbol']}：排名 #{int(r['universe_rank'])}"
+                  f"/{int(r['universe_size'])}，訊號{st}{tag}")
+    md += ["", "完整排名：latest_universe_ranking.md"]
+    return md
+
+
+def night_summary_md(plan, meta, universe_top=None):
     md = [f"# AI-Quant 明日操作參考 — {meta['intended_execution_date']}",
           "",
           "> 僅供價格與操作參考，不保證成交；系統不會自動下單。"]
@@ -246,6 +274,8 @@ def night_summary_md(plan, meta):
     if attention:
         md += ["", "## 注意", ""] + attention
 
+    md += _universe_teaser(universe_top)
+
     md += ["", "---", "完整技術資訊：",
            "latest_next_session_action_plan.md"]
     return "\n".join(md)
@@ -271,11 +301,11 @@ def _write(out_dir, dated_name, latest_name, text):
     return p
 
 
-def write_night_summary(plan, meta, out_dir):
+def write_night_summary(plan, meta, out_dir, universe_top=None):
     return _write(out_dir,
                   f"{meta['signal_date']}_next_session_summary.md",
                   "latest_next_session_summary.md",
-                  night_summary_md(plan, meta))
+                  night_summary_md(plan, meta, universe_top=universe_top))
 
 
 def write_live_summary(live, meta, out_dir):

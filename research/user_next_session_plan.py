@@ -426,6 +426,8 @@ def build_plan(root, holdings_path, date=None, use_panel=True,
         "user_position_known": user_position_known,
         "exposure": exp, "warnings": warnings,
         "curve_rows": curve_rows,
+        # for the additive universe-ranking layer (decision support only)
+        "root": root, "holdings_path": holdings_path,
     }
     return plan, meta
 
@@ -766,10 +768,31 @@ def write_report(plan, meta, out_dir=OUT_DIR):
                     "latest_next_session_action_plan.csv"))
     shutil.copyfile(md_p, os.path.join(out_dir,
                     "latest_next_session_action_plan.md"))
+    # additive full-universe ranking (decision-support layer; READ-ONLY
+    # toward the validated plan above — a ranking failure must be visible
+    # but must never invalidate the already-written action plan)
+    universe_top = None
+    try:
+        import universe_ranking as ur
+        udf, umeta = ur.build_ranking(
+            meta.get("root", ROOT),
+            holdings_path=meta.get("holdings_path"),
+            asof=meta["signal_date"], out_dir=out_dir)
+        universe_top = ur.top_nonportfolio(udf)
+        print(f"universe ranking: {umeta['scored_count']}/"
+              f"{umeta['model_eligible_count']} model-eligible scored "
+              f"({umeta['configured_universe_count']} configured) "
+              f"-> latest_universe_ranking.md")
+        if umeta["excluded"]:
+            print("   unscored: " + ", ".join(
+                f"{s}({r})" for s, r in umeta["excluded"]))
+    except FileNotFoundError as e:
+        print(f"universe ranking SKIPPED (no universe scores yet): {e}")
+
     # user-facing simplified summary (presentation layer only; the
     # technical report above remains the auditable artifact)
     import simplified_reports as sr
-    sr.write_night_summary(plan, meta, out_dir)
+    sr.write_night_summary(plan, meta, out_dir, universe_top=universe_top)
     return csv_p, md_p
 
 
