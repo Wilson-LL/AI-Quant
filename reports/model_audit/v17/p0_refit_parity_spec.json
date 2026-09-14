@@ -6,22 +6,99 @@
   "evaluation_interval": {
     "start": "2026-01-05",
     "end": "2026-07-23",
-    "note": "Latest half-year inside the frozen champion window (panel freeze 2026-07-23). This interval has ALREADY influenced research selection; it is NOT an untouched final test and results must not be described as OOS validation of the champion."
+    "note": "Latest half-year inside the frozen champion window (panel freeze 2026-07-23). This interval has ALREADY influenced research selection; it is NOT an untouched final test and results must not be described as OOS validation of the champion.",
+    "status": "BURNED DIAGNOSTIC INTERVAL: already influenced research selection; NOT untouched final OOS, NOT final validation, NOT prospective confirmation; P0 results are parity diagnostics, never independent estimates of strategy performance"
   },
   "decision_dates": "every trading date in research/data_cache between start and end inclusive (~137 sessions); identical for both arms; the exact list is written to p0/decision_dates.json by the runner before any fit",
   "seeds": {
-    "production_seed_ids": [0, 1, 2, 3, 4, 5, 6],
+    "production_seed_ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
     "production_seed_policy": "same fixed IDs retrained from scratch each session (verified: tests/test_seed_reproducibility.py)",
-    "fixed_3seed_subset": [0, 1, 2],
+    "fixed_3seed_subset": [
+      0,
+      1,
+      2
+    ],
     "rule": "identical seed IDs in both arms of every comparison; 3-seed arms are never compared with the 7-seed champion panel"
   },
   "arms": {
-    "P0_A_prime": {"A": {"seeds": [0, 1, 2], "refit_every_sessions": 126},
-                   "B": {"seeds": [0, 1, 2], "refit_every_sessions": 5}},
-    "P0_A":       {"A": {"seeds": [0, 1, 2], "refit_every_sessions": 126},
-                   "B": {"seeds": [0, 1, 2], "refit_every_sessions": 1}},
-    "P0_B":       {"A": {"seeds": [0, 1, 2, 3, 4, 5, 6], "refit_every_sessions": 126},
-                   "B": {"seeds": [0, 1, 2, 3, 4, 5, 6], "refit_every_sessions": 1}},
+    "P0_A_prime": {
+      "A": {
+        "seeds": [
+          0,
+          1,
+          2
+        ],
+        "refit_every_sessions": 126
+      },
+      "B": {
+        "seeds": [
+          0,
+          1,
+          2
+        ],
+        "refit_every_sessions": 5
+      }
+    },
+    "P0_A": {
+      "A": {
+        "seeds": [
+          0,
+          1,
+          2
+        ],
+        "refit_every_sessions": 126
+      },
+      "B": {
+        "seeds": [
+          0,
+          1,
+          2
+        ],
+        "refit_every_sessions": 5
+      },
+      "C": {
+        "seeds": [
+          0,
+          1,
+          2
+        ],
+        "refit_every_sessions": 1
+      }
+    },
+    "P0_B": {
+      "A": {
+        "seeds": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "refit_every_sessions": 126
+      },
+      "C": {
+        "seeds": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "refit_every_sessions": 1
+      }
+    },
     "cadence_definition": "refit k trains on all matured labels with label_end <= (first decision date of block k) - 1 and scores every decision date of its block; 'daily' = block length 1"
   },
   "held_constant": {
@@ -41,14 +118,36 @@
     "name_cap": 0.1,
     "sector_cap_soft": 0.2,
     "holding_sessions": 20,
-    "transaction_cost_levels_round_trip_bps": [0, 60, 100],
+    "transaction_cost_levels_round_trip_bps": [
+      0,
+      60,
+      100
+    ],
     "execution_timing": "label convention T+1 close -> T+21 close (next-open validated equivalent, v16)"
   },
   "metrics": {
-    "transformer_only": ["rank_ic_mean", "rank_ic_std", "positive_ic_frequency", "top20_minus_bottom20_fwd20_spread"],
-    "blend_portfolio": ["gross_return_per_block", "net60_sharpe_like", "net100_sharpe_like", "avg_one_way_turnover", "max_drawdown", "avg_names_changed_per_rebalance"],
-    "prediction_stability": ["consecutive_refit_score_correlation_same_date", "consecutive_refit_rank_correlation_same_date", "top_quintile_membership_overlap_consecutive_refits"],
-    "seed_dispersion": ["mean_cross_sectional_score_std_across_seeds"],
+    "transformer_only": [
+      "rank_ic_mean",
+      "rank_ic_std",
+      "positive_ic_frequency",
+      "top20_minus_bottom20_fwd20_spread"
+    ],
+    "blend_portfolio": [
+      "gross_return_per_block",
+      "net60_sharpe_like",
+      "net100_sharpe_like",
+      "avg_one_way_turnover",
+      "max_drawdown",
+      "avg_names_changed_per_rebalance"
+    ],
+    "prediction_stability": [
+      "consecutive_refit_score_correlation_same_date",
+      "consecutive_refit_rank_correlation_same_date",
+      "top_quintile_membership_overlap_consecutive_refits"
+    ],
+    "seed_dispersion": [
+      "mean_cross_sectional_score_std_across_seeds"
+    ],
     "paired": "all IC/spread metrics computed per decision date and differenced (B - A) on the same dates; HAC (Bartlett, lag 20) standard error of the mean difference"
   },
   "decision_thresholds": {
@@ -62,12 +161,45 @@
   "compute": {
     "measured_seconds_per_seed_fit": 70,
     "P0_A_prime_fits": "arm A 2 refits x 3 seeds + arm B ceil(137/5)=28 refits x 3 seeds = 90 seed-fits ~= 1.75 h + ~1 min dataset build",
-    "stop_rule": "if the runner's printed estimate exceeds 2.5 h, STOP and report"
+    "stop_rule": "if the runner's printed estimate exceeds 2.5 h, STOP and report",
+    "P0_A_fits": "arm C: 131 daily refits x 3 seeds = 393 seed-fits (A/B reused from cache) ~= 5.8 h at the measured 52.7 s/fit (P0-A' average), 7.6 h at 70 s/fit; must not overlap the 22:00 daily_ops window (runner --deadline stops launching new fits; resumable)"
   },
   "artifacts": {
     "root": "reports/model_audit/v17/p0/",
     "fit_key": "<refit_date>_c<cadence>_s<seed>_<target>_<cfg_sha1[:8]>.npz",
     "resume": "existing fit keys are skipped; only missing fits are computed",
     "production_isolation": "writes ONLY under the artifacts root; never touches checkpoints/, reports/transformer_gpu/, reports/paper_trading/, reports/user_actions/, my_holdings.csv, intraday SQLite, scheduled tasks"
+  },
+  "P0_A_daily_interpretation": {
+    "frozen_at": "2026-09-14 before any daily fit",
+    "P0_A_DAILY": "the P0-A' decision_thresholds applied to the paired C-A comparison (daily minus 126-session) on identical dates; A/B fits reused from cache when config hashes match",
+    "REFIT_DENSITY_EFFECT": {
+      "components": [
+        "rank_ic_mean",
+        "positive_ic_frequency",
+        "top20_minus_bottom20_fwd20",
+        "consecutive_refit_rank_corr",
+        "avg_one_way_turnover",
+        "max_drawdown_net60",
+        "net100_sharpe_like"
+      ],
+      "NONE": "C-A satisfies the PARITY_OK tolerances",
+      "DENSITY_RELATED": "C-A dIC <= (B-A dIC) - 0.005 AND C is worse than B on at least 4 of the 7 components (direction-aware) AND C-A is not PARITY_OK",
+      "NON_MONOTONIC": "B-A was outside PARITY_OK tolerances but C-A dIC >= (B-A dIC) + 0.005 (daily recovers) or C-A satisfies PARITY_OK while B-A did not",
+      "INCONCLUSIVE": "anything else (e.g. |C-A dIC - B-A dIC| < 0.005 with mixed component directions)",
+      "note": "perfect monotonicity is not required; Sharpe-like metrics are one component, never decisive alone"
+    },
+    "BAND10_ROBUSTNESS": {
+      "basis": "C-A on the blend50+band10 long-only book",
+      "ABSORBS_DIFFERENCE": "|d net100| <= 0.15 AND d max_dd <= +1.0pp (B worse) AND d turnover <= +0.05",
+      "PARTIALLY_ABSORBS_DIFFERENCE": "within 2x those tolerances (|d net100| <= 0.30, d max_dd <= +2.0pp, d turnover <= +0.10)",
+      "FAILS_TO_ABSORB_DIFFERENCE": "otherwise"
+    },
+    "REFIT_SHOCK_DIAGNOSTIC": {
+      "definition": "at every refit boundary the PREVIOUS model scores the boundary date (its stored overlap prediction) and the NEW model scores the same date from IDENTICAL feature windows; metrics: score corr, rank Spearman, top-20% Jaccard, names entering/leaving top quintile, mean |rank move|, max |rank move|. This isolates refit shock from market evolution because both models see the same inputs on the same date.",
+      "feasibility": "available without redesign: the runner already stores each fit's overlap-date prediction"
+    },
+    "VAL_VS_OOS_DISSOCIATION": "per refit: own validation IC (stored) vs the mean OOS rank IC over that refit's block dates; report per-arm means and the across-refit Spearman correlation; a positive val-IC gap with a negative OOS-IC gap between arms is recorded as a dissociation",
+    "decision_rule_after_result": "STOP in every case; P0-B is never auto-launched"
   }
 }

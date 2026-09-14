@@ -1,0 +1,274 @@
+{
+ "stage": "P0_A",
+ "interval": {
+  "start": "2026-01-05",
+  "end": "2026-07-23",
+  "note": "Latest half-year inside the frozen champion window (panel freeze 2026-07-23). This interval has ALREADY influenced research selection; it is NOT an untouched final test and results must not be described as OOS validation of the champion.",
+  "status": "BURNED DIAGNOSTIC INTERVAL: already influenced research selection; NOT untouched final OOS, NOT final validation, NOT prospective confirmation; P0 results are parity diagnostics, never independent estimates of strategy performance"
+ },
+ "arms": {
+  "A": {
+   "cadence": 126,
+   "seeds": [
+    0,
+    1,
+    2
+   ],
+   "n_decision_dates": 131,
+   "rank_ic_mean": 0.12160945535170355,
+   "rank_ic_std": 0.23385357105605323,
+   "rank_ic_hac_se": 0.06825615938054903,
+   "positive_ic_frequency": 0.7404580152671756,
+   "top20_minus_bottom20_fwd20": 0.0730050795344544,
+   "gross_return_per_block_mean": 0.08424968319480151,
+   "n_blocks": 7,
+   "net0_sharpe_like": 3.149,
+   "net60_sharpe_like": 3.108,
+   "net100_sharpe_like": 3.081,
+   "max_drawdown_net60": -0.0578,
+   "avg_one_way_turnover": 0.22283068740819073,
+   "avg_names_changed_per_rebalance": 9.35888887114401,
+   "consecutive_refit_score_corr": 0.941685170422448,
+   "consecutive_refit_rank_corr": 0.9956843373951281,
+   "top_quintile_overlap_consecutive": 0.8333333333333334,
+   "refit_shock": {
+    "n_boundaries": 1,
+    "same_date_score_corr": 0.941685170422448,
+    "same_date_rank_corr": 0.9956843373951281,
+    "same_date_topq_overlap": 0.8333333333333334,
+    "topq_entering_mean": 2.0,
+    "topq_leaving_mean": 2.0,
+    "mean_abs_rank_move": 2.1203703703703702,
+    "max_abs_rank_move_mean": 12.0,
+    "max_abs_rank_move_max": 12.0
+   },
+   "seed_dispersion_mean_score_std": 0.01357777789235115,
+   "training": {
+    "n_fits": 6,
+    "val_ic_mean": 0.0915908732543221,
+    "val_ic_std": 0.06641729313307898,
+    "val_ic_p10": 0.02832474532579938,
+    "val_ic_p90": 0.1550420757273437,
+    "epochs_mean": 6.0,
+    "train_s_total": 335.1,
+    "n_refits": 2,
+    "oos_block_ic_mean": 0.12546625209856924,
+    "val_ic_vs_oos_block_ic_spearman": NaN
+   }
+  },
+  "B": {
+   "cadence": 5,
+   "seeds": [
+    0,
+    1,
+    2
+   ],
+   "n_decision_dates": 131,
+   "rank_ic_mean": 0.10608818942915653,
+   "rank_ic_std": 0.24305598967637357,
+   "rank_ic_hac_se": 0.07408366820889861,
+   "positive_ic_frequency": 0.6870229007633588,
+   "top20_minus_bottom20_fwd20": 0.06812005362925372,
+   "gross_return_per_block_mean": 0.0819389154968831,
+   "n_blocks": 7,
+   "net0_sharpe_like": 3.154,
+   "net60_sharpe_like": 3.107,
+   "net100_sharpe_like": 3.075,
+   "max_drawdown_net60": -0.0583,
+   "avg_one_way_turnover": 0.23688586461036285,
+   "avg_names_changed_per_rebalance": 9.949206313635239,
+   "consecutive_refit_score_corr": 0.9156140695455284,
+   "consecutive_refit_rank_corr": 0.9526439390270252,
+   "top_quintile_overlap_consecutive": 0.8867528124049863,
+   "refit_shock": {
+    "n_boundaries": 26,
+    "same_date_score_corr": 0.9156140695455284,
+    "same_date_rank_corr": 0.9526439390270252,
+    "same_date_topq_overlap": 0.8867528124049863,
+    "topq_entering_mean": 1.3076923076923077,
+    "topq_leaving_mean": 1.3076923076923077,
+    "mean_abs_rank_move": 4.149732029955976,
+    "max_abs_rank_move_mean": 64.65384615384616,
+    "max_abs_rank_move_max": 103.0
+   },
+   "seed_dispersion_mean_score_std": 0.01335085928440094,
+   "training": {
+    "n_fits": 81,
+    "val_ic_mean": 0.11780179842416669,
+    "val_ic_std": 0.04795072789017287,
+    "val_ic_p10": 0.044345335544499716,
+    "val_ic_p90": 0.17162492322941508,
+    "epochs_mean": 6.0246913580246915,
+    "train_s_total": 4265.2,
+    "n_refits": 27,
+    "oos_block_ic_mean": 0.10580852228020486,
+    "val_ic_vs_oos_block_ic_spearman": -0.6538461538461537
+   }
+  },
+  "C": {
+   "cadence": 1,
+   "seeds": [
+    0,
+    1,
+    2
+   ],
+   "n_decision_dates": 131,
+   "rank_ic_mean": 0.10904899942487958,
+   "rank_ic_std": 0.2418457894376805,
+   "rank_ic_hac_se": 0.07263628351960806,
+   "positive_ic_frequency": 0.7251908396946565,
+   "top20_minus_bottom20_fwd20": 0.06789198052705317,
+   "gross_return_per_block_mean": 0.0819389154968831,
+   "n_blocks": 7,
+   "net0_sharpe_like": 3.154,
+   "net60_sharpe_like": 3.107,
+   "net100_sharpe_like": 3.075,
+   "max_drawdown_net60": -0.0583,
+   "avg_one_way_turnover": 0.23688586461036285,
+   "avg_names_changed_per_rebalance": 9.949206313635239,
+   "consecutive_refit_score_corr": 0.9241985733703458,
+   "consecutive_refit_rank_corr": 0.9646238666314327,
+   "top_quintile_overlap_consecutive": 0.9083901193566745,
+   "refit_shock": {
+    "n_boundaries": 130,
+    "same_date_score_corr": 0.9241985733703458,
+    "same_date_rank_corr": 0.9646238666314327,
+    "same_date_topq_overlap": 0.9083901193566745,
+    "topq_entering_mean": 1.0615384615384615,
+    "topq_leaving_mean": 1.0615384615384615,
+    "mean_abs_rank_move": 3.4382128221706783,
+    "max_abs_rank_move_mean": 47.603846153846156,
+    "max_abs_rank_move_max": 106.0
+   },
+   "seed_dispersion_mean_score_std": 0.013788046315312386,
+   "training": {
+    "n_fits": 393,
+    "val_ic_mean": 0.11851395466419834,
+    "val_ic_std": 0.04724006476136421,
+    "val_ic_p10": 0.0447412477924893,
+    "val_ic_p90": 0.17433832369237778,
+    "epochs_mean": 5.875318066157761,
+    "train_s_total": 19930.0,
+    "n_refits": 131,
+    "oos_block_ic_mean": 0.10904899942487958,
+    "val_ic_vs_oos_block_ic_spearman": -0.5009768857097102
+   }
+  }
+ },
+ "paired": {
+  "B_minus_A": {
+   "n_dates": 131,
+   "d_ic_mean": -0.015521265922547052,
+   "d_ic_hac_se": 0.009930506253402383,
+   "d_ic_frac_positive": 0.44274809160305345,
+   "d_spread20_mean": -0.004885025905200692,
+   "d_spread20_hac_se": 0.004320231222093114,
+   "d_pos_frac": -0.05343511450381677,
+   "d_rank_corr": -0.04304039836810292,
+   "d_turnover": 0.014055177202172114,
+   "d_max_dd_pp": -0.050000000000000044,
+   "d_net60_sharpe": -0.0009999999999998899,
+   "d_net100_sharpe": -0.005999999999999783,
+   "d_val_ic": 0.026210925169844593
+  },
+  "C_minus_A": {
+   "n_dates": 131,
+   "d_ic_mean": -0.012560455926823979,
+   "d_ic_hac_se": 0.007661143393211531,
+   "d_ic_frac_positive": 0.4122137404580153,
+   "d_spread20_mean": -0.0051130990074012336,
+   "d_spread20_hac_se": 0.0031872224968790943,
+   "d_pos_frac": -0.01526717557251911,
+   "d_rank_corr": -0.031060470763695336,
+   "d_turnover": 0.014055177202172114,
+   "d_max_dd_pp": -0.050000000000000044,
+   "d_net60_sharpe": -0.0009999999999998899,
+   "d_net100_sharpe": -0.005999999999999783,
+   "d_val_ic": 0.026923081409876246
+  },
+  "C_minus_B": {
+   "n_dates": 131,
+   "d_ic_mean": 0.002960809995723069,
+   "d_ic_hac_se": 0.003605580435052239,
+   "d_ic_frac_positive": 0.37404580152671757,
+   "d_spread20_mean": -0.0002280731022005425,
+   "d_spread20_hac_se": 0.002174951073698902,
+   "d_pos_frac": 0.03816793893129766,
+   "d_rank_corr": 0.01197992760440758,
+   "d_turnover": 0.0,
+   "d_max_dd_pp": 0.0,
+   "d_net60_sharpe": 0.0,
+   "d_net100_sharpe": 0.0,
+   "d_val_ic": 0.0007121562400316528
+  }
+ },
+ "P0_A_DAILY": "PARITY_WARNING",
+ "REFIT_DENSITY_EFFECT": "INCONCLUSIVE",
+ "BAND10_ROBUSTNESS": "ABSORBS_DIFFERENCE",
+ "val_vs_oos_dissociation": {
+  "A": {
+   "val_ic_mean": 0.0915908732543221,
+   "oos_ic_mean": 0.12160945535170355
+  },
+  "B": {
+   "val_ic_mean": 0.11780179842416669,
+   "oos_ic_mean": 0.10608818942915653
+  },
+  "C": {
+   "val_ic_mean": 0.11851395466419834,
+   "oos_ic_mean": 0.10904899942487958
+  }
+ },
+ "market_evolution_baseline_armA_consecutive_dates": {
+  "rank_corr": 0.997,
+  "topq_overlap": 0.972
+ },
+ "daily_refit_consecutive_dates_armC": {
+  "rank_corr": 0.964,
+  "topq_overlap": 0.904
+ },
+ "refit_shock_share_derived": {
+  "normalization": "M = 1 - Spearman rho; additive approximation",
+  "by_subtraction": 0.917,
+  "direct": 0.972,
+  "note": "derived diagnostic, not an independent statistic"
+ },
+ "fits": {
+  "armC_new": 393,
+  "armA_B_reused": 87,
+  "failed": 0,
+  "runtime_hours": 5.54
+ },
+ "frozen_interpretation": {
+  "frozen_at": "2026-09-14 before any daily fit",
+  "P0_A_DAILY": "the P0-A' decision_thresholds applied to the paired C-A comparison (daily minus 126-session) on identical dates; A/B fits reused from cache when config hashes match",
+  "REFIT_DENSITY_EFFECT": {
+   "components": [
+    "rank_ic_mean",
+    "positive_ic_frequency",
+    "top20_minus_bottom20_fwd20",
+    "consecutive_refit_rank_corr",
+    "avg_one_way_turnover",
+    "max_drawdown_net60",
+    "net100_sharpe_like"
+   ],
+   "NONE": "C-A satisfies the PARITY_OK tolerances",
+   "DENSITY_RELATED": "C-A dIC <= (B-A dIC) - 0.005 AND C is worse than B on at least 4 of the 7 components (direction-aware) AND C-A is not PARITY_OK",
+   "NON_MONOTONIC": "B-A was outside PARITY_OK tolerances but C-A dIC >= (B-A dIC) + 0.005 (daily recovers) or C-A satisfies PARITY_OK while B-A did not",
+   "INCONCLUSIVE": "anything else (e.g. |C-A dIC - B-A dIC| < 0.005 with mixed component directions)",
+   "note": "perfect monotonicity is not required; Sharpe-like metrics are one component, never decisive alone"
+  },
+  "BAND10_ROBUSTNESS": {
+   "basis": "C-A on the blend50+band10 long-only book",
+   "ABSORBS_DIFFERENCE": "|d net100| <= 0.15 AND d max_dd <= +1.0pp (B worse) AND d turnover <= +0.05",
+   "PARTIALLY_ABSORBS_DIFFERENCE": "within 2x those tolerances (|d net100| <= 0.30, d max_dd <= +2.0pp, d turnover <= +0.10)",
+   "FAILS_TO_ABSORB_DIFFERENCE": "otherwise"
+  },
+  "REFIT_SHOCK_DIAGNOSTIC": {
+   "definition": "at every refit boundary the PREVIOUS model scores the boundary date (its stored overlap prediction) and the NEW model scores the same date from IDENTICAL feature windows; metrics: score corr, rank Spearman, top-20% Jaccard, names entering/leaving top quintile, mean |rank move|, max |rank move|. This isolates refit shock from market evolution because both models see the same inputs on the same date.",
+   "feasibility": "available without redesign: the runner already stores each fit's overlap-date prediction"
+  },
+  "VAL_VS_OOS_DISSOCIATION": "per refit: own validation IC (stored) vs the mean OOS rank IC over that refit's block dates; report per-arm means and the across-refit Spearman correlation; a positive val-IC gap with a negative OOS-IC gap between arms is recorded as a dissociation",
+  "decision_rule_after_result": "STOP in every case; P0-B is never auto-launched"
+ }
+}
