@@ -1,0 +1,28 @@
+{
+  "n_sessions": 2850,
+  "n_stocks": 108,
+  "n_years": 12,
+  "candidate_events_total": 5432,
+  "events_per_session_by_month": {
+    "1": 1.625,
+    "2": 1.4134,
+    "3": 1.7698,
+    "4": 1.8261,
+    "5": 2.1394,
+    "6": 2.0729,
+    "7": 3.2797,
+    "8": 2.5665,
+    "9": 1.7155,
+    "10": 1.5656,
+    "11": 1.3898,
+    "12": 1.1369
+  },
+  "seasonal_excess_events_est": 827.9,
+  "seasonal_excess_events_per_stock_year": 0.639,
+  "median_resid_drop_summer": -0.0537,
+  "p25_resid_drop_summer": -0.0682,
+  "frac_label_windows_containing_candidate": 0.2383,
+  "frac_label_windows_containing_candidate_JunSep": 0.3034,
+  "fwd20_cross_sectional_std": 0.0851,
+  "adjustment_source_local": "NONE (twstock raw; data_cache_full has no dividend/adjust fields)"
+}

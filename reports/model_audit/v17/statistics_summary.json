@@ -1,0 +1,202 @@
+{
+  "prospective": {
+    "first_date": "2026-07-07",
+    "last_date": "2026-09-11",
+    "calendar_days": 66,
+    "n_prediction_dates": 32,
+    "h5": {
+      "n_daily_obs": 27,
+      "mean_ic": 0.0961,
+      "pos_frac": 0.63,
+      "approx_nonoverlap_blocks": 5,
+      "block_mean_ic_min": -0.0561,
+      "block_mean_ic_max": 0.2853,
+      "hac_se_of_mean": 0.094,
+      "hac_95ci": [
+        -0.088,
+        0.2803
+      ],
+      "n_eff_from_hac": 0.51
+    },
+    "h10": {
+      "n_daily_obs": 23,
+      "mean_ic": 0.1853,
+      "pos_frac": 0.739,
+      "approx_nonoverlap_blocks": 3,
+      "block_mean_ic_min": -0.1809,
+      "block_mean_ic_max": 0.4489,
+      "hac_se_of_mean": 0.0472,
+      "hac_95ci": [
+        0.0928,
+        0.2778
+      ],
+      "n_eff_from_hac": 1.15
+    },
+    "h20": {
+      "n_daily_obs": 14,
+      "mean_ic": 0.2034,
+      "pos_frac": 0.857,
+      "approx_nonoverlap_blocks": 1,
+      "block_mean_ic_min": -0.1764,
+      "block_mean_ic_max": 0.5332,
+      "hac_se_of_mean": 0.0,
+      "hac_95ci": [
+        0.2034,
+        0.2034
+      ],
+      "n_eff_from_hac": 0
+    }
+  },
+  "deflated": [
+    {
+      "panel": "CH",
+      "n_blocks": 42,
+      "sharpe_annual": 1.989,
+      "sharpe_per_block": 0.5603,
+      "skew": 0.29,
+      "kurtosis": 4.772,
+      "scenarios": [
+        {
+          "N_trials": 10,
+          "trial_sharpe_std_annual": 0.2,
+          "expected_max_null_sharpe_annual": 0.315,
+          "haircut_annual": 0.315,
+          "DSR_prob_true_sr_exceeds_null_max": 0.998
+        },
+        {
+          "N_trials": 10,
+          "trial_sharpe_std_annual": 0.35,
+          "expected_max_null_sharpe_annual": 0.551,
+          "haircut_annual": 0.551,
+          "DSR_prob_true_sr_exceeds_null_max": 0.993
+        },
+        {
+          "N_trials": 10,
+          "trial_sharpe_std_annual": 0.5,
+          "expected_max_null_sharpe_annual": 0.787,
+          "haircut_annual": 0.787,
+          "DSR_prob_true_sr_exceeds_null_max": 0.979
+        },
+        {
+          "N_trials": 30,
+          "trial_sharpe_std_annual": 0.2,
+          "expected_max_null_sharpe_annual": 0.415,
+          "haircut_annual": 0.415,
+          "DSR_prob_true_sr_exceeds_null_max": 0.996
+        },
+        {
+          "N_trials": 30,
+          "trial_sharpe_std_annual": 0.35,
+          "expected_max_null_sharpe_annual": 0.726,
+          "haircut_annual": 0.726,
+          "DSR_prob_true_sr_exceeds_null_max": 0.984
+        },
+        {
+          "N_trials": 30,
+          "trial_sharpe_std_annual": 0.5,
+          "expected_max_null_sharpe_annual": 1.037,
+          "haircut_annual": 1.037,
+          "DSR_prob_true_sr_exceeds_null_max": 0.947
+        },
+        {
+          "N_trials": 70,
+          "trial_sharpe_std_annual": 0.2,
+          "expected_max_null_sharpe_annual": 0.48,
+          "haircut_annual": 0.48,
+          "DSR_prob_true_sr_exceeds_null_max": 0.995
+        },
+        {
+          "N_trials": 70,
+          "trial_sharpe_std_annual": 0.35,
+          "expected_max_null_sharpe_annual": 0.841,
+          "haircut_annual": 0.841,
+          "DSR_prob_true_sr_exceeds_null_max": 0.974
+        },
+        {
+          "N_trials": 70,
+          "trial_sharpe_std_annual": 0.5,
+          "expected_max_null_sharpe_annual": 1.201,
+          "haircut_annual": 1.201,
+          "DSR_prob_true_sr_exceeds_null_max": 0.909
+        }
+      ],
+      "PSR_vs_0.0": 1.0,
+      "PSR_vs_1.0": 0.953
+    },
+    {
+      "panel": "BR",
+      "n_blocks": 67,
+      "sharpe_annual": 1.455,
+      "sharpe_per_block": 0.4099,
+      "skew": -0.105,
+      "kurtosis": 2.639,
+      "scenarios": [
+        {
+          "N_trials": 10,
+          "trial_sharpe_std_annual": 0.2,
+          "expected_max_null_sharpe_annual": 0.315,
+          "haircut_annual": 0.315,
+          "DSR_prob_true_sr_exceeds_null_max": 0.993
+        },
+        {
+          "N_trials": 10,
+          "trial_sharpe_std_annual": 0.35,
+          "expected_max_null_sharpe_annual": 0.551,
+          "haircut_annual": 0.551,
+          "DSR_prob_true_sr_exceeds_null_max": 0.975
+        },
+        {
+          "N_trials": 10,
+          "trial_sharpe_std_annual": 0.5,
+          "expected_max_null_sharpe_annual": 0.787,
+          "haircut_annual": 0.787,
+          "DSR_prob_true_sr_exceeds_null_max": 0.926
+        },
+        {
+          "N_trials": 30,
+          "trial_sharpe_std_annual": 0.2,
+          "expected_max_null_sharpe_annual": 0.415,
+          "haircut_annual": 0.415,
+          "DSR_prob_true_sr_exceeds_null_max": 0.988
+        },
+        {
+          "N_trials": 30,
+          "trial_sharpe_std_annual": 0.35,
+          "expected_max_null_sharpe_annual": 0.726,
+          "haircut_annual": 0.726,
+          "DSR_prob_true_sr_exceeds_null_max": 0.943
+        },
+        {
+          "N_trials": 30,
+          "trial_sharpe_std_annual": 0.5,
+          "expected_max_null_sharpe_annual": 1.037,
+          "haircut_annual": 1.037,
+          "DSR_prob_true_sr_exceeds_null_max": 0.818
+        },
+        {
+          "N_trials": 70,
+          "trial_sharpe_std_annual": 0.2,
+          "expected_max_null_sharpe_annual": 0.48,
+          "haircut_annual": 0.48,
+          "DSR_prob_true_sr_exceeds_null_max": 0.983
+        },
+        {
+          "N_trials": 70,
+          "trial_sharpe_std_annual": 0.35,
+          "expected_max_null_sharpe_annual": 0.841,
+          "haircut_annual": 0.841,
+          "DSR_prob_true_sr_exceeds_null_max": 0.909
+        },
+        {
+          "N_trials": 70,
+          "trial_sharpe_std_annual": 0.5,
+          "expected_max_null_sharpe_annual": 1.201,
+          "haircut_annual": 1.201,
+          "DSR_prob_true_sr_exceeds_null_max": 0.709
+        }
+      ],
+      "PSR_vs_0.0": 0.999,
+      "PSR_vs_1.0": 0.838
+    }
+  ]
+}
