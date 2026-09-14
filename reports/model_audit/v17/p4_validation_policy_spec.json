@@ -1,0 +1,57 @@
+{
+  "name": "P4-B validation / final-training policy screen (bounded, paired, 5-session cadence)",
+  "preregistered_at": "2026-09-14",
+  "status": "FROZEN before any P4-B fit; not launched",
+  "label": "BURNED METHODOLOGY DIAGNOSTIC - selects a training methodology on the burned 2026-H1 interval; NOT independent OOS validation; all absolute numbers remain SURVIVOR-UNIVERSE / UNADJUSTED-PRICE references",
+  "question": "Does the CURRENT validation policy (newest ~10% of matured dates held out, early stop on its IC, no refit on train+val) select worse models than a recent, shorter validation block, or than calibrating the epoch count and then training on train+validation?",
+  "evaluation_interval": {"start": "2026-01-05", "end": "2026-07-23", "decision_dates": 131, "same_as": "P0"},
+  "held_constant": {
+    "cadence": "5-session full refit (27 refits over the interval) - fixed for ALL policies; P0 showed 5-session ~= daily at the portfolio level",
+    "seeds": [0, 1, 2],
+    "architecture": "preset B", "features": "close_only", "target": "tgt_rank_20", "optimizer": "AdamW 3e-4 wd 1e-4 clip 1.0 batch 1024 AMP",
+    "early_stop_rule_where_used": "argmax val rank IC, patience 3, min 2, max 25",
+    "purge_sessions": 21, "blend": "blend50", "top_frac": 0.2, "band": 0.1, "costs_bps_round_trip": [0, 60, 100],
+    "execution": "T+1 close -> T+21 close label convention (next-open validated)"
+  },
+  "policies": {
+    "A_current": {
+      "definition": "matured_train_val: validation = newest 10% of matured dates (~260 sessions, contiguous, ending 21 sessions before the refit); train = all older matured dates ending 21 sessions before validation; early stop on validation IC; final weights = best-validation epoch; NO refit on train+val",
+      "fits": "REUSED from P0 arm B cache (identical function, seeds, dates, config hash) - 0 new fits"
+    },
+    "B_recent126": {
+      "definition": "validation = the most recent 126 matured sessions (contiguous, ending 21 sessions before the refit); train = all matured dates ending 21 sessions before the validation block; early stop on validation IC; final = best-validation epoch; no refit on train+val",
+      "fits": "27 refits x 3 seeds = 81"
+    },
+    "C_recent63": {
+      "definition": "as B with a 63-session validation block",
+      "fits": 81
+    },
+    "D_calibrate_then_train_all": {
+      "definition": "step 1 = policy B's fit (reused): E = 1 + index of the best-validation epoch. step 2 = retrain the SAME seed from scratch on TRAIN + VALIDATION (policy B's blocks, i.e. every matured date up to 21 sessions before the refit) for a fixed budget of E epochs with early stopping disabled (patience = 1e6, min_epochs = max_epochs = E). Implementation note: production fit_one always restores the epoch with the best IC on the rows passed as validation; step 2 passes the (now in-sample) validation rows, so the restored epoch is the best in-sample-IC epoch among the E epochs - in practice the last or near-last epoch. This is documented as an approximation of 'exactly E epochs'; an inert restore_best=False kwarg in fit_one would make it exact and is proposed for review, NOT applied. No information after the refit date is used at any step.",
+      "fits": "81 retrains (calibration reuses B)"
+    }
+  },
+  "epoch_diagnostic_P4_B0": {
+    "definition": "on 9 evenly spaced refit dates x 3 seeds under policy A's split, train with early stopping DISABLED for 15 epochs and, after every epoch, score (a) validation IC, (b) train loss, (c) the refit's 5-session OOS block IC (research-only; never used for selection). Implemented by wrapping predict_idx inside the research process only - production code untouched. Reports: per-epoch curves, correlation(val IC, later OOS IC) across epochs, regret = OOS IC at the validation-best epoch minus OOS IC at the ex-post best epoch, and OOS IC at a fixed epoch near the median early-stop point (6)",
+    "fits": "27 fits x 15 epochs (~2.5x a normal fit)"
+  },
+  "metrics": {
+    "primary": ["subsequent rank IC mean (HAC SE)", "positive-IC frequency", "top20-bottom20 fwd20 spread", "Spearman(val IC, subsequent block OOS IC) across refits, raw and time-detrended"],
+    "secondary": ["seed dispersion", "refit-to-refit same-date rank correlation", "top-quintile overlap"],
+    "portfolio_check": ["net100 Sharpe-like", "max drawdown net60", "one-way turnover"],
+    "paired": "all per-date metrics differenced against policy A on identical dates; HAC(20) SE"
+  },
+  "decision_thresholds": {
+    "PROMISING (a policy may proceed to a 7-seed dual-window confirmation)": "vs A on the same dates: dIC >= +0.005 AND dIC > +1 HAC SE AND positive-IC frequency >= A - 2pp AND spread >= A - 0.2pp AND val->OOS Spearman (time-detrended) >= A's + 0.30 or >= 0 AND d turnover <= +0.05 AND d max_dd <= +1.0pp AND all three seeds individually dIC >= 0",
+    "NOT_PROMISING": "dIC <= -0.005 or fails two or more of the secondary/portfolio checks",
+    "VALIDATION_POLICY_INCONCLUSIVE": "anything else; no winner is selected",
+    "note": "thresholds frozen before the run; a +0.001 IC difference is noise; Sharpe-like metrics never decisive"
+  },
+  "compute": {
+    "measured_seconds_per_fit": 52.9,
+    "new_fits": {"B": 81, "C": 81, "D": 81, "epoch_diag": 27, "total": 270},
+    "estimated_gpu_hours": "B/C/D 243 x 52.9 s = 3.6 h; epoch diagnostic 27 x ~130 s = 1.0 h; total ~4.6 h (~5.5 h at the p90 70 s/fit)",
+    "schedule_rule": "start only after tonight's daily_ops has completed and the GPU is idle; must not overlap the next production window"
+  },
+  "artifacts": {"root": "reports/model_audit/v17/p4/", "fit_key": "<policy>_<refit_date>_c5_s<seed>_<target>_<cfg_hash>.npz", "resume": "existing keys skipped", "isolation": "never writes outside p4/"}
+}

@@ -91,7 +91,7 @@ ranks.
 3. **Does band10 still absorb the ranking noise?** Yes — the B and C books are identical to each other and within 0.006 Sharpe / 0.05 pp DD of A.
 4. **Does daily retraining raise turnover?** Marginally: +0.014 one-way (+0.6 names per rebalance).
 5. **Market evolution vs refit shock?** Refit shock dominates day-to-day rank movement (0.965 same-date refit corr vs 0.997 market-only day-to-day).
-6. **Does higher val IC under dense refitting fail to translate?** Yes, quantified: dense arms' own val IC is **+0.027 higher** while their OOS IC is **−0.013 to −0.016 lower**; across refits the correlation between a fit's val IC and its subsequent block OOS IC is **negative (−0.65 B, −0.50 C)** — refits that look best on the (13-month-stale) holdout do worst afterwards.
+6. **Does higher val IC under dense refitting fail to translate?** Yes, quantified: dense arms' own val IC is **+0.027 higher** while their OOS IC is **−0.013 to −0.016 lower**; across refits the raw correlation between a fit's val IC and its subsequent block OOS IC is **negative (−0.65 B, −0.50 C)**. *Original interpretation (superseded):* "refits that look best on the holdout do worst afterwards." **Correction (P4-A, doc 18):** that raw correlation is primarily a shared time-trend confound; after detrending (+0.004 / +0.03) and within-refit across seeds (≈ 0) validation IC is **approximately uninformative** about later OOS IC, not meaningfully anti-predictive. The measured values above are unchanged.
 
 ## Pre-registered classifications (applied mechanically by the runner)
 
