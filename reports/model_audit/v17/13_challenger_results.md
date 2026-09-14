@@ -1,6 +1,9 @@
 # 13 — Challenger results
 
-**No GPU challenger has been run** (by design: review gate before compute).
+**No GPU challenger has been run.** The only GPU work so far is the P0-A′
+methodology screen (cadence parity, not a challenger) — see 16: classified
+**PARITY_WARNING** (5-session refit: IC −0.0155 vs 126-session on the same
+131 dates, ~1.6 HAC SE; book-level metrics identical; stability high).
 
 ## Stage-1 CPU results (frozen panels, `stage1_holding_sector.csv`)
 

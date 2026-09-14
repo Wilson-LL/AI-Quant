@@ -27,7 +27,7 @@ it — tested). Decision book unchanged: BOOK_EQUIVALENCE BYTE_IDENTICAL.
 | Construction | on the plateau / BR optimum; 60% semis+electronics tilt | 09 |
 | Holdings vs model | current divergence large (58% in book names; 55% of target exposure omitted; 0.61 one-way deviation) — **ACTUAL_REALIZED_LOSS_ATTRIBUTION_INCOMPLETE** (no fills/entry dates) | 10 |
 | Baselines | transformer ≈ 65% momentum; residual IC 0.02 / 0.00; beats ridge clearly; adds diversification more than IC | 11 |
-| Production parity | daily full refit (same fixed seeds 0–6 retrained each session) never validated → **P0**, paired-seed design, ≈9 h GPU (up to 26 h) | 15 |
+| Production parity | daily full refit (same fixed seeds 0–6 retrained each session) never validated → **P0**, paired-seed design. **P0-A′ run (1.28 h): PARITY_WARNING** — 5-session refit IC −0.0155 vs 126-session (same seeds/dates, ~1.6 HAC SE), positive-IC share −5 pp, book metrics identical, stability high; P0-A (daily) justified, not launched | 15, 16 |
 
 ## Proposed research order (no GPU launched)
 P0 parity (9–26 h) → P1 corporate-action data (0 GPU) → P2 universe data

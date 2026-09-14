@@ -1,0 +1,114 @@
+{
+ "stage": "P0_A_prime",
+ "classification": "PARITY_WARNING",
+ "interval": {
+  "start": "2026-01-05",
+  "end": "2026-07-23",
+  "note": "Latest half-year inside the frozen champion window (panel freeze 2026-07-23). This interval has ALREADY influenced research selection; it is NOT an untouched final test and results must not be described as OOS validation of the champion."
+ },
+ "interval_status": "BURNED DIAGNOSTIC INTERVAL \u2014 already influenced research selection; NOT untouched final OOS, NOT final validation, NOT prospective confirmation",
+ "decision_date_count": 131,
+ "first_date": "2026-01-05",
+ "last_date": "2026-07-23",
+ "seed_subset": [
+  0,
+  1,
+  2
+ ],
+ "fit_counts": {
+  "planned": 87,
+  "run": 87,
+  "failed": 0,
+  "arm_A_refits": 2,
+  "arm_B_refits": 27
+ },
+ "runtime_hours": 1.28,
+ "config_hash": "9ea09291",
+ "arms": {
+  "A": {
+   "cadence": 126,
+   "seeds": [
+    0,
+    1,
+    2
+   ],
+   "n_decision_dates": 131,
+   "rank_ic_mean": 0.12160945535170355,
+   "rank_ic_std": 0.23385357105605323,
+   "positive_ic_frequency": 0.7404580152671756,
+   "top20_minus_bottom20_fwd20": 0.0730050795344544,
+   "gross_return_per_block_mean": 0.08424968319480151,
+   "n_blocks": 7,
+   "net0_sharpe_like": 3.149,
+   "net60_sharpe_like": 3.108,
+   "net100_sharpe_like": 3.081,
+   "max_drawdown_net60": -0.0578,
+   "avg_one_way_turnover": 0.22283068740819073,
+   "avg_names_changed_per_rebalance": 9.35888887114401,
+   "consecutive_refit_score_corr": 0.941685170422448,
+   "consecutive_refit_rank_corr": 0.9956843373951281,
+   "top_quintile_overlap_consecutive": 0.8333333333333334,
+   "n_refit_boundaries": 1,
+   "seed_dispersion_mean_score_std": 0.01357777789235115,
+   "fits": {
+    "n": 6,
+    "val_ic_mean": 0.0915908732543221,
+    "epochs_mean": 6.0,
+    "train_s_total": 335.1
+   }
+  },
+  "B": {
+   "cadence": 5,
+   "seeds": [
+    0,
+    1,
+    2
+   ],
+   "n_decision_dates": 131,
+   "rank_ic_mean": 0.10608818942915653,
+   "rank_ic_std": 0.24305598967637357,
+   "positive_ic_frequency": 0.6870229007633588,
+   "top20_minus_bottom20_fwd20": 0.06812005362925372,
+   "gross_return_per_block_mean": 0.0819389154968831,
+   "n_blocks": 7,
+   "net0_sharpe_like": 3.154,
+   "net60_sharpe_like": 3.107,
+   "net100_sharpe_like": 3.075,
+   "max_drawdown_net60": -0.0583,
+   "avg_one_way_turnover": 0.23688586461036282,
+   "avg_names_changed_per_rebalance": 9.949206313635239,
+   "consecutive_refit_score_corr": 0.9156140695455284,
+   "consecutive_refit_rank_corr": 0.9526439390270252,
+   "top_quintile_overlap_consecutive": 0.8867528124049863,
+   "n_refit_boundaries": 26,
+   "seed_dispersion_mean_score_std": 0.01335085928440094,
+   "fits": {
+    "n": 81,
+    "val_ic_mean": 0.11780179842416669,
+    "epochs_mean": 6.0246913580246915,
+    "train_s_total": 4265.2
+   }
+  }
+ },
+ "paired_B_minus_A": {
+  "n_dates": 131,
+  "d_ic_mean": -0.015521265922547052,
+  "d_ic_hac_se": 0.009930506253402383,
+  "d_ic_frac_positive": 0.44274809160305345,
+  "d_spread20_mean": -0.004885025905200692,
+  "d_spread20_hac_se": 0.004320231222093114,
+  "d_pos_frac": -0.05343511450381677,
+  "d_turnover": 0.014055177202172087,
+  "d_max_dd_pp": -0.050000000000000044,
+  "d_net60_sharpe": -0.0009999999999998899,
+  "d_net100_sharpe": -0.005999999999999783
+ },
+ "frozen_decision_thresholds": {
+  "derivation": "from the champion's historical per-date IC std (~0.197 CH) and its book-level noise: dIC of 0.005 is ~7% of the mean CH IC and inside one HAC SE for a 137-date paired sample; 0.010 (~15%) with a consistent multi-metric direction is treated as material. Sharpe-like metrics over ~6 blocks are reported but are NOT decisive.",
+  "PARITY_OK": "dIC_mean(B-A) >= -0.005 (or negative but within 1 HAC SE of 0) AND dPosFrac >= -0.05 AND consecutive-refit rank corr(B) >= 0.90 AND top-quintile overlap(B) >= 0.70 AND dTurnover <= +0.05 AND dMaxDD <= +3pp",
+  "PRODUCTION_RESEARCH_PARITY_RISK": "dIC_mean(B-A) <= -0.010 AND dIC below -1 HAC SE AND at least two of: dPosFrac <= -0.05; dSpread20 <= -0.5pp; rank corr(B) < 0.80 or overlap(B) < 0.50; dTurnover > +0.10",
+  "PARITY_WARNING": "anything else (material movement without consistent direction/evidence)",
+  "better_than_A": "if B is materially better, record it; it does not change the champion references (they would be conservative)",
+  "note": "thresholds fixed before the run; not to be tuned afterwards"
+ }
+}
