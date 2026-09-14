@@ -73,6 +73,8 @@ CSV_COLS = [
     "symbol", "sector", "signal_date", "intended_execution_date",
     "model_action", "model_rank", "model_score", "model_target_weight",
     "position_side", "position_qty", "avg_cost", "market_value_abs",
+    "reference_price", "unrealized_pnl", "unrealized_pnl_pct",
+    "price_vs_cost_pct",
     "my_long_cmp_weight", "user_action", "user_action_priority",
     "signal_freshness", "model_position_age_sessions", "execution_posture",
     "previous_close", "atr20_pct",
@@ -83,6 +85,26 @@ CSV_COLS = [
 BUY_SIDE_ACTIONS = ("OPEN_LONG_NEW_SIGNAL", "OPEN_LONG_EXISTING_TARGET",
                     "ADD_LONG", "WATCH_LONG")
 SELL_SIDE_ACTIONS = ("REDUCE_LONG", "EXIT_LONG")
+
+
+def cost_basis_context(side, qty, avg_cost, reference_price):
+    """A2: descriptive position-P&L context from avg_cost and a reference
+    price (latest close at night, live price intraday). Pure arithmetic;
+    NEVER feeds the model or the action mapping (A3: no cost anchoring).
+    Unavailable inputs stay NaN — nothing is fabricated."""
+    out = {"reference_price": reference_price, "unrealized_pnl": np.nan,
+           "unrealized_pnl_pct": np.nan, "price_vs_cost_pct": np.nan}
+    if side not in ("LONG", "SHORT") or pd.isna(avg_cost) \
+            or pd.isna(reference_price) or avg_cost <= 0:
+        return out
+    move = reference_price / avg_cost - 1.0
+    out["price_vs_cost_pct"] = round(move, 6)
+    sign = 1.0 if side == "LONG" else -1.0
+    out["unrealized_pnl_pct"] = round(sign * move, 6)
+    if pd.notna(qty):
+        out["unrealized_pnl"] = round(sign * (reference_price - avg_cost)
+                                      * qty, 2)
+    return out
 
 
 def next_twse_session(date_str):
@@ -328,6 +350,11 @@ def build_plan(root, holdings_path, date=None, use_panel=True,
                 "position_qty": qty,
                 "avg_cost": p["avg_cost"] if p is not None else np.nan,
                 "market_value_abs": mv,
+                # A2 cost-basis CONTEXT (descriptive only — never an
+                # input to the model or to the action mapping)
+                **cost_basis_context(
+                    side, qty, p["avg_cost"] if p is not None else np.nan,
+                    prev_close),
                 "my_long_cmp_weight": cmp_w,
                 "user_action": ua, "user_action_priority": pri,
                 "signal_freshness": fresh,
@@ -771,7 +798,7 @@ def write_report(plan, meta, out_dir=OUT_DIR):
     # additive full-universe ranking (decision-support layer; READ-ONLY
     # toward the validated plan above — a ranking failure must be visible
     # but must never invalidate the already-written action plan)
-    universe_top = None
+    universe_top, universe_ranks = None, None
     try:
         import universe_ranking as ur
         udf, umeta = ur.build_ranking(
@@ -779,6 +806,8 @@ def write_report(plan, meta, out_dir=OUT_DIR):
             holdings_path=meta.get("holdings_path"),
             asof=meta["signal_date"], out_dir=out_dir)
         universe_top = ur.top_nonportfolio(udf)
+        universe_ranks = {s: int(k) for s, k in zip(
+            udf["symbol"], udf["universe_rank"]) if pd.notna(k)}
         print(f"universe ranking: {umeta['scored_count']}/"
               f"{umeta['model_eligible_count']} model-eligible scored "
               f"({umeta['configured_universe_count']} configured) "
@@ -792,7 +821,15 @@ def write_report(plan, meta, out_dir=OUT_DIR):
     # user-facing simplified summary (presentation layer only; the
     # technical report above remains the auditable artifact)
     import simplified_reports as sr
-    sr.write_night_summary(plan, meta, out_dir, universe_top=universe_top)
+    # A6 completeness gate: the holdings FILE is the source of truth
+    holdings_symbols = set()
+    hp = meta.get("holdings_path")
+    if hp and os.path.isfile(hp):
+        lots, _ = hold.load_lots(hp)
+        holdings_symbols = set(lots["symbol"].astype(str))
+    sr.write_night_summary(plan, meta, out_dir, universe_top=universe_top,
+                           universe_ranks=universe_ranks,
+                           holdings_symbols=holdings_symbols)
     return csv_p, md_p
 
 
