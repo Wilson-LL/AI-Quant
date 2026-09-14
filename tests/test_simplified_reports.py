@@ -183,7 +183,8 @@ class TestLiveSummary(unittest.TestCase):
                 + [live_row("0050", "NO_MODEL_OPINION", "", src="NONE",
                             price=np.nan, sug=np.nan, fresh="STALE")])
         md = self._md(rows)
-        self.assertLessEqual(len(md.splitlines()), 35)
+        # 35 + the mandatory holdings-first header block (Track A, v17)
+        self.assertLessEqual(len(md.splitlines()), 42)
 
 
 class TestNightSummary(unittest.TestCase):

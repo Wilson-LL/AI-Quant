@@ -197,7 +197,8 @@ def suggest_limit(side, state_label, price, source, row, domain):
     return np.nan, "NO_ACTION_REQUIRED"
 
 
-def refresh(plan_path, db_path, session_date, now=None, diagnostic=False):
+def refresh(plan_path, db_path, session_date, now=None, diagnostic=False,
+            holdings_path=None):
     now = now or _dt.datetime.now()
     plan = pd.read_csv(plan_path, dtype={"symbol": str})
     signal_date = str(plan["signal_date"].iloc[0])
@@ -358,6 +359,15 @@ def refresh(plan_path, db_path, session_date, now=None, diagnostic=False):
         rows.append({
             "symbol": sym, "user_action": ua,
             "model_action": r.get("model_action"),
+            # actual-position context carried from the nightly plan so the
+            # live summary can list EVERY holding (Track A completeness)
+            "position_side": r.get("position_side", ""),
+            "position_qty": _f(r.get("position_qty")),
+            "avg_cost": _f(r.get("avg_cost")),
+            "previous_close": _f(r.get("previous_close")),
+            "model_rank": _f(r.get("model_rank")),
+            "user_action_priority": r.get("user_action_priority", ""),
+            "user_action_reason": r.get("user_action_reason", ""),
             "signal_validity": sv,
             "signal_freshness": r.get("signal_freshness"),
             "quote_freshness": fresh,
@@ -416,8 +426,34 @@ def refresh(plan_path, db_path, session_date, now=None, diagnostic=False):
             "refresh_time": now.strftime("%Y-%m-%d %H:%M:%S"),
             "market_data": market_data, "book_stale": book_stale,
             "session_ok": session_ok,
-            "ranking_context": _ranking_context(plan_path, plan, states)}
+            "ranking_context": _ranking_context(plan_path, plan, states),
+            "universe_ranks": _universe_ranks(plan_path),
+            # A6: the holdings FILE (same validated loader) is the source
+            # of truth for live completeness — a position added after the
+            # nightly plan is still listed (PLAN_MISSING), never dropped
+            "holdings_symbols": _holdings_symbols(holdings_path)}
     return live, meta
+
+
+def _holdings_symbols(holdings_path):
+    if not holdings_path or not os.path.isfile(holdings_path):
+        return set()
+    import holdings as hold
+    lots, _ = hold.load_lots(holdings_path)
+    return set(lots["symbol"].astype(str))
+
+
+def _universe_ranks(plan_path):
+    rank_p = os.path.join(os.path.dirname(os.path.abspath(plan_path)),
+                          "latest_universe_ranking.csv")
+    if not os.path.isfile(rank_p):
+        return {}
+    try:
+        rk = pd.read_csv(rank_p, dtype={"symbol": str})
+        rk = rk[pd.to_numeric(rk["universe_rank"], errors="coerce").notna()]
+        return {s: int(r) for s, r in zip(rk["symbol"], rk["universe_rank"])}
+    except Exception:
+        return {}
 
 
 def _ranking_context(plan_path, plan, states, k=5):
@@ -697,7 +733,8 @@ def main(argv=None):
             print("No actionable report was generated.")
             return 3
     live, meta = refresh(a.plan, a.db, session, now=now,
-                         diagnostic=a.diagnostic)
+                         diagnostic=a.diagnostic,
+                         holdings_path=os.path.join(ROOT, "my_holdings.csv"))
     csv_p, md_p = write_report(live, meta, a.out_dir)
     terminal_summary(live, meta, md_p)
     return 0

@@ -146,6 +146,18 @@ def live_summary_md(live, meta):
           f"資料：{data_state}", "",
           "> 僅供價格與操作參考，不保證成交；系統不會自動下單。"]
 
+    # Track A: EVERY actual position first, gated (A5/A6)
+    rows = [r for _, r in live.iterrows()]
+    expected = set(meta.get("holdings_symbols") or ()) | {
+        str(r["symbol"]) for r in rows
+        if str(r.get("position_side") or "") in HOLD_SIDES}
+    sect, rendered = holdings_section_md(
+        rows, price_key="live_price",
+        universe_ranks=meta.get("universe_ranks"),
+        expected_symbols=expected, live=True)
+    check_holdings_coverage(expected, rendered, "live summary")
+    md += sect
+
     cats = {k: [] for k in ("blocked", "sell", "buy", "expensive",
                             "watch", "no_opinion", "other")}
     for _, r in live.iterrows():
@@ -218,6 +230,148 @@ def live_summary_md(live, meta):
 
 # ------------------------------------------------------------ NIGHT
 
+# ------------------------------------------------ Track A: holdings-first
+
+class HoldingsCoverageError(RuntimeError):
+    """A6 completeness gate: an actual position would be missing from a
+    user-facing summary. Raised instead of silently dropping it."""
+
+
+HOLD_SIDES = ("LONG", "SHORT", "UNKNOWN")
+
+STATUS_ZH = {"IN_BOOK": "投組內", "WATCH": "觀察中",
+             "RANKED_UNSELECTED": "未入選", "OUTSIDE_SCOPE": "模型未涵蓋",
+             "DATA_UNAVAILABLE": "資料不足", "STALE_DATA": "資料過期",
+             "PLAN_MISSING": "夜間計畫未含"}
+PRI_ZH = {"HIGH": "高", "MEDIUM": "中", "LOW": "低", "INFO": "資訊"}
+SIDE_ZH = {"LONG": "多", "SHORT": "空", "UNKNOWN": "?"}
+ACTION_ZH = {"EXIT_LONG": "賣出", "REDUCE_LONG": "減碼", "ADD_LONG": "加碼",
+             "HOLD_LONG": "續抱", "HOLD_SHORT": "續抱空單",
+             "REDUCE_SHORT": "減碼空單", "BUY_TO_COVER": "空單回補",
+             "POSITION_CONFLICT_REVIEW": "多空衝突檢視",
+             "NO_MODEL_OPINION": "無模型意見", "NO_ACTION": "無動作",
+             "WATCH_LONG": "觀察", "WATCH_NEUTRAL": "觀察"}
+
+
+def _pct(v):
+    return f"{v * 100:+.1f}%" if v is not None and pd.notna(v) else "—"
+
+
+def _model_status(r):
+    ua = str(r.get("user_action") or "")
+    ma = str(r.get("model_action") or "")
+    if ua == "NO_MODEL_OPINION":
+        return "OUTSIDE_SCOPE"
+    if ma in ("BUY", "HOLD", "REDUCE") and _f(r.get("model_rank")) is not None:
+        return "IN_BOOK"
+    if ma == "WATCH":
+        return "WATCH"
+    if ma == "SELL" or _f(r.get("universe_rank")) is not None:
+        return "RANKED_UNSELECTED"
+    return "DATA_UNAVAILABLE"
+
+
+def _f(v):
+    try:
+        v = float(v)
+    except (TypeError, ValueError):
+        return None
+    return v if np.isfinite(v) else None
+
+
+def holdings_section_md(rows, price_key, universe_ranks=None,
+                        expected_symbols=None, live=False):
+    """`# 我的實際持倉` — EVERY actual position exactly once (A5/A6).
+
+    rows: plan/live rows (dicts or Series) carrying position_side,
+    position_qty, avg_cost, previous_close, model_action, model_rank,
+    user_action, user_action_priority, user_action_reason and the
+    price column `price_key` (live_price intraday).
+    universe_ranks: {symbol: universe_rank} from the ranking layer.
+    expected_symbols: the holdings file's symbols; any not present in
+    rows is still rendered (PLAN_MISSING) — never dropped. Returns
+    (md_lines, rendered_symbols)."""
+    universe_ranks = universe_ranks or {}
+    held = [r for r in rows if str(r.get("position_side") or "")
+            in HOLD_SIDES]
+    md = ["", "# 我的實際持倉", ""]
+    if not held and not expected_symbols:
+        md += ["（my_holdings.csv 無持倉或不存在）"]
+        return md, set()
+    md += ["| 股票 | 方向 | 成本 | 目前價 | 未實現損益% | 模型排名 "
+           "| 模型狀態 | 正式動作 | 優先級 | 原因 |",
+           "|---|---|---:|---:|---:|---:|---|---|---|---|"]
+    rendered = set()
+    seen = set()
+    for r in held:
+        sym = str(r["symbol"])
+        side = str(r.get("position_side"))
+        key = (sym, side)
+        if key in seen:
+            continue
+        seen.add(key)
+        rendered.add(sym)
+        cost = _f(r.get("avg_cost"))
+        px = _f(r.get(price_key)) if price_key else None
+        px_note = ""
+        if px is None:
+            px = _f(r.get("previous_close"))
+            px_note = "（前收）" if px is not None and live else ""
+        pnl = None
+        if cost and px is not None and side in ("LONG", "SHORT"):
+            pnl = (px / cost - 1.0) * (1 if side == "LONG" else -1)
+        status = _model_status(r)
+        rk = _f(r.get("universe_rank"))
+        if rk is None:
+            rk = universe_ranks.get(sym)
+        if rk is None:
+            rk = _f(r.get("model_rank"))
+        rank_txt = f"#{int(rk)}" if rk is not None else "N/A"
+        if status == "DATA_UNAVAILABLE" and rk is not None:
+            status = "RANKED_UNSELECTED"   # rank came from the universe map
+        ua = str(r.get("user_action") or "")
+        pri = PRI_ZH.get(str(r.get("user_action_priority") or ""), "—")
+        if ua == "NO_MODEL_OPINION":
+            reason = "需要人工檢視，不代表買進/賣出訊號"
+            rank_txt = "N/A"
+        elif ua in ACTION_REASON_ZH and ua != "NO_ACTION":
+            reason = ACTION_REASON_ZH[ua]       # validated action stands
+        elif status == "DATA_UNAVAILABLE":
+            reason = "資料不足，需要人工檢視"
+        else:
+            reason = ACTION_REASON_ZH.get(ua, "")
+        md.append(f"| {sym} | {SIDE_ZH.get(side, side)} "
+                  f"| {_n(cost)} | {_n(px)}{px_note} | {_pct(pnl)} "
+                  f"| {rank_txt} | {STATUS_ZH[status]} "
+                  f"| {ACTION_ZH.get(ua, ua)} | {pri} | {reason} |")
+    for sym in sorted(set(expected_symbols or ()) - rendered):
+        rendered.add(sym)
+        md.append(f"| {sym} | ? | — | — | — | N/A "
+                  f"| {STATUS_ZH['PLAN_MISSING']} | 無動作 | — "
+                  "| 持倉檔在夜間計畫後變更？請重跑 daily_ops；需要人工檢視 |")
+    md += ["", "> 成本/損益僅為持倉背景資訊，不改變模型動作；"
+           "系統不會自動下單。"]
+    return md, rendered
+
+
+ACTION_REASON_ZH = {
+    "EXIT_LONG": "模型已將此檔移出投組", "REDUCE_LONG": "高於模型目標權重",
+    "ADD_LONG": "低於模型目標權重", "HOLD_LONG": "與模型目標一致",
+    "HOLD_SHORT": "模型無多方意見", "REDUCE_SHORT": "模型偏多，注意風險",
+    "BUY_TO_COVER": "模型看多此檔，空單風險",
+    "POSITION_CONFLICT_REVIEW": "同時持有多空部位", "NO_ACTION": "無需動作",
+    "WATCH_LONG": "觀察中", "WATCH_NEUTRAL": "觀察中",
+}
+
+
+def check_holdings_coverage(expected_symbols, rendered_symbols, where):
+    missing = sorted(set(expected_symbols) - set(rendered_symbols))
+    if missing:
+        raise HoldingsCoverageError(
+            f"{where}: actual holdings missing from the summary: "
+            f"{missing} — refusing to publish an incomplete holdings view")
+
+
 def _universe_teaser(universe_top):
     """Compact evening section: strongest non-portfolio research names.
     NEVER promoted to a buy — descriptive ranking context only."""
@@ -234,10 +388,22 @@ def _universe_teaser(universe_top):
     return md
 
 
-def night_summary_md(plan, meta, universe_top=None):
+def night_summary_md(plan, meta, universe_top=None, universe_ranks=None,
+                     holdings_symbols=None):
     md = [f"# AI-Quant 明日操作參考 — {meta['intended_execution_date']}",
           "",
           "> 僅供價格與操作參考，不保證成交；系統不會自動下單。"]
+
+    # Track A: EVERY actual position first, gated (A5/A6)
+    rows = [r for _, r in plan.iterrows()]
+    expected = set(holdings_symbols or ()) | {
+        str(r["symbol"]) for r in rows
+        if str(r.get("position_side") or "") in HOLD_SIDES}
+    sect, rendered = holdings_section_md(
+        rows, price_key=None, universe_ranks=universe_ranks,
+        expected_symbols=expected)
+    check_holdings_coverage(expected, rendered, "nightly summary")
+    md += sect
 
     buys = plan[plan["user_action"].isin(ENTRY_ACTIONS)]
     if len(buys):
@@ -301,11 +467,14 @@ def _write(out_dir, dated_name, latest_name, text):
     return p
 
 
-def write_night_summary(plan, meta, out_dir, universe_top=None):
+def write_night_summary(plan, meta, out_dir, universe_top=None,
+                        universe_ranks=None, holdings_symbols=None):
     return _write(out_dir,
                   f"{meta['signal_date']}_next_session_summary.md",
                   "latest_next_session_summary.md",
-                  night_summary_md(plan, meta, universe_top=universe_top))
+                  night_summary_md(plan, meta, universe_top=universe_top,
+                                   universe_ranks=universe_ranks,
+                                   holdings_symbols=holdings_symbols))
 
 
 def write_live_summary(live, meta, out_dir):
