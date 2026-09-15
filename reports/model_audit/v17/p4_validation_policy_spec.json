@@ -4,13 +4,33 @@
   "status": "FROZEN before any P4-B fit; not launched",
   "label": "BURNED METHODOLOGY DIAGNOSTIC - selects a training methodology on the burned 2026-H1 interval; NOT independent OOS validation; all absolute numbers remain SURVIVOR-UNIVERSE / UNADJUSTED-PRICE references",
   "question": "Does the CURRENT validation policy (newest ~10% of matured dates held out, early stop on its IC, no refit on train+val) select worse models than a recent, shorter validation block, or than calibrating the epoch count and then training on train+validation?",
-  "evaluation_interval": {"start": "2026-01-05", "end": "2026-07-23", "decision_dates": 131, "same_as": "P0"},
+  "evaluation_interval": {
+    "start": "2026-01-05",
+    "end": "2026-07-23",
+    "decision_dates": 131,
+    "same_as": "P0"
+  },
   "held_constant": {
     "cadence": "5-session full refit (27 refits over the interval) - fixed for ALL policies; P0 showed 5-session ~= daily at the portfolio level",
-    "seeds": [0, 1, 2],
-    "architecture": "preset B", "features": "close_only", "target": "tgt_rank_20", "optimizer": "AdamW 3e-4 wd 1e-4 clip 1.0 batch 1024 AMP",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "architecture": "preset B",
+    "features": "close_only",
+    "target": "tgt_rank_20",
+    "optimizer": "AdamW 3e-4 wd 1e-4 clip 1.0 batch 1024 AMP",
     "early_stop_rule_where_used": "argmax val rank IC, patience 3, min 2, max 25",
-    "purge_sessions": 21, "blend": "blend50", "top_frac": 0.2, "band": 0.1, "costs_bps_round_trip": [0, 60, 100],
+    "purge_sessions": 21,
+    "blend": "blend50",
+    "top_frac": 0.2,
+    "band": 0.1,
+    "costs_bps_round_trip": [
+      0,
+      60,
+      100
+    ],
     "execution": "T+1 close -> T+21 close label convention (next-open validated)"
   },
   "policies": {
@@ -27,7 +47,7 @@
       "fits": 81
     },
     "D_calibrate_then_train_all": {
-      "definition": "step 1 = policy B's fit (reused): E = 1 + index of the best-validation epoch. step 2 = retrain the SAME seed from scratch on TRAIN + VALIDATION (policy B's blocks, i.e. every matured date up to 21 sessions before the refit) for a fixed budget of E epochs with early stopping disabled (patience = 1e6, min_epochs = max_epochs = E). Implementation note: production fit_one always restores the epoch with the best IC on the rows passed as validation; step 2 passes the (now in-sample) validation rows, so the restored epoch is the best in-sample-IC epoch among the E epochs - in practice the last or near-last epoch. This is documented as an approximation of 'exactly E epochs'; an inert restore_best=False kwarg in fit_one would make it exact and is proposed for review, NOT applied. No information after the refit date is used at any step.",
+      "definition": "step 1 = policy B's fit (reused): E = 1 + index of the best-validation epoch. step 2 = retrain the SAME seed from scratch on TRAIN + VALIDATION (policy B's blocks, i.e. every matured date up to 21 sessions before the refit) for EXACTLY E optimizer epochs and keep the weights after epoch E: no early stopping, no best-checkpoint restore. EXACT research-only mechanism (fit_fixed_epochs): production fit_one is called unchanged with patience=1e9, min_epochs=max_epochs=E and a 4-row sentinel validation slice taken from the training rows themselves; _rank_ic skips groups with < 5 rows, so no finite validation IC is ever observed, best_state stays None and no restore occurs (asserted: epochs_run == E and best_val_ic == -1e9). Same seed => identical initialization and batch permutation as the production path (tests/test_p4_epoch_diagnostic.py). No information after the refit date is used at any step.",
       "fits": "81 retrains (calibration reuses B)"
     }
   },
@@ -36,9 +56,22 @@
     "fits": "27 fits x 15 epochs (~2.5x a normal fit)"
   },
   "metrics": {
-    "primary": ["subsequent rank IC mean (HAC SE)", "positive-IC frequency", "top20-bottom20 fwd20 spread", "Spearman(val IC, subsequent block OOS IC) across refits, raw and time-detrended"],
-    "secondary": ["seed dispersion", "refit-to-refit same-date rank correlation", "top-quintile overlap"],
-    "portfolio_check": ["net100 Sharpe-like", "max drawdown net60", "one-way turnover"],
+    "primary": [
+      "subsequent rank IC mean (HAC SE)",
+      "positive-IC frequency",
+      "top20-bottom20 fwd20 spread",
+      "Spearman(val IC, subsequent block OOS IC) across refits, raw and time-detrended"
+    ],
+    "secondary": [
+      "seed dispersion",
+      "refit-to-refit same-date rank correlation",
+      "top-quintile overlap"
+    ],
+    "portfolio_check": [
+      "net100 Sharpe-like",
+      "max drawdown net60",
+      "one-way turnover"
+    ],
     "paired": "all per-date metrics differenced against policy A on identical dates; HAC(20) SE"
   },
   "decision_thresholds": {
@@ -49,9 +82,102 @@
   },
   "compute": {
     "measured_seconds_per_fit": 52.9,
-    "new_fits": {"B": 81, "C": 81, "D": 81, "epoch_diag": 27, "total": 270},
+    "new_fits": {
+      "B": 81,
+      "C": 81,
+      "D": 81,
+      "epoch_diag": 27,
+      "total": 270
+    },
     "estimated_gpu_hours": "B/C/D 243 x 52.9 s = 3.6 h; epoch diagnostic 27 x ~130 s = 1.0 h; total ~4.6 h (~5.5 h at the p90 70 s/fit)",
     "schedule_rule": "start only after tonight's daily_ops has completed and the GPU is idle; must not overlap the next production window"
   },
-  "artifacts": {"root": "reports/model_audit/v17/p4/", "fit_key": "<policy>_<refit_date>_c5_s<seed>_<target>_<cfg_hash>.npz", "resume": "existing keys skipped", "isolation": "never writes outside p4/"}
+  "artifacts": {
+    "root": "reports/model_audit/v17/p4/",
+    "fit_key": "<policy>_<refit_date>_c5_s<seed>_<target>_<cfg_hash>.npz",
+    "resume": "existing keys skipped",
+    "isolation": "never writes outside p4/"
+  },
+  "P4_B0": {
+    "frozen_at": "2026-09-14 before any B0 fit",
+    "purpose": "Does validation-IC early stopping select better later-OOS epochs than a simple ex-ante fixed epoch? (primary diagnostic = WITHIN-refit epoch association, immune to the cross-refit time trend)",
+    "historical_selected_epoch_distribution": {
+      "source": "213 production seed-fits (reports/transformer_gpu/*_train_log.md) + 480 P0 research fits; best epoch = epochs_run - patience(3) unless capped",
+      "production_implied_best_epoch": {
+        "min": 1,
+        "median": 3,
+        "p75": 4,
+        "p90": 6,
+        "p95": 6,
+        "max": 9
+      },
+      "p0_implied_best_epoch": {
+        "min": 1,
+        "median": 3,
+        "p75": 4,
+        "p90": 5,
+        "p95": 5,
+        "max": 9
+      },
+      "epochs_run": {
+        "min": 4,
+        "median": 6,
+        "p95": "8-9",
+        "max": 12
+      }
+    },
+    "epoch_horizon": 15,
+    "epoch_horizon_justification": "15 >= max observed selected epoch (9) + 6 epochs margin and >= p95 (6) + 9; covers the entire empirical selection distribution; production max_epochs is 25 but no fit has ever selected beyond 9",
+    "n_refits": 9,
+    "refit_selection": "9 evenly spaced 5-session refit block-starts across the burned 2026-H1 interval (numpy.linspace over the 27 refits, rounded) \u2014 deterministic, chosen before any epoch-level result",
+    "refit_dates": [
+      "2026-01-05",
+      "2026-01-26",
+      "2026-02-25",
+      "2026-03-26",
+      "2026-04-20",
+      "2026-05-12",
+      "2026-06-09",
+      "2026-07-01",
+      "2026-07-23"
+    ],
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "training": "Policy-A (production) split per refit; early stopping DISABLED (patience 1e9, min_epochs = max_epochs = horizon); per epoch record train loss, validation IC, validation MSE, subsequent OOS block IC, OOS prediction std; the OOS numbers are computed in a research-only wrapper of predict_idx and never affect optimisation or checkpoint choice; the trained net is discarded",
+    "oos_block": "the refit's own 5-session block [r0, r0+4] (r0 = refit_rank + 1) scored against fwd_20 = close(T+21)/close(T+1) - 1 from the cache; all labels matured (cache through 2026-09-11); identical for every epoch of a refit; training/validation labels end <= refit_rank (asserted)",
+    "fixed_epoch_comparators": [
+      2,
+      3,
+      5,
+      8,
+      12
+    ],
+    "primary_fixed_epoch": 3,
+    "primary_justification": "3 = median production-selected epoch (ex-ante, from the historical distribution)",
+    "comparisons": [
+      "val-best epoch (argmax val IC over 1..15)",
+      "production-selected epoch (patience-3/min-2 rule simulated on the val curve)",
+      "ex-post OOS-best epoch (oracle, unattainable)",
+      "fixed epochs"
+    ],
+    "metrics": [
+      "within-refit Spearman/Pearson(val IC, OOS IC) across epochs (primary); aggregate over all epoch observations (secondary, trend-confounded)",
+      "OOS IC of val-best / prod-selected / fixed-k / oracle",
+      "regret to oracle",
+      "paired prod-selected minus fixed-k with refit-clustered SE (fits of one refit share the OOS block)",
+      "selected-epoch distribution; frac val-best within 2 epochs of oracle",
+      "by seed, by refit"
+    ],
+    "classification": {
+      "EARLY_STOPPING_INFORMATIVE": "paired (prod-selected - fixed 3) mean OOS IC >= +0.010 AND > 1 refit-clustered SE AND prod-selected beats fixed 3 on >= 60% of fits AND median within-refit Spearman >= +0.30",
+      "EARLY_STOPPING_UNINFORMATIVE": "paired (prod-selected - fixed 3) mean <= +0.003 AND median within-refit Spearman <= +0.10",
+      "EARLY_STOPPING_WEAK": "otherwise",
+      "note": "frozen before the run; the oracle is a reference only, never the comparator"
+    },
+    "seconds_per_fit_estimate": 150,
+    "compute": "27 fits x 15 epochs; ~9 s/epoch + per-epoch OOS scoring -> ~150 s/fit -> ~1.1 h"
+  }
 }
