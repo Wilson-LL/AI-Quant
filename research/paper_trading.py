@@ -41,11 +41,16 @@ QUINTILE = 0.2
 BAND = 0.10
 
 
-def _book_from_scores(day, prev_names=None, band=0.0):
-    """day: DataFrame[stock, score]. Returns DataFrame[stock, weight, score, rank]."""
+def _book_from_scores(day, prev_names=None, band=0.0, ref_n=None):
+    """day: DataFrame[stock, score]. Returns DataFrame[stock, weight, score, rank].
+    ref_n: REFERENCE_ELIGIBLE_UNIVERSE_N (eod_integrity.reference_universe_n).
+    When symbols are temporarily excluded for data integrity, the book size
+    and band pool are sized on the reference universe, while candidates are
+    the valid ranked names only (an excluded name's slot goes to the next
+    valid name). None = the scored count (unchanged historical behavior)."""
     day = day.dropna(subset=["score"]).drop_duplicates("stock").sort_values(
         "score", ascending=False).reset_index(drop=True)
-    n = len(day)
+    n = len(day) if ref_n is None else max(int(ref_n), len(day))
     k = max(3, round(QUINTILE * n))
     longs = list(day["stock"].head(k))
     if band and prev_names:
@@ -118,6 +123,9 @@ def snapshot(asof=None):
         rows.append({"stock": sid, "mom": c[-6] / c[-132] - 1.0})
     d12 = pd.DataFrame(rows)
     mm = preds[["stock", "score"]].merge(d12, on="stock", how="inner")
+    import eod_integrity as E
+    ref_n = E.reference_universe_n(mm["stock"], E.integrity_window_excluded(pred_dir, asof),
+                                   eligible_pool=d12["stock"])
     mm["z_tf"] = (mm["score"] - mm["score"].mean()) / (mm["score"].std() + 1e-9)
     mm["z_mom"] = (mm["mom"] - mm["mom"].mean()) / (mm["mom"].std() + 1e-9)
     scores = {"tf": mm.assign(s=mm["z_tf"]), "d12": mm.assign(s=mm["z_mom"]),
@@ -128,7 +136,7 @@ def snapshot(asof=None):
         prev = _prev_book(strat, asof)
         book = _book_from_scores(
             sd, prev_names=list(prev["stock"]) if prev is not None else None,
-            band=BAND if strat.endswith("band10") else 0.0)
+            band=BAND if strat.endswith("band10") else 0.0, ref_n=ref_n)
         p = _save_book(asof, strat, book)
         print(f"[snapshot {asof}] {strat}: {len(book)} names -> {p}")
 

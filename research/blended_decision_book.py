@@ -48,6 +48,11 @@ def build(asof=None):
         c = df["close"].to_numpy(np.float64)
         rows.append({"stock": sid, "mom": c[-6] / c[-132] - 1.0})
     mm = preds.merge(pd.DataFrame(rows), on="stock", how="inner")
+    # REFERENCE_ELIGIBLE_UNIVERSE_N: integrity-excluded names (no score, not
+    # ranked) still count toward every denominator-based book parameter.
+    import eod_integrity as E
+    ref_n = E.reference_universe_n(mm["stock"], E.integrity_window_excluded(pred_dir, asof),
+                                   eligible_pool=[r["stock"] for r in rows])
     mm["z_tf"] = (mm["score"] - mm["score"].mean()) / (mm["score"].std() + 1e-9)
     mm["z_mom"] = (mm["mom"] - mm["mom"].mean()) / (mm["mom"].std() + 1e-9)
     mm["blend"] = 0.5 * mm["z_tf"] + 0.5 * mm["z_mom"]
@@ -63,12 +68,12 @@ def build(asof=None):
               else pd.Series(dtype=float))
     book = _book_from_scores(mm[["stock", "blend"]].rename(columns={"blend": "score"}),
                              prev_names=list(prev_w.index) if len(prev_w) else None,
-                             band=BAND)
+                             band=BAND, ref_n=ref_n)
     tgt = book.set_index("stock")["weight"]
     assert float(tgt.max()) <= NAME_CAP + CAP_TOL, "name cap violated"
 
     ranks = mm.set_index("stock")["blend"].rank(ascending=False).astype(int)
-    n = len(mm)
+    n = ref_n
     k_watch = int(0.3 * n)
     out = []
     for sid in sorted(set(tgt.index) | set(prev_w.index) | set(ranks.nsmallest(0).index)):
@@ -139,8 +144,10 @@ def build(asof=None):
     if len(integ):
         det = integ["detail"] if "detail" in integ else integ["reason"]
         md += ["", "## DATA_INTEGRITY_FAILURE (excluded, not scored)", "",
-               f"Model cross-section: {len(mm) + len(integ)} → {len(mm)} names "
-               "(z-scores, ranks, band and weights computed over valid names only).", ""]
+               f"Model cross-section: reference eligible universe {ref_n}, valid scored "
+               f"{len(mm)} (z-scores and ranks over valid names only; book size, band and "
+               f"watch list sized on the reference universe {ref_n}, so an excluded name's "
+               "slot goes to the next valid name).", ""]
         md += [f"- {s} — DATA_INTEGRITY_FAILURE / {d}" for s, d in zip(integ["symbol"], det)]
     with open(csv_p.replace(".csv", ".md"), "w", encoding="utf-8") as f:
         f.write("\n".join(md) + "\n")

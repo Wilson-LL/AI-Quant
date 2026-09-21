@@ -645,25 +645,104 @@ class TestExclusionBookSemantics(unittest.TestCase):
             shutil.rmtree(out, ignore_errors=True)
         return db, uni, md
 
-    def test_x1_excluded_symbol_removed_and_cross_section_recomputed(self):
+    def row(self, x):
+        asof = str(CAL[-1])[:10]
+        return [x, "DATA_INTEGRITY_FAILURE", "WINDOW_CROSSES_DATA_GAP", asof, asof,
+                E.CONFIRMED_NO_TRADE_IN_REQUIRED_WINDOW, False]
+
+    def full_and_excluded(self, pick):
+        """Build the 108/108-style full book, then exclude the name picked from
+        its blend ranking. Returns (full db, full uni, excluded db, uni, md, x)."""
         import pipeline_gate as G
         syms = G.universe()                                   # full-size cross-section (name cap)
-        x = syms[7]
-        valid = [s for s in syms if s != x]
-        asof = str(CAL[-1])[:10]
-        row = [x, "DATA_INTEGRITY_FAILURE", "WINDOW_CROSSES_DATA_GAP", asof, asof,
-               E.CONFIRMED_NO_TRADE_IN_REQUIRED_WINDOW, False]
-        db, uni, md = self.build(syms, valid, [row])
-        self.assertNotIn(x, set(db["symbol"]))
-        self.assertNotIn(x, set(uni["symbol"]))
-        self.assertEqual(sorted(uni["rank"]), list(range(1, len(valid) + 1)))
-        self.assertIn(f"{x} — DATA_INTEGRITY_FAILURE / CONFIRMED_NO_TRADE_IN_REQUIRED_WINDOW", md)
-        self.assertIn(f"{len(syms)} → {len(valid)}", md)
-        db0, uni0, md0 = self.build(valid, valid, [])        # a universe that never had x
-        pd.testing.assert_frame_equal(db, db0)
-        pd.testing.assert_frame_equal(uni, uni0)
-        self.assertNotIn("DATA_INTEGRITY_FAILURE", md0)      # no section when nothing excluded
+        dbf, unif, _ = self.build(syms, syms, [])
+        x = pick(unif.sort_values("rank")["symbol"].tolist())
+        db, uni, md = self.build(syms, [s for s in syms if s != x], [self.row(x)])
+        return dbf, unif, db, uni, md, x
 
+    @staticmethod
+    def held(db):
+        return db.loc[db["target_weight"] > 0].set_index("symbol")["target_weight"]
+
+    def test_x1_A_all_valid_is_original_semantics(self):
+        import paper_trading as P
+        rng = np.random.default_rng(3)
+        day = pd.DataFrame({"stock": [f"{1000 + i}" for i in range(108)], "score": rng.normal(size=108)})
+        prev = list(day["stock"].sample(22, random_state=1))
+        a = P._book_from_scores(day, prev_names=prev, band=P.BAND)
+        b = P._book_from_scores(day, prev_names=prev, band=P.BAND, ref_n=108)
+        pd.testing.assert_frame_equal(a, b)                   # ref_n == N: identical
+        self.assertEqual(len(a), 22)
+
+    def test_x2_B_excluded_in_book_slot_filled_by_next_valid_name(self):
+        dbf, unif, db, uni, md, x = self.full_and_excluded(lambda r: r[10])
+        hf, he = self.held(dbf), self.held(db)
+        self.assertIn(x, hf.index)
+        self.assertEqual(len(he), len(hf))                    # cardinality preserved (not N-1)
+        nxt = unif.sort_values("rank")["symbol"].tolist()[len(hf)]   # first name outside the full book
+        self.assertEqual(set(he.index), (set(hf.index) - {x}) | {nxt})
+        self.assertNotIn(x, set(db["symbol"]))                # no score, rank or row of any kind
+        self.assertNotIn(x, set(uni["symbol"]))
+        self.assertEqual(sorted(uni["rank"]), list(range(1, len(uni) + 1)))
+        self.assertIn(f"{x} — DATA_INTEGRITY_FAILURE / CONFIRMED_NO_TRADE_IN_REQUIRED_WINDOW", md)
+        self.assertIn(f"reference eligible universe {len(unif)}, valid scored {len(uni)}", md)
+        self.assertAlmostEqual(float(he.sum()), float(hf.sum()), places=4)   # gross exposure
+        self.assertLessEqual(float(he.max()), 0.10 + 1e-4)                  # name cap
+
+    def test_x3_E_would_be_selected_top_name_skipped(self):
+        dbf, unif, db, uni, md, x = self.full_and_excluded(lambda r: r[0])
+        hf, he = self.held(dbf), self.held(db)
+        nxt = unif.sort_values("rank")["symbol"].tolist()[len(hf)]
+        self.assertEqual(set(he.index), (set(hf.index) - {x}) | {nxt})
+        self.assertEqual(len(he), len(hf))
+
+    def test_x4_F_excluded_outside_all_bands_book_unchanged(self):
+        dbf, unif, db, uni, md, x = self.full_and_excluded(lambda r: r[-1])
+        hf, he = self.held(dbf), self.held(db)
+        pd.testing.assert_series_equal(he.sort_index(), hf.sort_index())   # same names, same weights
+        self.assertEqual(set(dbf["symbol"]) - {x}, set(db["symbol"]))       # same actions/watch list
+
+    def test_x5_band10_retention_pool_sized_on_reference_universe(self):
+        """The 2026-09-11 / 2308 case: an incumbent at valid rank 26 of 107 is
+        retained with the 108-name rule (k=22, pool=26) and would be dropped by
+        the old N-1 rule (k=21, pool=25)."""
+        import paper_trading as P
+        day = pd.DataFrame({"stock": [f"{1000 + i}" for i in range(107)],
+                            "score": np.linspace(1, 0, 107)})
+        inc = "1025"                                          # valid rank 26
+        prev = [f"{1000 + i}" for i in range(21)] + [inc]
+        new = P._book_from_scores(day, prev_names=prev, band=P.BAND, ref_n=108)
+        old = P._book_from_scores(day, prev_names=prev, band=P.BAND)
+        self.assertEqual(len(new), 22)
+        self.assertIn(inc, set(new["stock"]))
+        self.assertEqual(len(old), 21)
+        self.assertNotIn(inc, set(old["stock"]))
+
+    def test_x6_neural_target_book_uses_reference_universe(self):
+        import inference_transformer_eod as I
+        rng = np.random.default_rng(5)
+        pred = pd.DataFrame({"stock": [f"{1100 + i}" for i in range(107)], "score": rng.normal(size=107),
+                             "score_std": 0.1, "sector": "x", "vol_20": 0.2})
+        full = I.make_decision_book(pred, None, 0.2, 0.05, 20, "t+1")
+        ref = I.make_decision_book(pred, None, 0.2, 0.05, 20, "t+1", ref_n=108)
+        self.assertEqual(int((full["target_weight"] > 0).sum()), 21)
+        self.assertEqual(int((ref["target_weight"] > 0).sum()), 22)
+        same = I.make_decision_book(pred, None, 0.2, 0.05, 20, "t+1", ref_n=107)
+        pd.testing.assert_frame_equal(full, same)
+
+    def test_x7_reference_universe_counts_only_window_exclusions(self):
+        self.assertEqual(E.reference_universe_n(["a", "b"], {"c"}), 3)
+        self.assertEqual(E.reference_universe_n(["a", "b"], {"c"}, eligible_pool=["a", "b"]), 2)
+        self.assertEqual(E.reference_universe_n(["a", "b"], {"a"}), 2)
+        tmp = tempfile.mkdtemp()
+        try:
+            pd.DataFrame([{"symbol": "c", "reason": "WINDOW_CROSSES_DATA_GAP"},
+                          {"symbol": "d", "reason": "STALE_TAIL"}]).to_csv(
+                os.path.join(tmp, "2026-01-02_data_integrity.csv"), index=False)
+            self.assertEqual(E.integrity_window_excluded(tmp, "2026-01-02"), {"c"})
+            self.assertEqual(E.integrity_window_excluded(tmp, "2026-01-05"), set())
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
 
 class TestInferencePolicy(unittest.TestCase):
 

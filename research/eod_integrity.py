@@ -161,6 +161,37 @@ def window_failure_reasons(cache_dir, symbols, calendar, asof, req=None, registr
     return out
 
 
+def integrity_window_excluded(pred_dir, asof):
+    """Symbols the live integrity policy removed from the `asof` model
+    cross-section because their required window crosses a missing session
+    (reason WINDOW_CROSSES_DATA_GAP in <asof>_data_integrity.csv). Stale-tail
+    names are NOT included: they were never scored before the integrity fix
+    either, so they never counted toward the portfolio denominator."""
+    p = os.path.join(pred_dir, f"{asof}_data_integrity.csv")
+    if not os.path.isfile(p):
+        return set()
+    d = pd.read_csv(p, dtype={"symbol": str})
+    if d.empty:
+        return set()
+    return set(d.loc[d["reason"] == "WINDOW_CROSSES_DATA_GAP", "symbol"])
+
+
+def reference_universe_n(valid_symbols, excluded, eligible_pool=None):
+    """REFERENCE_ELIGIBLE_UNIVERSE_N: the otherwise-eligible model universe
+    BEFORE temporary data-integrity exclusions = valid scored names + excluded
+    names that would otherwise have entered the same cross-section
+    (`eligible_pool`, e.g. names with a momentum score for the blend book).
+    Every denominator-based portfolio parameter (top-N, band, watch list) uses
+    this N; ranks and candidates come from valid names only, so an excluded
+    name's slot is filled by the next valid name. Excluded names never get a
+    score of any kind."""
+    valid = set(valid_symbols)
+    extra = set(excluded) - valid
+    if eligible_pool is not None:
+        extra &= set(eligible_pool)
+    return len(valid) + len(extra)
+
+
 def held_symbols(root):
     """Symbols whose management requires a valid model view: open positions in
     my_holdings.csv (any side) plus names held in the standing (latest)

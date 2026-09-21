@@ -68,13 +68,17 @@ def previous_book():
     return pd.read_csv(books[-1], dtype={"symbol": str})
 
 
-def make_decision_book(pred, prev, top_frac, band, horizon, exec_date):
-    """pred: DataFrame [stock, score, score_std, sector, vol_20]."""
+def make_decision_book(pred, prev, top_frac, band, horizon, exec_date, ref_n=None):
+    """pred: DataFrame [stock, score, score_std, sector, vol_20].
+    ref_n: REFERENCE_ELIGIBLE_UNIVERSE_N. Book size k and band width are sized
+    on the reference universe (valid + integrity-excluded names); ranks and
+    candidates are the valid scored names only. None = scored count."""
     pred = pred.sort_values("score", ascending=False).reset_index(drop=True)
     pred["rank"] = np.arange(1, len(pred) + 1)
     n = len(pred)
-    k = max(3, round(top_frac * n))
-    band_k = max(1, round(band * n))
+    n_ref = n if ref_n is None else max(int(ref_n), n)
+    k = max(3, round(top_frac * n_ref))
+    band_k = max(1, round(band * n_ref))
     # Thin-universe guard (2026-08-24 incident review): reuse the SAME
     # research assumption the validated backtests have always used —
     # transformer_portfolio.backtest_scores(min_names=60) skips thin
@@ -251,7 +255,8 @@ def main(top_frac=0.2, band=0.05):
 
     prev = previous_book()
     exec_date = f"next trading day after {asof}"
-    book = make_decision_book(pred, prev, top_frac, band, horizon, exec_date)
+    book = make_decision_book(pred, prev, top_frac, band, horizon, exec_date,
+                              ref_n=policy["eligible"])
 
     os.makedirs(REPORT_DIR, exist_ok=True)
     pred_out = pred.sort_values("score", ascending=False)
@@ -270,6 +275,8 @@ def main(top_frac=0.2, band=0.05):
         "seeds": len(nets),
         "data_integrity": {
             "status": policy["status"],
+            "reference_eligible_universe_n": policy["eligible"],
+            "valid_scored_universe_n": policy["valid"],
             "universe_before_exclusion": policy["eligible"],
             "effective_universe": policy["valid"],
             "valid_ratio": round(policy["valid_ratio"], 6),
