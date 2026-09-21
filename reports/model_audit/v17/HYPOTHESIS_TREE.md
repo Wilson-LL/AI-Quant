@@ -7,19 +7,38 @@ Failed hypotheses are never deleted. Every entry says whether its evidence inter
 ---
 
 ## H-EPOCH-LONG — long training (100+ epochs) may produce late OOS recovery / improvement
-- **Status:** TESTING → WEAKLY_CONTRADICTED on mechanism arithmetic (Council Session 01, 2026-09-15, blind to the in-flight results). P4-B0-LONG launched 2026-09-15 09:25 under prior approval; its OOS results remain embargoed and unevaluated; the Council found its frozen classifier structurally unable to decide (see `COUNCIL_01_long_training_synthesis.md` §1 A1).
-- **Claim:** OOS rank IC, which peaks at epoch ≈3 (678–717 optimizer steps at batch 1024) and decays through epoch 15, may recover or exceed the early peak at 50–100 epochs (22.6k–23.9k steps).
-- **Supporting evidence:** THEORETICAL_ONLY. Nobody has measured epoch-N weights at N > 15 with best-validation restore disabled (v12 epoch arms kept patience + restore, deployed ≈ epoch 13). Epoch 3 is not a converged state (98.7% positional attention input at init; per-coordinate displacement 0.21 at epoch 3). B0's OOS decline is not statistically established (ep15 − ep3 = −0.056 ± 0.048, t −1.15). Late-epoch behaviour is block-conditional and seed-reproducible (slope corr +0.886; 3/9 refits improve).
-- **Contradicting evidence:** MECHANICAL_CODE_PROOF: decoupled wd inert (0.070% shrink over the run), no LR schedule/warm-up, no interpolation (train R² ≈1.5% at ep15, ≈10% at ep100) → double descent and grokking unavailable. BURNED_DIAGNOSTIC P4-B0: per-date validation rank IC ep15 − ep3 = −0.0711 (clustered SE 0.0120, t −5.9, 9/9 refits) — strong on validation, underpowered on OOS (dissent preserved: D1). Raw val MSE rise is a dispersion artefact (rescaled MSE improves), so it is NOT evidence. HISTORICAL v12: INCONCLUSIVE (validation metric; worst book in its family).
-- **Confounders:** epochs ≡ steps at fixed batch (report in steps; label BATCH_1024_CONSTANT_LR); epoch-3 comparator carries a +0.0128 winner's-curse premium (honest bar ≈ +0.023); n_eff = 3 refit blocks, one a single session; refit-clustered SE 0.081 at n=3 vs ±0.010 bar (≈195–200 clusters needed); `NO_BENEFIT` biased shut by a max over 71 epochs (+0.112); `PROMISING` ≈9.5% type-I at ≈0% power; the three LONG refits are the most hypothesis-hostile sub-sample (ep3 OOS IC 0.174 vs 0.086); 2026-H1 burned; no schedule arm; block-conditional heterogeneity breaks any "all refits agree" gate.
-- **Next discriminating experiment:** (0 GPU, before unblinding IC) mechanism-first read of the retained LONG artifacts — train loss, val rank IC, `oos_pred_std`, `grad_norm`, `weight_norm` at 30/50/75/100; anchor check of epochs 1–15 vs the nine B0 cells with a declared tolerance; clustered SE + permutation null for the max added to `evaluate_long`; prediction averaging from saved preds. GPU (user-gated, only if a phase change appears): Tier 1 batch-4096 step test (0.58 h, no code change) → paired schedule contrast at epoch 50 (≈3.3 h, needs a research-only LR hook) → LONG′ on 9 refits with a widened scoring window (5.2 h).
-- **Interval burned:** YES (2026-H1).
-- **Last updated:** 2026-09-15 (Council Session 01).
+- **Status:** **REJECTED (frozen recipe only), met at minimum margins.** P4-B0-LONG, unblinded 2026-09-21 under the preregistered amendment `P4_B0_LONG_AMENDMENT_1` (`c6e6a6d`); mechanism frozen before OOS (`93fff20`); reports 20–22; Council Sessions 01 (blind) and 02 (post-unblind).
+- **Scope:** batch 1024, constant LR 3e-4 with gradient clipping, AdamW wd 1e-4 (inert), no schedule, ≤ 23.9k optimizer steps. Says nothing about LR schedules, weight averaging or regularisation.
+- **Supporting evidence (for the hypothesis):** none. Validation rank IC shows a transient, non-sustained hump at epochs 31–40 on all three refits (0.049/0.067/0.072) that did not transfer to OOS (epochs 20/30: 0.001/0.011). It is data-selected and cannot select an epoch.
+- **Contradicting evidence:** BURNED_DIAGNOSTIC. Anchor bit-exact vs P4-B0 (epochs 1–15). Mechanism MECHANISM_NO_PHASE_CHANGE: in-sample R² 1.5% → 18.8%, true val Pearson r 0.062 → 0.021, val rank IC 0.100 (ep 3) → 0.022 (ep 100), cross-seed agreement falls, dispersion still expanding. OOS trajectory class A: epoch 3 0.174 → late mean (50/75/100) 0.011. L − early regime (epochs 2–5) −0.139, SE 0.101, 3/3 refits, 7/9 fits. L − production-selected epoch −0.169, SE 0.100, 3/3 refits, 9/9 fits. Late maxima are consistent with an AR(1) noise null. Prediction averaging over epochs 50–100 recovers ≤ 0.0015 (post-hoc).
+- **Confounders / fragility:** not significant (t(2) = −1.38, 95% CI −0.57 to +0.30). The label rests on three near-threshold facts (Q2 0.002/0.004 below PARTIAL; 2026-07-23 single session at −0.014; 7/9 fits exactly). A reseed flips the mechanism leg with probability ~12–20%; a within-refit seed bootstrap of the full verdict gives REJECTED 51%, WEAKLY_CONTRADICTED 39%, INCONCLUSIVE 11%, supportive 0% (direction robust, label near coin-flip). Dropping 2026-01-05 gives WEAKLY_CONTRADICTED; that block supplies ~81% of the magnitude, and it is where momentum alone paid 0.33. The OOS cost is mostly factor de-exposure (12-1 momentum exposure ~0.8 → 0.03–0.31) priced by each block's factor payoff. Hostile subsample (epoch-3 OOS 0.174 vs 0.086 on the other six P4-B0 refits). Burned interval; blinding was by attestation.
+- **Original frozen classifier:** LONG_EPOCH_NO_BENEFIT (ORIGINAL_PREREGISTERED_CLASSIFIER / STRUCTURALLY_FLAWED / NOT_PRIMARY_EVIDENCE); agrees in direction.
+- **Next:** closed for the frozen recipe. Do NOT test 200/500/1000 epochs or batch 4096. Follow-ups are separate hypotheses: H-RESIDUAL-SIGNAL, H-FACTOR-PREMIUM, H-LR-SCHEDULE (early), H-WEIGHT-AVERAGING.
+- **Interval burned:** YES (2026-H1). **Last updated:** 2026-09-21 (Council Session 02).
+
+## H-RESIDUAL-SIGNAL — the deployed transformer carries ranking signal beyond its ten input features (DATA/TARGET vs model limit)
+- **Status:** UNTESTED as preregistered. Hints: report 11 residual IC 0.017 / −0.001 beyond momentum; Session 02 post-hoc epoch-3 residual validation IC beyond the ten last-step features ≈ 0.001 on three refits (ML Researcher); epoch-3 rank exposure to 12-1 momentum 0.77–0.90.
+- **Next (0 GPU):** paired per-date incremental IC of the production-selected fits (P0/P4 prediction caches, ≥ 9 refits) over a benchmark fitted only on training rows (ridge on the ten features; 12-1 momentum alone), clustered by refit. Equivalence rule, preregistered before computing: DATA/TARGET-limited only if the upper 95% bound < 0.01; non-factor signal only if the lower bound > 0; otherwise INCONCLUSIVE.
+- **Burned:** would use burned blocks (mechanism probe only). **Updated:** 2026-09-21.
+
+## H-FACTOR-PREMIUM — the factor the early model learns (12-1 momentum / 60-day vol) pays positively out of sample
+- **Status:** UNTESTED. It decides whether long-training de-exposure is a cost or a hedge. Block values so far: 12-1 momentum OOS IC 0.329 / 0.264 / −0.016 on the three P4-B0-LONG blocks.
+- **Next (0 GPU):** factor OOS IC across all nine P4-B0 blocks plus the prospective window from 2026-07-24. **Updated:** 2026-09-21.
+
+## H-LR-SCHEDULE — an LR schedule changes what the model learns in the early regime
+- **Status:** UNTESTED. The late-fork variant (anneal from epoch 50) is NOT motivated: it would start from a memorising iterate. Only an early variant has a rationale.
+- **Next (conditional, ~0.26 GPU-h):** anneal to zero by ~1,150 steps on the 27 P4-B0 fits, read on validation, with a pre-declared readout step and a λ ≡ 1 bit-parity smoke test. Run only if H-RESIDUAL-SIGNAL finds non-factor signal. Not launched. **Burned:** YES. **Updated:** 2026-09-21.
+
+## H-WEIGHT-AVERAGING — SWA / checkpoint averaging recovers signal from the late regime
+- **Status:** WEAKLY_CONTRADICTED (late window, prediction space, post-hoc BURNED_DIAGNOSTIC). Averaging epochs 50–100 recovers ≤ 0.0015 over the mean single epoch; the 30–100 average (~0.049) fails the early bar (0.102). Weight-space SWA is untested, with a low prior. Early-window averaging is untested.
+- **Dissent:** Red Team wants DEPRIORITISED, not closed; ML Researcher and Auditor call it closed as a late-regime rescue.
+- **Next:** none now. **Updated:** 2026-09-21.
 
 ## H-EARLYSTOP-WEAK — validation-IC early stopping adds little over an ex-ante fixed epoch
 - **Status:** WEAKLY_SUPPORTED (BURNED_DIAGNOSTIC, P4-B0: production rule 0.107 vs fixed-3 0.115 OOS IC; wins 30% of fits; within-refit val→OOS Spearman median +0.24). Classification EARLY_STOPPING_WEAK.
 - **Confounders:** 9 refits; val block 14 months stale; 15-epoch horizon.
 - **Next:** P4-B1 (current early stopping vs fixed 3, 27 refits × 3 seeds) — not launched.
+- **Note (2026-09-21):** the fixed-epoch-3 comparator carries a +0.0128 (P4-B0) / +0.023 (P4-B0-LONG refits) winner's-curse premium over the mean of epochs 2–5.
 - **Interval burned:** YES. **Last updated:** 2026-09-15.
 
 ## H-VALSTALE — the 263-session, 14-month-stale validation block carries little selection signal

@@ -158,3 +158,15 @@ None. No change to `max_epochs`, patience, or seeds is supported. H-EPOCH-LONG m
 - Round 1 produced four independent reports that converged on the design's power and classifier defects while disagreeing on mechanism; Round 2 falsified one headline claim from each of three members (ML noise ball, GPU β₂, Auditor monotone OOS) and one from the Red Team (PROMISING base rate), each conceded on recomputation. That is the intended behaviour.
 - Subagent outputs are not persisted by the harness; the Lead must archive reports to disk before relaying. Done for this session.
 - Agent Teams are unavailable in this runtime; role files load only at session start. Round 1 used the `Explore` type with role files read first; Round 2 used `SendMessage` to resume the same agents.
+
+---
+
+## Erratum (Council Session 02, 2026-09-21)
+
+**A8 is FALSIFIED as computed.** A8 decomposed validation MSE using `oos_pred_std` as a proxy for validation prediction dispersion. That proxy overstates validation dispersion by 1.7 to 2.1 times. With the true validation prediction SD, available from the P4-B0-LONG retained predictions, the scale-free validation Pearson r on the nine shared fits *falls* from 0.062 at epoch 3 to 0.029 at epoch 15 and 0.021 at epoch 100. It does not rise from 0.066 to 0.122. The Auditor and the ML Researcher reproduced this independently. P4-B0 kept no validation predictions, so the 27-fit value cannot be recomputed directly; the proxy reproduces the reported rise, which identifies it as the source. Consequences:
+
+- The reading "un-shrinking, not over-confident" loses its support. Past epoch 15 the learned signal degrades while in-sample fit rises, which is ordinary overfitting.
+- The dispersion figure at epoch 15 should be 17% of the target SD (validation predictions), not 30%.
+- The logical point that raw MSE alone is not proof of overfitting still stands.
+
+See `COUNCIL_02_long_training_unblinded_synthesis.md` §2.
