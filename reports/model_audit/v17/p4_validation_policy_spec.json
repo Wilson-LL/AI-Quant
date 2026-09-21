@@ -179,5 +179,47 @@
     },
     "seconds_per_fit_estimate": 150,
     "compute": "27 fits x 15 epochs; ~9 s/epoch + per-epoch OOS scoring -> ~150 s/fit -> ~1.1 h"
+  },
+  "P4_B0_LONG": {
+    "frozen_at": "2026-09-15 before any long-epoch fit",
+    "question": "Does OOS predictive quality remain degraded after the early epoch peak, or is there a later recovery at much larger epoch counts (100+)? Training-DURATION diagnostic only; architecture, data, optimizer, LR, batch unchanged.",
+    "refit_dates": [
+      "2026-01-05",
+      "2026-04-20",
+      "2026-07-23"
+    ],
+    "refit_selection": "EARLY / MIDDLE / LATE = first, middle (index 4) and last of the nine pre-registered P4-B0 refit dates \u2014 chosen before any long-epoch result",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "fits": 9,
+    "epoch_horizon": 100,
+    "training": "production Policy-A split (train rows, validation rows, purge 21), early stopping DISABLED, exactly 100 epochs, NO best-validation restore; per epoch: train loss, validation MSE, validation rank IC, future OOS block rank IC (diagnostic only), prediction dispersion, mean/max gradient norm (research-only wrap of clip_grad_norm_), weight norm; validation and OOS predictions of EVERY epoch retained (per-epoch weights are not stored: 9 x 100 x 470 KB)",
+    "oos_block": "the refit's own 5-session block scored against fwd_20 (matured); identical for every epoch; never influences optimisation",
+    "checkpoint_epochs": [
+      1,
+      3,
+      5,
+      10,
+      15,
+      20,
+      30,
+      50,
+      75,
+      100
+    ],
+    "primary_metric": "future OOS rank IC (mean over the 9 fits at each checkpoint)",
+    "classification": {
+      "early_regime": "mean OOS IC over epochs 2-5",
+      "late_regime": "mean OOS IC over checkpoints 50, 75, 100",
+      "LONG_EPOCH_PROMISING": "late_regime >= max(epoch-3, production-selected) + 0.010 AND late >= epoch-3 + 0.010 on >= 7 of 9 fits AND >= production-selected + 0.010 on >= 7 of 9 AND holds by seed (all 3) and by refit (all 3)",
+      "LONG_EPOCH_NO_BENEFIT": "OOS IC at 50, 75 and 100 are each <= early_regime - 0.020 AND the mean per-fit best OOS IC over epochs >= 30 is < early_regime - 0.010 (no consistent late recovery)",
+      "LONG_EPOCH_POSSIBLE_RECOVERY": "otherwise",
+      "rule": "classification from OOS rank IC only, never from training loss; no new preferred epoch may be chosen from this set"
+    },
+    "seconds_per_epoch_estimate": 6.9,
+    "compute": "9 fits x 100 epochs x ~6.9 s = ~1.7 h (plus per-epoch OOS scoring); run only when production is idle"
   }
 }

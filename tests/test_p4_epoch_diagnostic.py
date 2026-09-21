@@ -176,3 +176,24 @@ class TestOOSSeparation(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestLongEpochCurve(unittest.TestCase):
+
+    def test_long_curve_records_norms_and_retains_predictions(self):
+        X, y, dr = tiny()
+        tr, va = np.arange(0, 300), np.arange(300, 360)
+        oos = np.arange(384, 480)
+        oos_dates = pd.to_datetime("2026-01-01") + pd.to_timedelta(dr[oos], "D")
+        fwd = y[oos].numpy()
+        H = 4
+        curve, vp, op = p4.epoch_curve_long(tte, X, y, tr, va, dr[va], CFG, 2, H, oos, oos_dates, fwd)
+        self.assertEqual([c["epoch"] for c in curve], list(range(1, H + 1)))
+        for c in curve:
+            for k in ("grad_norm_mean", "grad_norm_max", "weight_norm", "oos_ic", "val_loss"):
+                self.assertTrue(np.isfinite(c[k]), k)
+        self.assertEqual(vp.shape, (H, len(va)))       # every epoch's predictions retained
+        self.assertEqual(op.shape, (H, len(oos)))
+        # the hooks were removed again (production functions restored)
+        self.assertEqual(tte.predict_idx.__name__, "predict_idx")
+        self.assertEqual(torch.nn.utils.clip_grad_norm_.__name__, "clip_grad_norm_")

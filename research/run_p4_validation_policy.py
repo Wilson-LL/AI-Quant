@@ -433,6 +433,190 @@ def evaluate_b0():
     print(json.dumps(out, indent=1, default=float))
 
 
+# ------------------------------------------------------------ P4-B0-LONG (training-dynamics diagnostic)
+
+def epoch_curve_long(tte, Xg, yg, tr, va, va_dates, cfg, seed, horizon_epochs,
+                     oos_idx, oos_dates, oos_fwd):
+    """Like epoch_curve but also records per-epoch gradient norm (mean of
+    the per-step total norms returned by clip_grad_norm_, wrapped in this
+    process only), weight norm, and RETAINS the validation and OOS
+    predictions of every epoch. Early stopping disabled; no restore; the
+    OOS block never influences optimisation."""
+    import numpy as np
+    import pandas as pd
+    import torch
+    cfg_b = dict(cfg, patience=10 ** 9)
+    va_t = torch.as_tensor(np.asarray(va), device=Xg.device)
+    oos_t = torch.as_tensor(np.asarray(oos_idx), device=Xg.device)
+    yv = yg[va_t]
+    recs, val_preds, oos_preds = [], [], []
+    grad_norms = []
+    orig_pred = tte.predict_idx
+    orig_clip = torch.nn.utils.clip_grad_norm_
+
+    def clip_hook(params, max_norm, *a, **k):
+        gn = orig_clip(params, max_norm, *a, **k)
+        grad_norms.append(float(gn))
+        return gn
+
+    def pred_hook(net, X, ii, batch=8192):
+        res = orig_pred(net, X, ii, batch)
+        if torch.is_tensor(ii) and len(ii) == len(va_t) and bool((ii == va_t).all()):
+            val_loss = float(((res - yv) ** 2).mean())
+            p = orig_pred(net, X, oos_t, batch).cpu().numpy()
+            b = pd.DataFrame({"date": oos_dates, "pred": p, "fwd": oos_fwd}).dropna()
+            ic = float(b.groupby("date").apply(
+                lambda g: g["pred"].rank().corr(g["fwd"].rank()), include_groups=False).mean())
+            wn = float(torch.sqrt(sum((q.detach().float() ** 2).sum() for q in net.parameters())))
+            recs.append({"val_loss": val_loss, "oos_ic": ic, "oos_pred_std": float(np.std(p)),
+                         "grad_norm_mean": float(np.mean(grad_norms)) if grad_norms else float("nan"),
+                         "grad_norm_max": float(np.max(grad_norms)) if grad_norms else float("nan"),
+                         "weight_norm": wn})
+            grad_norms.clear()
+            val_preds.append(res.cpu().numpy().astype(np.float32))
+            oos_preds.append(p.astype(np.float32))
+        return res
+    tte.predict_idx = pred_hook
+    torch.nn.utils.clip_grad_norm_ = clip_hook
+    try:
+        net, vic, info = tte.fit_one(Xg, yg, tr, va, va_dates, cfg_b, seed=seed,
+                                     max_epochs=horizon_epochs, min_epochs=horizon_epochs)
+    finally:
+        tte.predict_idx = orig_pred
+        torch.nn.utils.clip_grad_norm_ = orig_clip
+    assert info["epochs_run"] == horizon_epochs == len(recs), "an epoch was not recorded"
+    curve = [{"epoch": h["epoch"] + 1, "train_loss": h["train_loss"], "val_ic": h["val_ic"], **r}
+             for h, r in zip(info["history"], recs)]
+    del net
+    return curve, np.stack(val_preds), np.stack(oos_preds)
+
+
+def run_long_epoch(dry_run=False):
+    import torch
+    import train_transformer_eod as tte
+    from dataset_transformer_eod import build_dataset, matured_train_val
+    import audit_v17_signal as A
+
+    spec = load_spec()
+    L = spec["P4_B0_LONG"]
+    iv = spec["evaluation_interval"]
+    H = int(L["epoch_horizon"])
+    cfg = tte.PRESETS[PRESET]
+    chash = cfg_hash(cfg)
+    ldir = os.path.join(OUT, "b0_long")
+    os.makedirs(ldir, exist_ok=True)
+    data = build_dataset(FEATURE_SET, seq_len=cfg["seq_len"], horizons=(HORIZON,), verbose=False)
+    dates, dr, stocks = data["dates"], data["date_rank"], np.asarray(data["stocks"])
+    refits, _, e_rank = plan_refits(dates, iv["start"], iv["end"], CADENCE)
+    by_date = {str(dates[r])[:10]: r for r in refits}
+    pick = [by_date[d] for d in L["refit_dates"]]
+    todo = [(r0, s) for r0 in pick for s in SEEDS
+            if not os.path.isfile(os.path.join(ldir, f"long_{str(dates[r0])[:10]}_c{CADENCE}_s{s}_{TARGET}_H{H}_{chash}.json"))]
+    sec = float(L["seconds_per_epoch_estimate"]) * H
+    print(f"[p4-long] refits {len(pick)} x seeds {len(SEEDS)} x epochs {H}; fits missing {len(todo)}; "
+          f"~{sec:.0f} s/fit -> ~{len(todo) * sec / 3600:.2f} h")
+    if dry_run:
+        return
+    tte.require_cuda()
+    Xg = tte.to_gpu(data)
+    yg = torch.as_tensor(np.nan_to_num(np.clip(data["targets"][TARGET], -1, 1)), device=Xg.device)
+    wide = A.close_matrix()
+    f20 = A.fwd_returns(wide, 20).rename("fwd").reset_index()
+    f20.columns = ["date", "stock", "fwd"]
+    fwd_map = f20.set_index(["date", "stock"])["fwd"]
+    t_all = time.time()
+    for r0, seed in todo:
+        refit_rank = r0 - 1
+        block_end = min(r0 + CADENCE - 1, e_rank)
+        tr, va, _ = matured_train_val(data, TARGET, refit_rank, HORIZON)
+        oos_idx = np.nonzero((dr >= r0) & (dr <= block_end))[0]
+        oos_dates = dates[dr[oos_idx]]
+        oos_fwd = np.array([fwd_map.get((d, s), np.nan)
+                            for d, s in zip(oos_dates, stocks[data["stock_idx"][oos_idx]])])
+        assert int(data["label_end_rank"][HORIZON][tr].max()) <= refit_rank
+        assert int(data["label_end_rank"][HORIZON][va].max()) <= refit_rank
+        assert int(dr[oos_idx].min()) > refit_rank
+        t0 = time.time()
+        curve, vp, op = epoch_curve_long(tte, Xg, yg, tr, va, dr[va], cfg, seed, H,
+                                         oos_idx, oos_dates, oos_fwd)
+        stem = f"long_{str(dates[r0])[:10]}_c{CADENCE}_s{seed}_{TARGET}_H{H}_{chash}"
+        rec = {"refit_date": str(dates[r0])[:10], "seed": seed, "horizon": H,
+               "train_end": str(dates[int(dr[tr].max())])[:10],
+               "val_start": str(dates[int(dr[va].min())])[:10], "val_end": str(dates[int(dr[va].max())])[:10],
+               "oos_start": str(dates[r0])[:10], "oos_end": str(dates[block_end])[:10],
+               "production_selected_epoch": simulate_production_stop([c["val_ic"] for c in curve]),
+               "train_s": round(time.time() - t0, 1), "curve": curve}
+        with open(os.path.join(ldir, stem + ".json"), "w") as f:
+            json.dump(rec, f, indent=1)
+        np.savez_compressed(os.path.join(ldir, stem + "_preds.npz"), val_preds=vp, oos_preds=op,
+                            oos_idx=oos_idx, va_idx=np.asarray(va))
+        print(f"[p4-long] {rec['refit_date']} s{seed}: {H} epochs in {rec['train_s']:.0f}s "
+              f"(elapsed {(time.time()-t_all)/60:.1f} min)", flush=True)
+        torch.cuda.empty_cache()
+    print(f"[p4-long] done in {(time.time()-t_all)/3600:.2f} h")
+
+
+def evaluate_long():
+    import glob
+    spec = load_spec()
+    L = spec["P4_B0_LONG"]
+    cps = [int(k) for k in L["checkpoint_epochs"]]
+    recs = [json.load(open(p)) for p in sorted(glob.glob(os.path.join(OUT, "b0_long", "long_*.json")))]
+    allc = pd.concat([pd.DataFrame(r["curve"]).assign(refit_date=r["refit_date"], seed=r["seed"]) for r in recs])
+    allc.to_csv(os.path.join(OUT, "b0_long_epoch_curves.csv"), index=False)
+    mean = allc.groupby("epoch")[["train_loss", "val_ic", "val_loss", "oos_ic", "oos_pred_std",
+                                  "grad_norm_mean", "weight_norm"]].mean()
+    rows = []
+    for r in recs:
+        c = pd.DataFrame(r["curve"]).set_index("epoch")
+        ps = int(r["production_selected_epoch"])
+        row = {"refit_date": r["refit_date"], "seed": r["seed"], "prod_selected_epoch": ps,
+               "oos_prod_selected": float(c.loc[ps, "oos_ic"]),
+               "oos_early_regime_2_5": float(c.loc[2:5, "oos_ic"].mean()),
+               "oos_late_50_100": float(c.loc[[50, 75, 100], "oos_ic"].mean()),
+               "oos_oracle": float(c["oos_ic"].max()), "oracle_epoch": int(c["oos_ic"].idxmax()),
+               "oos_late_max": float(c.loc[30:, "oos_ic"].max()), "oos_late_max_epoch": int(c.loc[30:, "oos_ic"].idxmax())}
+        for k in cps:
+            row[f"oos_{k}"] = float(c.loc[k, "oos_ic"])
+        rows.append(row)
+    df = pd.DataFrame(rows)
+    df.to_csv(os.path.join(OUT, "b0_long_summary.csv"), index=False)
+    early = float(df["oos_early_regime_2_5"].mean())
+    late = float(df["oos_late_50_100"].mean())
+    e3, prod = float(df["oos_3"].mean()), float(df["oos_prod_selected"].mean())
+    # frozen classification (spec.P4_B0_LONG.classification)
+    per_fit_late_beats_e3 = int((df["oos_late_50_100"] >= df["oos_3"] + 0.010).sum())
+    per_fit_late_beats_prod = int((df["oos_late_50_100"] >= df["oos_prod_selected"] + 0.010).sum())
+    late_cps = [float(df[f"oos_{k}"].mean()) for k in (50, 75, 100)]
+    if late >= max(e3, prod) + 0.010 and per_fit_late_beats_e3 >= 7 and per_fit_late_beats_prod >= 7 \
+            and all(df.groupby("seed")["oos_late_50_100"].mean() >= df.groupby("seed")["oos_3"].mean() + 0.010) \
+            and all(df.groupby("refit_date")["oos_late_50_100"].mean() >= df.groupby("refit_date")["oos_3"].mean() + 0.010):
+        cls = "LONG_EPOCH_PROMISING"
+    elif all(v <= early - 0.020 for v in late_cps) and float(df["oos_late_max"].mean()) < early - 0.010:
+        cls = "LONG_EPOCH_NO_BENEFIT"
+    else:
+        cls = "LONG_EPOCH_POSSIBLE_RECOVERY"
+    out = {"n_fits": int(len(df)), "horizon": L["epoch_horizon"], "refit_dates": L["refit_dates"],
+           "checkpoint_mean_oos_ic": {str(k): float(df[f"oos_{k}"].mean()) for k in cps},
+           "checkpoint_mean_val_ic": {str(k): float(mean.loc[k, "val_ic"]) for k in cps},
+           "checkpoint_mean_train_loss": {str(k): float(mean.loc[k, "train_loss"]) for k in cps},
+           "checkpoint_mean_pred_std": {str(k): float(mean.loc[k, "oos_pred_std"]) for k in cps},
+           "early_regime_2_5_mean": early, "late_50_100_mean": late, "epoch3_mean": e3,
+           "prod_selected_mean": prod, "prod_selected_epochs": df["prod_selected_epoch"].tolist(),
+           "oracle_epochs": df["oracle_epoch"].tolist(), "late_max_epochs": df["oos_late_max_epoch"].tolist(),
+           "per_fit_late_beats_epoch3_by_0.01": per_fit_late_beats_e3,
+           "per_fit_late_beats_prod_by_0.01": per_fit_late_beats_prod,
+           "by_seed": {str(s): {"epoch3": float(g["oos_3"].mean()), "late": float(g["oos_late_50_100"].mean()),
+                                "e100": float(g["oos_100"].mean())} for s, g in df.groupby("seed")},
+           "by_refit": {k: {"epoch3": float(g["oos_3"].mean()), "late": float(g["oos_late_50_100"].mean()),
+                            "e100": float(g["oos_100"].mean())} for k, g in df.groupby("refit_date")},
+           "classification": cls}
+    with open(os.path.join(OUT, "result_P4_B0_LONG.json"), "w") as f:
+        json.dump(out, f, indent=1, default=float)
+    print(json.dumps(out, indent=1, default=float))
+    print(mean.loc[cps].round(4).to_string())
+
+
 # ------------------------------------------------------------ evaluation
 
 def evaluate():
@@ -567,8 +751,9 @@ def evaluate():
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--stage", default="fits", choices=["fits", "epoch_diag"])
+    ap.add_argument("--stage", default="fits", choices=["fits", "epoch_diag", "long_epoch"])
     ap.add_argument("--evaluate-b0", action="store_true")
+    ap.add_argument("--evaluate-long", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--evaluate", action="store_true")
     ap.add_argument("--deadline", default=None)
@@ -576,8 +761,12 @@ def main():
     os.makedirs(OUT, exist_ok=True)
     if a.evaluate_b0:
         evaluate_b0()
+    elif a.evaluate_long:
+        evaluate_long()
     elif a.evaluate:
         evaluate()
+    elif a.stage == "long_epoch":
+        run_long_epoch(dry_run=a.dry_run)
     elif a.stage == "epoch_diag":
         run_epoch_diag(dry_run=a.dry_run)
     else:
