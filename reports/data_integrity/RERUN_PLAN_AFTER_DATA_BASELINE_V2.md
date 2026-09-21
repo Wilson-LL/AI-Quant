@@ -1,5 +1,14 @@
 # Research rerun plan after DATA_BASELINE_V2 (plan only — nothing here has been run)
 
+> **Superseded ordering (2026-09-22):** see `RERUN_PLAN_REVIEW_20260922.md`. The steps now run in this order:
+> 1. champion and simple-baseline references;
+> 2. Transformer vs momentum / ridge;
+> 3. H-RESIDUAL-SIGNAL;
+> 4. a measured V1→V2 materiality check;
+> 5. P0 / P4 reruns only if step 4 triggers them.
+>
+> The review also categorises each prior result as STILL_VALID, SENSITIVITY_RERUN or FULL_RERUN_REQUIRED.
+
 **Status:** research frozen. No GPU work and no model output until the user approves this plan, integrates `release/eod-integrity-ops`, and lifts the freeze.
 
 Every earlier research result was computed on the holed cache (DATA_BASELINE_V1), using no gap guard. The comparisons below are therefore **re-measurements on V2 data with the gap guard on**, not continuations. Each item carries four fixed conditions:

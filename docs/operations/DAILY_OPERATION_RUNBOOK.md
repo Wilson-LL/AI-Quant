@@ -1,8 +1,48 @@
 # Daily Operation Runbook
 
-All commands from the repo root (`C:\Users\wilso\source\code\AI-Quant`),
-using the venv python: `.venv\Scripts\python.exe` (never system python;
-torch nightly + AMP live in the venv).
+## Canonical production directory (from 2026-09-22)
+
+Production runs from a **dedicated worktree on `main`**:
+`C:\Users\wilso\source\code\AI-Quant-prod`. `daily_ops.bat` and
+`morning_execution_plan.bat` are run **from there only**. The original clone
+`C:\Users\wilso\source\code\AI-Quant` is a research-only worktree (branch
+`research/v17-production-audit-and-holdings`). Never switch its branch to
+deploy, and never run production from it.
+
+Update production with a fast-forward of `main`:
+`git -C ..\AI-Quant-prod merge --ff-only <reviewed release branch>`, then
+`git push origin main`. Research branches are never merged wholesale.
+
+The production worktree needs local, git-ignored runtime state. None of it
+is copied from research outputs:
+
+| item | requirement |
+|---|---|
+| `research\data_cache\` | EOD cache. Seeded from the immutable DATA_BASELINE_V2 copy (`AI-Quant-backups\eod_cache_data_baseline_v2_20260921`, aggregate SHA-256 `c37dc970…`); afterwards maintained only by `daily_ops.bat` (append-only). |
+| `.venv\` | the torch-nightly venv (junction to, or a copy of, the known-good venv) |
+| `my_holdings.csv` | the user's real holdings. Must be present: it feeds the held-symbol hard block of the integrity gate and steps 8–9. Exactly one canonical copy should be maintained. |
+| `reports\paper_trading\` books, decision books, ledger | the standing production lineage (previous book = band10 incumbents and the gate's held set) |
+| `reports\transformer_gpu\<date>_*` | the previous neural target book (band) and predictions |
+| `reports\user_actions\`, `reports\user_holdings\` | the previous standing plan (continuity and recovery) |
+| `checkpoints\` | not needed: the daily retrain trains from scratch |
+
+**Intraday collector.** The `AIQuant-IntradayCollector` / `AIQuant-IntradayPostClose` scheduled tasks still run from the research clone. They pick their universe from that clone's latest decision book and write the intraday DB there. Until the tasks are repointed (a user decision), the morning plan in the production worktree needs `--db` pointing at the collector DB, and the collector universe lags the production book.
+
+## Data integrity statuses (integrity gate, step 1)
+
+| status | meaning | pipeline |
+|---|---|---|
+| SAFE | no current model symbol has a broken 191-session window | runs |
+| DEGRADED | one or more NON-held symbols excluded (DATA_INTEGRITY_FAILURE: no score, no rank); valid/eligible >= 99% | runs; exclusions listed in the report and book md |
+| UNSAFE_FOR_NEW_MODEL_OUTPUT | a held symbol (my_holdings.csv or standing book) invalid, or valid coverage < 99%, or structural date defects | aborts; the previous plan is untouched |
+
+Under DEGRADED, portfolio construction keeps its size. The book size, band10 pool, neural k/band and watch list are sized on REFERENCE_ELIGIBLE_UNIVERSE_N, meaning valid names plus integrity-excluded names, while candidates are valid names only. An excluded name's slot therefore goes to the next valid name. Confirmed symbol no-trade days live in `reports\data_integrity\symbol_no_trade_registry.csv`. They are never filled, and they still break contiguity.
+
+## Commands
+
+All commands run from the production worktree, using the venv python:
+`.venv\Scripts\python.exe` (never system python; torch nightly + AMP live
+in the venv).
 
 **Run the whole cycle with `.\daily_ops.bat`** — it executes the 9 steps
 below with fail-fast integrity gates (2026-08-24 incident fix). Manual
