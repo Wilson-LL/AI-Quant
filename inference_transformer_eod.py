@@ -166,6 +166,22 @@ def make_decision_book(pred, prev, top_frac, band, horizon, exec_date):
     return book
 
 
+def integrity_failures(data, asof):
+    """Symbols that cannot receive a normal score at `asof`: required window
+    crosses a missing session (WINDOW_CROSSES_DATA_GAP) or stale cache tail."""
+    rows = []
+    for sid, st in sorted(data.get("integrity", {}).get("latest_status", {}).items()):
+        if st["last_date"] != asof:
+            reason = "STALE_TAIL"
+        elif st["status"] == "WINDOW_CROSSES_DATA_GAP":
+            reason = "WINDOW_CROSSES_DATA_GAP"
+        else:
+            continue
+        rows.append({"symbol": sid, "status": "DATA_INTEGRITY_FAILURE", "reason": reason,
+                     "last_cached_date": st["last_date"], "asof": asof})
+    return pd.DataFrame(rows, columns=["symbol", "status", "reason", "last_cached_date", "asof"])
+
+
 def main(top_frac=0.2, band=0.05):
     t0 = time.time()
     nets, cfg, manifest = load_ensemble()
@@ -191,6 +207,13 @@ def main(top_frac=0.2, band=0.05):
     })
     infer_s = time.time() - t0
 
+    # H-DATA-INTEGRITY: a symbol whose required inference window crosses a
+    # missing trading session gets NO normal score (the dataset gap guard
+    # builds no sample for it). It is never silently dropped: it is listed
+    # as DATA_INTEGRITY_FAILURE in <asof>_data_integrity.csv, metrics.json
+    # and the report.
+    integ_df = integrity_failures(data, asof)
+
     prev = previous_book()
     exec_date = f"next trading day after {asof}"
     book = make_decision_book(pred, prev, top_frac, band, horizon, exec_date)
@@ -210,7 +233,13 @@ def main(top_frac=0.2, band=0.05):
         "inference_s": round(infer_s, 2),
         "device": torch.cuda.get_device_name(0) if DEVICE == "cuda" else "cpu",
         "seeds": len(nets),
+        "data_integrity": {
+            "n_failures": int(len(integ_df)),
+            "failures": integ_df[["symbol", "reason"]].to_dict("records"),
+            "required_contiguous_sessions": data.get("integrity", {}).get("required_contiguous_sessions"),
+            "calendar_method": data.get("integrity", {}).get("calendar_method")},
     }
+    integ_df.to_csv(os.path.join(REPORT_DIR, f"{asof}_data_integrity.csv"), index=False)
     with open(os.path.join(REPORT_DIR, f"{asof}_metrics.json"), "w", encoding="utf-8") as f:
         json.dump(metrics, f, indent=2)
 
@@ -235,6 +264,12 @@ def main(top_frac=0.2, band=0.05):
         for _, r in sells.iterrows():
             lines.append(f"- {r['action']} {r['symbol']} ({r['sector']}), "
                          f"weight {r['previous_weight']:.2%} → {r['target_weight']:.2%}")
+    if len(integ_df):
+        lines += ["", "## DATA_INTEGRITY_FAILURE (not scored)", "",
+                  "These symbols received no model score because their required input "
+                  "window crosses a missing trading session or their cache tail is stale:", ""]
+        lines += [f"- {r['symbol']}: {r['reason']} (last cached {r['last_cached_date']})"
+                  for _, r in integ_df.iterrows()]
     lines += ["", "## Caveats",
               "- Research system on a survivorship-biased cached universe; not investment advice.",
               "- Scores are cross-sectional ranks, not return forecasts.",

@@ -284,13 +284,29 @@ def _barrier(c, Y, exec_lag, H=0.12, L=0.06):
 
 def build_dataset(feature_set="close_only", seq_len=40, horizons=(5, 10, 20),
                   exec_lag=1, universe=None, min_names_per_date=30,
-                  include_barrier=False, verbose=True):
-    """Build the full sequence dataset. Returns a dict; see module docstring."""
+                  include_barrier=False, verbose=True, gap_guard=True, calendar=None):
+    """Build the full sequence dataset. Returns a dict; see module docstring.
+
+    Gap guard (H-DATA-INTEGRITY): features, windows and labels are built on
+    each stock's own rows, so a missing trading session would otherwise be
+    spliced over (Wed -> Fri read as one session when Thu was a market
+    session). With `gap_guard` (default) no sample is built whose feature
+    lookback + sequence (research/eod_integrity.required_windows) or whose
+    label window crosses an expected market session missing from the cache;
+    such samples are recorded as WINDOW_CROSSES_DATA_GAP in
+    out["integrity"]. The expected calendar is derived from cross-sectional
+    coverage of the loaded universe unless `calendar` is given. On a
+    gap-free cache the guard changes nothing."""
     ids = universe or [s for s in SECTOR_MAP if SECTOR_MAP[s] != "etf"]
     uni = load_universe(ids)
     if verbose:
         print(f"[dataset] {len(uni)} stocks loaded, feature_set={feature_set}, "
               f"seq_len={seq_len}, exec_lag={exec_lag}")
+    if gap_guard:
+        import eod_integrity as EI
+        cal = (pd.DatetimeIndex(calendar) if calendar is not None
+               else EI.derive_calendar({s: d["date"] for s, d in uni.items()}))
+        lookback = EI.feature_lookback(feature_set)
 
     # ---- per-stock features + forward returns -> long panel
     blocks = []
@@ -306,8 +322,17 @@ def build_dataset(feature_set="close_only", seq_len=40, horizons=(5, 10, 20),
         blk["sector"] = SECTOR_MAP.get(sid, "other")
         blk["t_in_stock"] = np.arange(len(df))
         blk["n_stock"] = len(df)
+        if gap_guard:
+            gb = EI.gap_before(df["date"].values, cal)
+            # row i's features are gap-free only if rows i-lookback..i are contiguous
+            blk["_feat_contig"] = EI.contiguous_back(gb, lookback + 1)
+        else:
+            blk["_feat_contig"] = True
         for Y in horizons:
-            blk[f"fwd_{Y}"] = _fwd_ret(c, Y, exec_lag)
+            fwd = _fwd_ret(c, Y, exec_lag)
+            if gap_guard:   # label rows t..t+exec_lag+Y must be contiguous sessions
+                fwd = np.where(EI.contiguous_forward(gb, exec_lag + Y), fwd, np.nan)
+            blk[f"fwd_{Y}"] = fwd
         # realized 20d vol at t (annualization-free; used by tgt_voladj_20)
         lr = np.log(c[1:] / c[:-1])
         blk["_vol20_t"] = pd.Series(np.concatenate([[np.nan], lr])).rolling(20).std().to_numpy()
@@ -320,6 +345,12 @@ def build_dataset(feature_set="close_only", seq_len=40, horizons=(5, 10, 20),
         blk["_ddwin_20"] = ddw
         if include_barrier:
             blk["tgt_barrier"] = _barrier(c, 20, exec_lag)
+        if gap_guard:
+            blk["_vol20_t"] = np.where(EI.contiguous_back(gb, 21), blk["_vol20_t"], np.nan)
+            f_ok = EI.contiguous_forward(gb, exec_lag + 20)
+            blk["_ddwin_20"] = np.where(f_ok, blk["_ddwin_20"], np.nan)
+            if include_barrier:
+                blk["tgt_barrier"] = np.where(f_ok, blk["tgt_barrier"], np.nan)
         blocks.append(blk)
     panel = pd.concat(blocks, ignore_index=True)
 
@@ -397,18 +428,38 @@ def build_dataset(feature_set="close_only", seq_len=40, horizons=(5, 10, 20),
     sectors = sorted(panel["sector"].unique())
     sector_idx_of = {s: i for i, s in enumerate(sectors)}
 
+    integrity = {"gap_guard": bool(gap_guard), "rejected_by_stock": {}, "latest_status": {}}
+    if gap_guard:
+        integrity.update(calendar_method=EI.CALENDAR_METHOD, calendar_sessions=int(len(cal)),
+                         feature_lookback_rows=int(lookback),
+                         required_contiguous_sessions=int(lookback + seq_len))
+
+    def _valid_ends(mask):
+        ok_ = np.zeros(len(mask), dtype=bool)
+        cs_ = np.cumsum(mask.astype(np.int32))
+        for t in range(seq_len - 1, len(mask)):
+            prev = cs_[t - seq_len] if t >= seq_len else 0
+            ok_[t] = (cs_[t] - prev) == seq_len
+        return ok_
+
     for sid, g in panel.groupby("stock", sort=False):
         gi = g.index.to_numpy()
         F = feat_mat[gi]                       # (n, F) this stock, time-ordered
         dr = g["date_rank"].to_numpy()
         n = len(g)
         finite = np.isfinite(F).all(axis=1)
-        # valid window end t: rows t-seq_len+1..t all finite
-        ok = np.zeros(n, dtype=bool)
-        csum = np.cumsum(finite.astype(np.int32))
-        for t in range(seq_len - 1, n):
-            prev = csum[t - seq_len] if t >= seq_len else 0
-            ok[t] = (csum[t] - prev) == seq_len
+        # valid window end t: rows t-seq_len+1..t all finite (and, with the gap
+        # guard, every row's feature lookback free of missing sessions)
+        ok_finite = _valid_ends(finite)
+        contig = g["_feat_contig"].to_numpy(bool)
+        ok = _valid_ends(finite & contig) if gap_guard else ok_finite
+        rej = ok_finite & ~ok
+        if rej.any():
+            integrity["rejected_by_stock"][sid] = int(rej.sum())
+        integrity["latest_status"][sid] = {
+            "last_date": str(g["date"].iloc[-1])[:10],
+            "status": ("OK" if ok[-1] else ("WINDOW_CROSSES_DATA_GAP" if rej[-1]
+                                             else "INSUFFICIENT_HISTORY"))}
         ts = np.nonzero(ok)[0]
         if len(ts) == 0:
             continue
@@ -443,7 +494,11 @@ def build_dataset(feature_set="close_only", seq_len=40, horizons=(5, 10, 20),
         "seq_len": seq_len,
         "exec_lag": exec_lag,
         "horizons": tuple(horizons),
+        "integrity": integrity,
     }
+    if gap_guard and verbose and integrity["rejected_by_stock"]:
+        print(f"[dataset] gap guard: {sum(integrity['rejected_by_stock'].values())} samples "
+              f"WINDOW_CROSSES_DATA_GAP across {len(integrity['rejected_by_stock'])} stocks")
     if verbose:
         print(f"[dataset] X {X.shape} ({X.nbytes/1e6:.0f} MB), "
               f"{len(all_dates)} dates {str(all_dates[0])[:10]}..{str(all_dates[-1])[:10]}")

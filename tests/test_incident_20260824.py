@@ -255,14 +255,20 @@ class TestBatContract(unittest.TestCase):
             cls.bat = f.read()
 
     def test_gates_wired_after_critical_steps(self):
-        for stage in ("refresh", "retrain", "inference", "book"):
+        # H-DATA-INTEGRITY adds the longitudinal `integrity` gate after the
+        # cross-sectional `refresh` coverage gate (contract change, 5 gates).
+        for stage in ("refresh", "integrity", "retrain", "inference", "book"):
             self.assertIn(f"pipeline_gate.py {stage}", self.bat, stage)
         self.assertEqual(self.bat.count(
-            r"python.exe research\pipeline_gate.py"), 4)
-        # abort checks: 4 gate + snapshot/evaluate/diff plain ERRORLEVEL
+            r"python.exe research\pipeline_gate.py"), 5)
+        self.assertLess(self.bat.index("pipeline_gate.py refresh"),
+                        self.bat.index("pipeline_gate.py integrity"))
+        self.assertLess(self.bat.index("pipeline_gate.py integrity"),
+                        self.bat.index("--mode daily-retrain"))
+        # abort checks: 5 gate + snapshot/evaluate/diff plain ERRORLEVEL
         # + the book step's explicit STEP_RC abort
         self.assertEqual(
-            self.bat.count("if errorlevel 1 goto :pipefail"), 7)
+            self.bat.count("if errorlevel 1 goto :pipefail"), 8)
         self.assertIn('if not "%STEP_RC%"=="0" goto :pipefail', self.bat)
         # GPU steps pass exit code + step-start marker to the gate
         self.assertEqual(self.bat.count(

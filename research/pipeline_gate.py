@@ -12,6 +12,12 @@ Stages:
               be >= the pre-registered publication threshold (same 0.99
               policy as user_next_session_plan.PARTIAL_COVERAGE_MIN);
               blocks a partial-publication day BEFORE the GPU retrain.
+  integrity — LONGITUDINAL per-symbol continuity (H-DATA-INTEGRITY),
+              reported separately from the cross-sectional coverage:
+              TAIL_COVERAGE, RECENT_WINDOW_INTEGRITY (blocking: every
+              current symbol's required inference window must be free
+              of missing sessions) and HISTORICAL_TRAINING_INTEGRITY
+              (reported; the dataset gap guard excludes those samples).
   retrain   — checkpoints/transformer_eod/daily_manifest.json asof ==
               newest cache date.
   inference — reports/transformer_gpu/<newest>_{predictions.csv,
@@ -77,6 +83,52 @@ def newest_and_coverage(root):
     return newest, n_at, n_at / max(len(last), 1)
 
 
+def longitudinal_integrity(root):
+    """Per-symbol LONGITUDINAL continuity (H-DATA-INTEGRITY). Deliberately
+    separate from the cross-sectional newest-date coverage above: "108/108 at
+    the latest date" says nothing about holes inside each symbol's history.
+    Returns the three independently reported components:
+      TAIL_COVERAGE                 newest-date coverage vs PARTIAL_COVERAGE_MIN
+                                    (same semantics as the refresh stage)
+      RECENT_WINDOW_INTEGRITY       every model-eligible symbol that is current
+                                    at the newest date has all expected sessions
+                                    of its REQUIRED_INFERENCE_CONTIGUOUS_SESSIONS
+                                    window (derived from the feature code), no
+                                    duplicates and monotonic dates -> FAIL blocks
+      HISTORICAL_TRAINING_INTEGRITY historical holes and the training samples the
+                                    dataset gap guard excludes -> reported (WARN),
+                                    not blocking, because no sample is built
+                                    across a hole."""
+    import eod_integrity as E
+    cache_dir = os.path.join(root, "research", "data_cache")
+    newest, n_at, ratio = newest_and_coverage(root)
+    raw = E.read_cache_dates(cache_dir, universe())
+    elig = [s for s in universe() if s in raw]
+    cal = E.derive_calendar({s: raw[s] for s in elig})
+    req = E.required_windows()
+    rows = [E.audit_symbol(s, raw[s], cal, cal.max(), req) for s in elig]
+    recent_bad = sorted(r["symbol"] for r in rows
+                        if r["tail_fresh"] and (r["recent_window_missing"] or 0) > 0)
+    structural = sorted(r["symbol"] for r in rows
+                        if r["duplicate_dates"] or r["non_monotonic_steps"])
+    hist = [r for r in rows if r["missing_sessions"] > 0]
+    return {
+        "TAIL_COVERAGE": {"ok": ratio >= PARTIAL_COVERAGE_MIN, "newest": newest,
+                          "ratio": ratio, "threshold": PARTIAL_COVERAGE_MIN},
+        "RECENT_WINDOW_INTEGRITY": {
+            "ok": not recent_bad and not structural,
+            "required_sessions": req["REQUIRED_INFERENCE_CONTIGUOUS_SESSIONS"],
+            "symbols_window_crosses_gap": recent_bad, "symbols_structural": structural},
+        "HISTORICAL_TRAINING_INTEGRITY": {
+            "ok": True, "symbols_with_holes": len(hist),
+            "missing_symbol_sessions": int(sum(r["missing_sessions"] for r in hist)),
+            "training_samples_excluded_by_guard": int(sum(
+                r["LEVEL_B_training_samples_feature_window_cross"]
+                + r["LEVEL_B_training_samples_label_window_cross"] for r in rows))},
+        "calendar_method": E.CALENDAR_METHOD, "calendar_last": str(cal.max())[:10],
+    }
+
+
 def _stage_artifacts(root, stage, newest):
     """Absolute paths of every artifact the stage must produce."""
     if stage == "retrain":
@@ -131,6 +183,28 @@ def check(root, stage, exit_code=None, since_marker=None):
                     f"({stale_mtime}) — the step produced no fresh "
                     "output (silent no-op / stale artifact)")
     n_cached = round(n_at / ratio) if ratio else 0
+    if stage == "integrity":
+        li = longitudinal_integrity(root)
+        tc, rw, hi = (li["TAIL_COVERAGE"], li["RECENT_WINDOW_INTEGRITY"],
+                      li["HISTORICAL_TRAINING_INTEGRITY"])
+        print(f"[gate integrity] TAIL_COVERAGE: {'PASS' if tc['ok'] else 'FAIL'} "
+              f"({tc['ratio']:.0%} at {tc['newest']}, threshold {tc['threshold']:.0%})")
+        print(f"[gate integrity] RECENT_WINDOW_INTEGRITY: {'PASS' if rw['ok'] else 'FAIL'} "
+              f"({rw['required_sessions']}-session window; crosses gap: "
+              f"{rw['symbols_window_crosses_gap'] or 'none'}; structural: "
+              f"{rw['symbols_structural'] or 'none'})")
+        print(f"[gate integrity] HISTORICAL_TRAINING_INTEGRITY: "
+              f"{'WARN' if hi['symbols_with_holes'] else 'PASS'} "
+              f"({hi['symbols_with_holes']} symbols with holes, "
+              f"{hi['missing_symbol_sessions']} missing symbol-sessions, "
+              f"{hi['training_samples_excluded_by_guard']} training samples excluded by the gap guard)")
+        if not tc["ok"]:
+            return False, "TAIL_COVERAGE below threshold"
+        if not rw["ok"]:
+            return False, ("RECENT_WINDOW_INTEGRITY failed: current model-input windows "
+                           "cross missing trading sessions — do not retrain/infer/publish "
+                           "(repair: refresh_data.py --repair-gaps --repair-priorities P0)")
+        return True, "longitudinal integrity OK for current inference windows"
     if stage == "refresh":
         if ratio < PARTIAL_COVERAGE_MIN:
             return False, (f"newest EOD date {newest} covers only "
@@ -172,7 +246,7 @@ def check(root, stage, exit_code=None, since_marker=None):
 
 def main(argv=None):
     ap = argparse.ArgumentParser()
-    ap.add_argument("stage", choices=("refresh", "retrain", "inference",
+    ap.add_argument("stage", choices=("refresh", "integrity", "retrain", "inference",
                                       "book"))
     ap.add_argument("--root", default=ROOT)
     ap.add_argument("--exit-code", type=int, default=None,

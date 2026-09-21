@@ -1,0 +1,349 @@
+"""EOD cache trading-session integrity (H-DATA-INTEGRITY, P0 data defect).
+
+The per-symbol EOD cache can contain missing trading sessions, including
+whole missing months, and the feature pipeline builds features, 60-step
+sequences and forward-return labels on each symbol's OWN rows. A hole is
+therefore silently spliced over: `log_ret_1` can carry a multi-week return
+as if it were one session, and every rolling lookback shifts.
+
+This module is the single source of truth for:
+
+* the EXPECTED market-session calendar (no authoritative TWSE holiday
+  calendar exists in this repo, so it is DERIVED from cross-sectional
+  coverage; see CALENDAR_METHOD);
+* per-symbol gap auditing (missing sessions, duplicates, non-monotonic
+  dates, off-calendar rows, full-month holes, latest contiguous run);
+* the three integrity levels (A live inference, B training, C history);
+* the required contiguous window, DERIVED from the feature code;
+* gap flags used by the dataset / inference guard;
+* the deterministic backfill plan and the data manifest.
+
+It never modifies the cache. It never forward-fills or interpolates.
+
+  python research/eod_integrity.py audit [--cache-dir DIR] [--out DIR]
+"""
+
+import argparse
+import datetime as _dt
+import hashlib
+import json
+import os
+import sys
+
+import numpy as np
+import pandas as pd
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT)
+sys.path.insert(0, os.path.join(ROOT, "research"))
+
+SCHEMA_VERSION = "eod_integrity/1"
+CALENDAR_METHOD = "CROSS_SECTIONAL_MAJORITY_v1"
+CALENDAR_MIN_SHARE = 0.5     # share of symbols alive on the date that have a row
+CALENDAR_MIN_SYMBOLS = 10    # absolute floor
+SEQ_LEN = 60                 # production preset sequence length (train_transformer_eod.PRESETS)
+EXEC_LAG, HORIZON = 1, 20    # production target: fwd_20 from close[t+1]
+RECENT_TRAINING_SESSIONS = 504   # "recent training data" for backfill priority P1 (~2 years)
+
+# fetch/repair states (refresh_data gap repair)
+FETCH_OK = "FETCH_OK"
+EMPTY_RESPONSE_SUSPECT = "EMPTY_RESPONSE_SUSPECT"
+NETWORK_ERROR = "NETWORK_ERROR"
+RATE_LIMIT_SUSPECT = "RATE_LIMIT_SUSPECT"
+CONFIRMED_NO_DATA = "CONFIRMED_NO_DATA"
+UNRESOLVED = "UNRESOLVED"
+FETCH_STATES = (FETCH_OK, EMPTY_RESPONSE_SUSPECT, NETWORK_ERROR, RATE_LIMIT_SUSPECT,
+                CONFIRMED_NO_DATA, UNRESOLVED)
+
+# sample / symbol integrity statuses
+WINDOW_CROSSES_DATA_GAP = "WINDOW_CROSSES_DATA_GAP"
+DATA_INTEGRITY_FAILURE = "DATA_INTEGRITY_FAILURE"
+UNKNOWN_LISTING_BOUNDARY = "UNKNOWN_LISTING_BOUNDARY"
+
+
+# ------------------------------------------------------------ required window (derived from code)
+
+def feature_lookback(feature_set="close_only", n=400):
+    """Largest number of PRIOR rows any production feature needs: the index of
+    the first row at which every feature is finite on a gap-free synthetic
+    series. Derived by running the production feature code, not assumed."""
+    from dataset_transformer_eod import FEATURE_COLS, _stock_features
+    rng = np.random.default_rng(0)
+    c = 100.0 * np.exp(np.cumsum(rng.normal(0, 0.01, n)))
+    df = pd.DataFrame({"date": pd.bdate_range("2000-01-03", periods=n), "open": c, "high": c * 1.01,
+                       "low": c * 0.99, "close": c, "volume": np.full(n, 1e6)})
+    feats = _stock_features(df, feature_set)
+    # per-stock columns only: cross-sectional placeholders are filled at panel level
+    cols = [c for c in FEATURE_COLS[feature_set] if c in feats.columns and feats[c].notna().any()]
+    f = feats[cols].to_numpy(float)
+    ok = np.isfinite(f).all(axis=1)
+    if not ok.any():
+        raise ValueError(f"{feature_set}: no row with all per-stock features finite in {n} rows")
+    return int(np.argmax(ok))
+
+
+def required_windows(feature_set="close_only", seq_len=SEQ_LEN, exec_lag=EXEC_LAG, horizon=HORIZON):
+    L = feature_lookback(feature_set)
+    inference = seq_len + L                   # sessions ending at the as-of date, inclusive
+    return {"feature_lookback_rows": L, "seq_len": seq_len,
+            "REQUIRED_INFERENCE_CONTIGUOUS_SESSIONS": inference,
+            "label_forward_sessions": exec_lag + horizon,
+            "REQUIRED_TRAINING_CONTIGUOUS_SESSIONS": inference + exec_lag + horizon,
+            "derivation": (f"first sequence step needs {L} prior rows (max feature lookback, "
+                           f"measured on the production feature code); a {seq_len}-step sequence "
+                           f"therefore spans {L} + {seq_len} = {inference} contiguous sessions ending "
+                           f"at the as-of date; a training sample additionally needs the "
+                           f"{exec_lag}+{horizon} forward sessions of its label")}
+
+
+# ------------------------------------------------------------ calendar
+
+def read_cache_dates(cache_dir, symbols=None):
+    """{symbol: raw date Series in FILE order} (duplicates and order preserved)."""
+    out = {}
+    names = symbols if symbols is not None else sorted(f[:-4] for f in os.listdir(cache_dir) if f.endswith(".csv"))
+    for s in names:
+        p = os.path.join(cache_dir, f"{s}.csv")
+        if not os.path.isfile(p):
+            continue
+        d = pd.read_csv(p, usecols=["date"])["date"]
+        out[s] = pd.to_datetime(d)
+    return out
+
+
+def derive_calendar(dates_by_symbol, min_share=CALENDAR_MIN_SHARE, min_symbols=CALENDAR_MIN_SYMBOLS):
+    """Expected market sessions = dates on which at least `min_share` of the
+    symbols whose cached span covers the date (first <= d <= last) have a row,
+    and at least `min_symbols` symbols have a row. Ordinary weekends, holidays
+    and exchange closures have no (or sparse) coverage and are never sessions.
+    No weekday rule: TWSE held Saturday make-up sessions (8 of them in
+    2016-2018, each traded by ~104/108 names), which are real sessions."""
+    uniq = {s: pd.DatetimeIndex(pd.unique(d)).sort_values() for s, d in dates_by_symbol.items() if len(d)}
+    if not uniq:
+        return pd.DatetimeIndex([])
+    all_d = pd.DatetimeIndex(sorted(set().union(*[set(v) for v in uniq.values()])))
+    have = pd.Series(0, index=all_d)
+    alive = pd.Series(0, index=all_d)
+    for v in uniq.values():
+        have[v] += 1
+        alive[(all_d >= v[0]) & (all_d <= v[-1])] += 1
+    share = have / alive.clip(lower=1)
+    keep = (share >= min_share) & (have >= min_symbols)
+    return all_d[keep.to_numpy()]
+
+
+def gap_before(dates, calendar):
+    """For sorted unique dates: bool array, True at i if at least one expected
+    session lies strictly between dates[i-1] and dates[i]."""
+    d = pd.DatetimeIndex(dates)
+    if len(d) == 0:
+        return np.zeros(0, bool)
+    cal = pd.DatetimeIndex(calendar)
+    lo = np.searchsorted(cal.values, d.values[:-1], side="right")
+    hi = np.searchsorted(cal.values, d.values[1:], side="left")
+    return np.concatenate([[False], (hi - lo) > 0])
+
+
+def contiguous_back(gap, span):
+    """True at row i if rows i-span+1..i are contiguous (no gap in transitions
+    i-span+2..i) AND at least span rows exist. span counts rows including i."""
+    n = len(gap)
+    g = np.asarray(gap, int)
+    cs = np.concatenate([[0], np.cumsum(g)])
+    out = np.zeros(n, bool)
+    for i in range(span - 1, n):
+        out[i] = (cs[i + 1] - cs[i - span + 2]) == 0 if span > 1 else True
+    return out
+
+
+def contiguous_forward(gap, span):
+    """True at row i if rows i..i+span are contiguous (no gap in transitions
+    i+1..i+span) and exist."""
+    n = len(gap)
+    g = np.asarray(gap, int)
+    cs = np.concatenate([[0], np.cumsum(g)])
+    out = np.zeros(n, bool)
+    for i in range(0, n - span):
+        out[i] = (cs[i + span + 1] - cs[i + 1]) == 0
+    return out
+
+
+# ------------------------------------------------------------ per-symbol audit
+
+def audit_symbol(sym, raw_dates, calendar, newest, req):
+    raw = pd.DatetimeIndex(raw_dates)
+    dup = int(raw.duplicated().sum())
+    nonmono = int((np.diff(raw.values.astype("int64")) < 0).sum()) if len(raw) > 1 else 0
+    d = pd.DatetimeIndex(pd.unique(raw)).sort_values()
+    first, last = d[0], d[-1]
+    cal = pd.DatetimeIndex(calendar)
+    exp = cal[(cal >= first) & (cal <= last)]
+    present = exp.intersection(d)
+    missing = exp.difference(d)
+    extra = d.difference(cal)
+    # gap intervals (maximal runs of consecutive missing expected sessions)
+    pos = pd.Series(np.arange(len(cal)), index=cal)
+    mp = pos.reindex(missing).to_numpy()
+    intervals = []
+    if len(mp):
+        start = prev = mp[0]
+        for p in mp[1:]:
+            if p != prev + 1:
+                intervals.append((start, prev))
+                start = p
+            prev = p
+        intervals.append((start, prev))
+    iv = [{"start": str(cal[a])[:10], "end": str(cal[b])[:10], "sessions": int(b - a + 1)} for a, b in intervals]
+    # full calendar months with zero rows inside the cached span
+    months_exp = pd.Series(1, index=exp).groupby([exp.year, exp.month]).size()
+    months_have = pd.Series(1, index=present).groupby([present.year, present.month]).size() if len(present) else pd.Series(dtype=int)
+    full_months = [f"{y}-{m:02d}" for (y, m), n in months_exp.items() if (y, m) not in months_have.index]
+    # latest contiguous run ending at the last cached date (in expected sessions)
+    last_missing = missing.max() if len(missing) else None
+    run = int(((exp > last_missing) if last_missing is not None else np.ones(len(exp), bool)).sum())
+    newest = pd.Timestamp(newest)
+    tail_fresh = last == newest
+    need_a = req["REQUIRED_INFERENCE_CONTIGUOUS_SESSIONS"]
+    recent = cal[cal <= newest][-need_a:]
+    recent_missing = int(len(recent.difference(d))) if tail_fresh else None
+    level_a = bool(tail_fresh and recent_missing == 0 and len(recent) == need_a and first <= recent[0])
+    # training samples that would be built under the OLD finite-only rule but cross a gap
+    gb = gap_before(d, cal)
+    L, S, fwd = req["feature_lookback_rows"], req["seq_len"], req["label_forward_sessions"]
+    n = len(d)
+    old_ok = np.zeros(n, bool)
+    old_ok[L + S - 1:] = True                           # enough rows for a finite window (gap-blind)
+    feat_ok = contiguous_back(gb, L + S)
+    lab_ok = contiguous_forward(gb, fwd)
+    feat_cross = int((old_ok & ~feat_ok).sum())
+    lab_cross = int((old_ok & feat_ok & ~lab_ok & (np.arange(n) < n - fwd)).sum())
+    return {
+        "symbol": sym, "first_date": str(first)[:10], "last_date": str(last)[:10],
+        "expected_sessions": int(len(exp)), "actual_sessions": int(len(present)),
+        "missing_sessions": int(len(missing)), "duplicate_dates": dup, "non_monotonic_steps": nonmono,
+        "off_calendar_rows": int(len(extra)), "gap_intervals": int(len(iv)),
+        "multi_session_gaps": int(sum(1 for x in iv if x["sessions"] >= 2)),
+        "largest_gap_sessions": int(max((x["sessions"] for x in iv), default=0)),
+        "largest_gap_start": max(iv, key=lambda x: x["sessions"])["start"] if iv else "",
+        "full_month_gaps": len(full_months), "full_month_list": ";".join(full_months),
+        "missing_2025_26": int((missing >= "2025-01-01").sum()),
+        "latest_contiguous_run": run, "tail_fresh": bool(tail_fresh),
+        "recent_window_missing": recent_missing,
+        "LEVEL_A_live_inference": "PASS" if level_a else "FAIL",
+        "LEVEL_B_training_samples_feature_window_cross": feat_cross,
+        "LEVEL_B_training_samples_label_window_cross": lab_cross,
+        "LEVEL_C_history": "COMPLETE" if len(missing) == 0 else "INCOMPLETE",
+        "listing_boundary": UNKNOWN_LISTING_BOUNDARY,
+        "_intervals": iv,
+    }
+
+
+def model_eligible(symbols):
+    from data import SECTOR_MAP
+    return [s for s in symbols if SECTOR_MAP.get(s) != "etf"]
+
+
+# ------------------------------------------------------------ backfill plan
+
+def backfill_plan(audits, calendar, newest, req):
+    cal = pd.DatetimeIndex(calendar)
+    cal = cal[cal <= pd.Timestamp(newest)]
+    a_start = cal[-req["REQUIRED_INFERENCE_CONTIGUOUS_SESSIONS"]]
+    p1_start = cal[-RECENT_TRAINING_SESSIONS]
+    span = req["REQUIRED_TRAINING_CONTIGUOUS_SESSIONS"]
+    rows = []
+    for a in audits:
+        for g in a["_intervals"]:
+            s, e = pd.Timestamp(g["start"]), pd.Timestamp(g["end"])
+            months = pd.period_range(s, e, freq="M")
+            prio = "P0" if e >= a_start else ("P1" if e >= p1_start else "P2")
+            for m in months:
+                ms = max(s, m.start_time)
+                me = min(e, m.end_time.normalize())
+                n_exp = int(((cal >= ms) & (cal <= me)).sum())
+                rows.append({"symbol": a["symbol"], "missing_start": g["start"], "missing_end": g["end"],
+                             "interval_sessions": g["sessions"], "fetch_month": str(m),
+                             "expected_sessions_in_request": n_exp, "priority": prio,
+                             "recent_input_impact": bool(e >= a_start),
+                             "training_impact_samples": int(min(span + g["sessions"] - 1,
+                                                                a["actual_sessions"]))})
+    df = pd.DataFrame(rows)
+    if len(df):
+        df = df.sort_values(["priority", "symbol", "fetch_month"]).reset_index(drop=True)
+    return df
+
+
+# ------------------------------------------------------------ manifest
+
+def cache_hash(cache_dir, symbols):
+    h = hashlib.sha256()
+    for s in sorted(symbols):
+        p = os.path.join(cache_dir, f"{s}.csv")
+        if os.path.isfile(p):
+            h.update(s.encode())
+            with open(p, "rb") as f:
+                h.update(hashlib.sha256(f.read()).digest())
+    return h.hexdigest()
+
+
+def run_audit(cache_dir, out_dir):
+    from data import SECTOR_MAP
+    configured = sorted(SECTOR_MAP)
+    raw = read_cache_dates(cache_dir)
+    cached = sorted(raw)
+    eligible = [s for s in model_eligible(configured) if s in raw]
+    calendar = derive_calendar({s: raw[s] for s in eligible})
+    newest = calendar.max()
+    req = required_windows()
+    audits = [audit_symbol(s, raw[s], calendar, newest, req) for s in cached]
+    inv = pd.DataFrame([{k: v for k, v in a.items() if not k.startswith("_")} for a in audits])
+    inv["model_eligible"] = inv["symbol"].isin(eligible)
+    plan = backfill_plan([a for a in audits if a["symbol"] in eligible], calendar, newest, req)
+    os.makedirs(out_dir, exist_ok=True)
+    inv.to_csv(os.path.join(out_dir, "eod_cache_gap_inventory.csv"), index=False)
+    plan.to_csv(os.path.join(out_dir, "eod_backfill_plan.csv"), index=False)
+    el = inv[inv["model_eligible"]]
+    summary = {
+        "schema_version": SCHEMA_VERSION,
+        "audit_timestamp": _dt.datetime.now().astimezone().isoformat(timespec="seconds"),
+        "cache_dir": os.path.abspath(cache_dir),
+        "calendar_method": CALENDAR_METHOD,
+        "calendar_rule": f"share of alive symbols with a row >= {CALENDAR_MIN_SHARE} AND >= {CALENDAR_MIN_SYMBOLS} symbols",
+        "calendar_sessions": int(len(calendar)), "calendar_first": str(calendar.min())[:10],
+        "calendar_last": str(newest)[:10],
+        "configured_symbols": len(configured), "cached_symbols": len(cached),
+        "configured_without_cache": sorted(set(configured) - set(cached)),
+        "model_eligible_symbols": len(eligible),
+        "required_windows": req,
+        "eligible_with_any_gap": int((el["missing_sessions"] > 0).sum()),
+        "eligible_with_2025_26_gap": int((el["missing_2025_26"] > 0).sum()),
+        "eligible_missing_symbol_sessions": int(el["missing_sessions"].sum()),
+        "eligible_full_month_gaps": int(el["full_month_gaps"].sum()),
+        "eligible_largest_gap": el.sort_values("largest_gap_sessions").iloc[-1][["symbol", "largest_gap_sessions", "largest_gap_start"]].to_dict(),
+        "eligible_with_duplicates": int((el["duplicate_dates"] > 0).sum()),
+        "eligible_with_non_monotonic": int((el["non_monotonic_steps"] > 0).sum()),
+        "eligible_off_calendar_rows": int(el["off_calendar_rows"].sum()),
+        "eligible_level_a_fail": sorted(el.loc[el["LEVEL_A_live_inference"] == "FAIL", "symbol"].tolist()),
+        "eligible_level_a_fail_gap": sorted(el.loc[(el["LEVEL_A_live_inference"] == "FAIL") & el["tail_fresh"], "symbol"].tolist()),
+        "eligible_level_a_fail_stale_tail": sorted(el.loc[~el["tail_fresh"], "symbol"].tolist()),
+        "training_samples_feature_window_cross": int(el["LEVEL_B_training_samples_feature_window_cross"].sum()),
+        "training_samples_label_window_cross": int(el["LEVEL_B_training_samples_label_window_cross"].sum()),
+        "backfill_requests": int(len(plan)),
+        "backfill_requests_by_priority": plan["priority"].value_counts().to_dict() if len(plan) else {},
+        "backfill_completion_state": "NOT_STARTED",
+        "unresolved_symbols": sorted(el.loc[el["missing_sessions"] > 0, "symbol"].tolist()),
+        "cache_sha256": cache_hash(cache_dir, cached),
+    }
+    with open(os.path.join(out_dir, "eod_data_manifest.json"), "w", encoding="utf-8") as f:
+        json.dump(summary, f, indent=1, default=str)
+    return summary, inv, plan, calendar
+
+
+if __name__ == "__main__":
+    ap = argparse.ArgumentParser()
+    ap.add_argument("cmd", choices=["audit"])
+    ap.add_argument("--cache-dir", default=os.path.join(ROOT, "research", "data_cache"))
+    ap.add_argument("--out", default=os.path.join(ROOT, "reports", "data_integrity"))
+    a = ap.parse_args()
+    s, inv, plan, cal = run_audit(a.cache_dir, a.out)
+    print(json.dumps({k: v for k, v in s.items() if k not in ("unresolved_symbols",)}, indent=1, default=str))

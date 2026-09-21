@@ -32,6 +32,13 @@ REM (2026-08-24 incident: 34/108) must not reach model training.
 set "STEP=EOD refresh coverage"
 .venv\Scripts\python.exe research\pipeline_gate.py refresh
 if errorlevel 1 goto :pipefail
+REM Longitudinal integrity gate (H-DATA-INTEGRITY): the 99% newest-date
+REM coverage above says nothing about holes INSIDE each symbol's history.
+REM Block retrain/inference/publication if any current model-input window
+REM crosses a missing trading session (standing plan left untouched).
+set "STEP=EOD longitudinal integrity"
+.venv\Scripts\python.exe research\pipeline_gate.py integrity
+if errorlevel 1 goto :pipefail
 
 REM Step-start markers let the gate require artifact mtimes AFTER the
 REM step began: a nonzero exit passes ONLY when every expected dated
