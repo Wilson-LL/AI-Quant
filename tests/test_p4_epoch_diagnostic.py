@@ -174,26 +174,123 @@ class TestOOSSeparation(unittest.TestCase):
         self.assertGreaterEqual(int(dr[oos].min()) - int(dr[va].max()), 21)   # val ends 21 before refit
 
 
-if __name__ == "__main__":
-    unittest.main()
+def _long_inputs(flip_oos=False):
+    X, y, dr = tiny()
+    tr, va = np.arange(0, 300), np.arange(300, 360)
+    oos = np.arange(384, 480)
+    oos_dates = pd.to_datetime("2026-01-01") + pd.to_timedelta(dr[oos], "D")
+    fwd = y[oos].numpy() + 0.05 * np.random.default_rng(1).normal(size=len(oos))
+    return X, y, dr, tr, va, oos, oos_dates, (-fwd if flip_oos else fwd)
 
 
 class TestLongEpochCurve(unittest.TestCase):
+    """P4-B0-LONG harness (epoch_curve_long). Placed above unittest.main() so it
+    is collected by direct invocation as well as by discovery / pytest."""
+
+    MECH = ("train_loss", "val_ic", "val_loss", "oos_pred_std", "grad_norm_mean", "grad_norm_max", "weight_norm")
+
+    def _long(self, H, seed=2, flip_oos=False, y_override=None):
+        X, y, dr, tr, va, oos, od, fwd = _long_inputs(flip_oos)
+        if y_override is not None:
+            y = y_override(y)
+        return p4.epoch_curve_long(tte, X, y, tr, va, dr[va], CFG, seed, H, oos, od, fwd)
 
     def test_long_curve_records_norms_and_retains_predictions(self):
-        X, y, dr = tiny()
-        tr, va = np.arange(0, 300), np.arange(300, 360)
-        oos = np.arange(384, 480)
-        oos_dates = pd.to_datetime("2026-01-01") + pd.to_timedelta(dr[oos], "D")
-        fwd = y[oos].numpy()
         H = 4
-        curve, vp, op = p4.epoch_curve_long(tte, X, y, tr, va, dr[va], CFG, 2, H, oos, oos_dates, fwd)
+        curve, vp, op = self._long(H)
         self.assertEqual([c["epoch"] for c in curve], list(range(1, H + 1)))
         for c in curve:
             for k in ("grad_norm_mean", "grad_norm_max", "weight_norm", "oos_ic", "val_loss"):
                 self.assertTrue(np.isfinite(c[k]), k)
-        self.assertEqual(vp.shape, (H, len(va)))       # every epoch's predictions retained
-        self.assertEqual(op.shape, (H, len(oos)))
+        self.assertEqual(vp.shape, (H, 60))            # every epoch's predictions retained
+        self.assertEqual(op.shape, (H, 96))
         # the hooks were removed again (production functions restored)
         self.assertEqual(tte.predict_idx.__name__, "predict_idx")
         self.assertEqual(torch.nn.utils.clip_grad_norm_.__name__, "clip_grad_norm_")
+
+    def test_oos_label_flip_changes_only_oos_ic(self):
+        """Flipping the OOS labels negates OOS IC and changes nothing else:
+        the OOS block cannot reach optimisation, predictions or norms."""
+        a, va_a, oo_a = self._long(4)
+        b, va_b, oo_b = self._long(4, flip_oos=True)
+        self.assertTrue(np.array_equal(va_a, va_b))
+        self.assertTrue(np.array_equal(oo_a, oo_b))
+        for x, z in zip(a, b):
+            for k in self.MECH:
+                self.assertEqual(x[k], z[k], k)
+            self.assertAlmostEqual(x["oos_ic"], -z["oos_ic"], places=10)
+        self.assertNotEqual(a[-1]["oos_ic"], 0.0)
+
+    def test_validation_label_flip_changes_only_validation_metrics(self):
+        """Validation labels score epochs but never train them (no early stop,
+        no restore): flipping them leaves training, norms and predictions
+        identical and negates validation IC."""
+        va = slice(300, 360)
+
+        def flip_val(y):
+            y2 = y.clone()
+            y2[va] = -y2[va]
+            return y2
+        a, va_a, oo_a = self._long(4)
+        b, va_b, oo_b = self._long(4, y_override=flip_val)
+        self.assertTrue(np.array_equal(va_a, va_b))
+        self.assertTrue(np.array_equal(oo_a, oo_b))
+        for x, z in zip(a, b):
+            for k in ("train_loss", "grad_norm_mean", "grad_norm_max", "weight_norm", "oos_ic", "oos_pred_std"):
+                self.assertEqual(x[k], z[k], k)
+            self.assertAlmostEqual(x["val_ic"], -z["val_ic"], places=4)
+        self.assertNotEqual(a[-1]["val_loss"], b[-1]["val_loss"])
+
+    def test_training_labels_are_used_and_only_training_rows(self):
+        """Target integrity: perturbing TRAINING labels changes the trajectory;
+        perturbing labels of rows outside train/validation/OOS changes nothing."""
+        def flip_train(y):
+            y2 = y.clone()
+            y2[:300] = -y2[:300]
+            return y2
+
+        def poison_unused(y):
+            y2 = y.clone()
+            y2[360:384] = 99.0                      # rows in no split (purge gap)
+            return y2
+        a, va_a, _ = self._long(3)
+        b, va_b, _ = self._long(3, y_override=flip_train)
+        c, va_c, _ = self._long(3, y_override=poison_unused)
+        self.assertFalse(np.array_equal(va_a, va_b))
+        self.assertNotEqual([x["val_ic"] for x in a], [x["val_ic"] for x in b])
+        self.assertTrue(np.array_equal(va_a, va_c))
+        for x, z in zip(a, c):
+            for k in self.MECH + ("oos_ic",):
+                self.assertEqual(x[k], z[k], k)
+
+
+class TestLongMatchesB0Path(unittest.TestCase):
+    """LONG recording must not change RNG consumption, training rows, labels,
+    optimiser behaviour or epoch 1..H semantics relative to the original P4-B0
+    path (epoch_curve). CPU is deterministic, so equality is exact."""
+
+    SHARED = ("train_loss", "val_ic", "val_loss", "oos_ic", "oos_pred_std")
+
+    def test_prefix_identical_to_b0_path_and_rng_consumption(self):
+        X, y, dr, tr, va, oos, od, fwd = _long_inputs()
+        b0 = p4.epoch_curve(tte, X, y, tr, va, dr[va], CFG, 4, 4, oos, od, fwd)
+        rng_after_b0 = torch.get_rng_state().clone()
+        lg4, _, _ = p4.epoch_curve_long(tte, X, y, tr, va, dr[va], CFG, 4, 4, oos, od, fwd)
+        rng_after_long = torch.get_rng_state().clone()
+        self.assertTrue(torch.equal(rng_after_b0, rng_after_long))     # same RNG draws consumed
+        for x, z in zip(b0, lg4):
+            for k in self.SHARED:
+                self.assertEqual(x[k], z[k], k)
+
+    def test_longer_horizon_does_not_change_earlier_epochs(self):
+        X, y, dr, tr, va, oos, od, fwd = _long_inputs()
+        b0 = p4.epoch_curve(tte, X, y, tr, va, dr[va], CFG, 4, 3, oos, od, fwd)
+        lg, vp, _ = p4.epoch_curve_long(tte, X, y, tr, va, dr[va], CFG, 4, 6, oos, od, fwd)
+        self.assertEqual(len(lg), 6)
+        for x, z in zip(b0, lg[:3]):                  # epochs 1..3 of a 6-epoch run == 3-epoch B0 run
+            for k in self.SHARED:
+                self.assertEqual(x[k], z[k], k)
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -615,6 +615,7 @@ def evaluate_long():
         json.dump(out, f, indent=1, default=float)
     print(json.dumps(out, indent=1, default=float))
     print(mean.loc[cps].round(4).to_string())
+    return out      # returned for p4_long_eval (transparency only); classification logic unchanged
 
 
 # ------------------------------------------------------------ evaluation
