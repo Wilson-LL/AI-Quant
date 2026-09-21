@@ -131,6 +131,17 @@ def build(asof=None):
           "```",
           db[db["action"] != "WATCH"].drop(columns=["caveats", "intended_execution_date"]).to_string(index=False),
           "```", "", f"Caveats: {CAVEAT}"]
+    # H-DATA-INTEGRITY: never omit an excluded symbol silently. Section is
+    # written only when inference listed failures, so gap-free outputs are
+    # byte-identical to the pre-integrity code.
+    ip = os.path.join(pred_dir, f"{asof}_data_integrity.csv")
+    integ = pd.read_csv(ip, dtype={"symbol": str}) if os.path.isfile(ip) else pd.DataFrame()
+    if len(integ):
+        det = integ["detail"] if "detail" in integ else integ["reason"]
+        md += ["", "## DATA_INTEGRITY_FAILURE (excluded, not scored)", "",
+               f"Model cross-section: {len(mm) + len(integ)} → {len(mm)} names "
+               "(z-scores, ranks, band and weights computed over valid names only).", ""]
+        md += [f"- {s} — DATA_INTEGRITY_FAILURE / {d}" for s, d in zip(integ["symbol"], det)]
     with open(csv_p.replace(".csv", ".md"), "w", encoding="utf-8") as f:
         f.write("\n".join(md) + "\n")
     print(f"[decision book {asof}] {(db['target_weight'] > 0).sum()} held, "

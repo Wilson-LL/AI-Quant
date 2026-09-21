@@ -182,6 +182,35 @@ def integrity_failures(data, asof):
     return pd.DataFrame(rows, columns=["symbol", "status", "reason", "last_cached_date", "asof"])
 
 
+def apply_integrity_policy(integ_df, n_scored, asof, root=None, cache_dir=None):
+    """Symbol-level live policy (research/eod_integrity.classify_live_integrity).
+    Adds `detail` (CONFIRMED_NO_TRADE_IN_REQUIRED_WINDOW /
+    MISSING_SESSION_IN_REQUIRED_WINDOW / STALE_TAIL) and `held`, and returns
+    (integ_df, policy). Only window failures count against the 99% valid-model
+    coverage rule; stale tails are the refresh gate's concern. Excluded symbols
+    get no score/rank of any kind: they are simply absent from the cross-section."""
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "research"))
+    import eod_integrity as E
+    root = root or os.environ.get("AIQUANT_RUNTIME_ROOT", os.path.dirname(os.path.abspath(__file__)))
+    cache_dir = cache_dir or os.path.join(root, "research", "data_cache")
+    integ_df = integ_df.copy()
+    win_bad = integ_df.loc[integ_df["reason"] == "WINDOW_CROSSES_DATA_GAP", "symbol"].tolist()
+    held, _ = E.held_symbols(root)
+    detail = {}
+    if win_bad:
+        raw = E.read_cache_dates(cache_dir)
+        cal = E.derive_calendar(raw)
+        detail = {s: v["reason"] for s, v in
+                  E.window_failure_reasons(cache_dir, win_bad, cal, asof).items()}
+    integ_df["detail"] = [detail.get(s, E.MISSING_SESSION_IN_REQUIRED_WINDOW) if r == "WINDOW_CROSSES_DATA_GAP"
+                          else r for s, r in zip(integ_df["symbol"], integ_df["reason"])]
+    integ_df["held"] = integ_df["symbol"].isin(held)
+    # otherwise-eligible = scored names + window-invalid names (stale tails excluded)
+    policy = E.classify_live_integrity(
+        [f"__scored_{i}" for i in range(n_scored)] + win_bad, win_bad, held)
+    return integ_df, policy
+
+
 def main(top_frac=0.2, band=0.05):
     t0 = time.time()
     nets, cfg, manifest = load_ensemble()
@@ -213,6 +242,12 @@ def main(top_frac=0.2, band=0.05):
     # as DATA_INTEGRITY_FAILURE in <asof>_data_integrity.csv, metrics.json
     # and the report.
     integ_df = integrity_failures(data, asof)
+    integ_df, policy = apply_integrity_policy(integ_df, len(pred), asof)
+    if not policy["publication_allowed"]:
+        # hard block BEFORE any artifact is written: the previous plan stays
+        print(f"DATA_INTEGRITY_STATUS: {policy['status']} — {policy['reason']}")
+        print(integ_df.to_string(index=False))
+        raise SystemExit(3)
 
     prev = previous_book()
     exec_date = f"next trading day after {asof}"
@@ -234,8 +269,12 @@ def main(top_frac=0.2, band=0.05):
         "device": torch.cuda.get_device_name(0) if DEVICE == "cuda" else "cpu",
         "seeds": len(nets),
         "data_integrity": {
+            "status": policy["status"],
+            "universe_before_exclusion": policy["eligible"],
+            "effective_universe": policy["valid"],
+            "valid_ratio": round(policy["valid_ratio"], 6),
             "n_failures": int(len(integ_df)),
-            "failures": integ_df[["symbol", "reason"]].to_dict("records"),
+            "failures": integ_df[["symbol", "reason", "detail", "held"]].to_dict("records"),
             "required_contiguous_sessions": data.get("integrity", {}).get("required_contiguous_sessions"),
             "calendar_method": data.get("integrity", {}).get("calendar_method")},
     }
@@ -266,9 +305,14 @@ def main(top_frac=0.2, band=0.05):
                          f"weight {r['previous_weight']:.2%} → {r['target_weight']:.2%}")
     if len(integ_df):
         lines += ["", "## DATA_INTEGRITY_FAILURE (not scored)", "",
+                  f"DATA_INTEGRITY_STATUS: **{policy['status']}** — {policy['reason']}. "
+                  f"Model universe {policy['eligible']} → {policy['valid']} "
+                  "(excluded names were removed from the cross-section; z-score, rank, "
+                  "top fraction, band and weights are computed over valid names only).", "",
                   "These symbols received no model score because their required input "
                   "window crosses a missing trading session or their cache tail is stale:", ""]
-        lines += [f"- {r['symbol']}: {r['reason']} (last cached {r['last_cached_date']})"
+        lines += [f"- {r['symbol']} — DATA_INTEGRITY_FAILURE / {r['detail']} "
+                  f"(last cached {r['last_cached_date']}; held: {'yes' if r['held'] else 'no'})"
                   for _, r in integ_df.iterrows()]
     lines += ["", "## Caveats",
               "- Research system on a survivorship-biased cached universe; not investment advice.",

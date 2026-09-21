@@ -416,7 +416,7 @@ class TestGates(unittest.TestCase):
         ok_int, msg = self.G.check(self.root, "integrity")
         self.assertTrue(ok_refresh)                              # "12/12 at the newest date" ...
         self.assertFalse(ok_int)                                 # ... does NOT pass a hidden hole
-        self.assertIn("RECENT_WINDOW_INTEGRITY", msg)
+        self.assertIn(E.UNSAFE, msg)                             # 11/12 valid < 99%
         self.write(self.syms[0], CAL, 0)
         self.assertTrue(self.G.check(self.root, "integrity")[0])
         bat = open(os.path.join(REPO, "daily_ops.bat"), encoding="utf-8", errors="replace").read()
@@ -430,6 +430,267 @@ class TestGates(unittest.TestCase):
         self.assertIn("Previous standing plan remains untouched", pipefail)
 
 
+class TestConfirmedNoTradeRegistry(unittest.TestCase):
+    """Decision 2026-09-21: 2207 / 2025-12-18 = CONFIRMED_NO_TRADE. Resolves the
+    repair-queue item; never fills a row; never restores window contiguity."""
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        self.day = CAL[-30]
+        write_cache(self.tmp, "S", CAL.delete(len(CAL) - 30))
+        self.state = os.path.join(self.tmp, "state.json")
+        self.month = str(self.day.to_period("M"))
+        self.calls = []
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def run_repair(self, registry=None):
+        month_days = CAL[(CAL.to_period("M") == self.day.to_period("M")) & (CAL != self.day)]
+
+        def factory(sym):
+            def fetch(y, m):
+                self.calls.append((y, m))
+                return payload(month_days)          # the source serves every day but this one
+            return fetch
+        return RD.repair_gaps(self.tmp, CAL, [("S", self.month)], state_path=self.state,
+                              registry_path=registry, fetch_factory=factory,
+                              sleep_fn=lambda x: None)[1][f"S|{self.month}"]
+
+    def registry(self):
+        reg = os.path.join(self.tmp, "registry.csv")
+        pd.DataFrame({"symbol": ["S"], "date": [str(self.day)[:10]], "status": ["CONFIRMED_NO_TRADE"],
+                      "reason": ["zero-trade day"], "source": ["TWSE MI_INDEX (test)"]}).to_csv(reg, index=False)
+        return reg
+
+    def test_nt5_confirmed_no_trade_resolves_queue_item(self):
+        st = self.run_repair()
+        self.assertEqual(st["state"], E.MARKET_OPEN_SYMBOL_NO_DATA)       # before the decision
+        st = self.run_repair(self.registry())
+        self.assertEqual(st["state"], E.CONFIRMED_SYMBOL_NO_TRADE)        # upgraded, resolved
+        self.assertEqual(st["state"], "CONFIRMED_NO_TRADE")
+        self.assertEqual(len(self.calls), 1)                              # no retry download
+        exc = E.missing_exceptions(self.state, self.registry())
+        self.assertEqual(exc[("S", str(self.day)[:10])], E.CONFIRMED_SYMBOL_NO_TRADE)
+
+    def test_nt6_confirmed_no_trade_does_not_resolve_window_continuity(self):
+        self.run_repair(self.registry())
+        d = pd.read_csv(os.path.join(self.tmp, "S.csv"))["date"]
+        a = E.audit_symbol("S", d, CAL, CAL.max(), REQ, E.missing_exceptions(self.state, self.registry()))
+        self.assertEqual(a["LEVEL_A_live_inference"], "FAIL")
+        self.assertEqual(a["recent_window_missing"], 1)
+        wf = E.window_failure_reasons(self.tmp, ["S"], CAL, CAL.max(), registry_path=self.registry())
+        self.assertEqual(wf["S"]["reason"], E.CONFIRMED_NO_TRADE_IN_REQUIRED_WINDOW)
+        wf2 = E.window_failure_reasons(self.tmp, ["S"], CAL, CAL.max(),
+                                       registry_path=os.path.join(self.tmp, "none.csv"))
+        self.assertEqual(wf2["S"]["reason"], E.MISSING_SESSION_IN_REQUIRED_WINDOW)
+
+    def test_nt7_confirmed_no_trade_synthesizes_no_row(self):
+        before = open(os.path.join(self.tmp, "S.csv"), "rb").read()
+        self.run_repair(self.registry())
+        self.run_repair(self.registry())
+        after = open(os.path.join(self.tmp, "S.csv"), "rb").read()
+        self.assertEqual(before, after)                                   # byte-identical file
+        self.assertNotIn(str(self.day)[:10].encode(), after)
+
+    def test_repo_registry_has_2207_with_evidence(self):
+        reg = E.load_no_trade_registry(E.NO_TRADE_REGISTRY_DEFAULT)
+        self.assertIn(("2207", "2025-12-18"), reg)
+        r = pd.read_csv(E.NO_TRADE_REGISTRY_DEFAULT, dtype=str)
+        row = r[(r["symbol"] == "2207") & (r["date"] == "2025-12-18")].iloc[0]
+        self.assertEqual(row["status"], "CONFIRMED_NO_TRADE")
+        self.assertIn("MI_INDEX", row["source"])
+
+
+class TestLiveIntegrityPolicy(unittest.TestCase):
+    """Symbol-level live policy: derived from the 99% rule, never a fixed
+    one-symbol allowance; a held invalid symbol always blocks."""
+
+    U = [f"{1000 + i}" for i in range(108)]
+
+    def test_p1_107_of_108_degraded(self):
+        p = E.classify_live_integrity(self.U, ["1005"], set())
+        self.assertEqual(p["status"], E.DEGRADED)
+        self.assertTrue(p["publication_allowed"])
+        self.assertEqual((p["valid"], p["eligible"]), (107, 108))
+        self.assertEqual(p["excluded"], ["1005"])
+
+    def test_p2_106_of_108_blocked(self):
+        p = E.classify_live_integrity(self.U, ["1005", "1006"], set())
+        self.assertEqual(p["status"], E.UNSAFE)
+        self.assertFalse(p["publication_allowed"])
+
+    def test_p3_threshold_is_the_ratio_not_a_count(self):
+        u = [str(i) for i in range(300)]
+        self.assertEqual(E.classify_live_integrity(u, ["1", "2", "3"], set())["status"], E.DEGRADED)
+        self.assertEqual(E.classify_live_integrity(u, ["1", "2", "3", "4"], set())["status"], E.UNSAFE)
+        self.assertEqual(E.classify_live_integrity(u[:50], ["1"], set())["status"], E.UNSAFE)
+
+    def test_p4_held_invalid_blocks_even_at_99pct(self):
+        u = self.U[:106] + ["2883", "3443"]
+        for held_sym in ("2883", "3443"):
+            p = E.classify_live_integrity(u, [held_sym], {"2883", "3443"})
+            self.assertEqual(p["status"], E.UNSAFE)                      # never "99% is enough"
+            self.assertFalse(p["publication_allowed"])
+            self.assertEqual(p["held_invalid"], [held_sym])
+            self.assertGreaterEqual(p["valid_ratio"], 0.99)
+
+    def test_p5_clean_is_safe(self):
+        self.assertEqual(E.classify_live_integrity(self.U, [], {"1000"})["status"], E.SAFE)
+        self.assertEqual(E.VALID_MODEL_COVERAGE_MIN, 0.99)
+
+
+class TestHeldSymbolGateRegression(unittest.TestCase):
+    """End-to-end integrity gate on a synthetic runtime root with the full universe."""
+
+    def setUp(self):
+        import pipeline_gate as G
+        self.G = G
+        self.root = tempfile.mkdtemp()
+        self.cache = os.path.join(self.root, "research", "data_cache")
+        os.makedirs(self.cache)
+        self.syms = G.universe()
+        self.hole = CAL.delete(len(CAL) - 40)
+        for i, s in enumerate(self.syms):
+            write_cache(self.cache, s, CAL, i)
+        self.n = len(self.syms)
+
+    def tearDown(self):
+        shutil.rmtree(self.root, ignore_errors=True)
+
+    def holdings(self, syms):
+        pd.DataFrame({"symbol": syms, "shares": [1000] * len(syms)}).to_csv(
+            os.path.join(self.root, "my_holdings.csv"), index=False)
+
+    def standing_book(self, syms):
+        pt = os.path.join(self.root, "reports", "paper_trading")
+        os.makedirs(pt, exist_ok=True)
+        pd.DataFrame({"symbol": syms, "target_weight": [1 / len(syms)] * len(syms)}).to_csv(
+            os.path.join(pt, "2025-12-01_blend50_band10_decision_book.csv"), index=False)
+
+    def test_g1_one_nonheld_invalid_is_degraded_and_listed(self):
+        self.assertGreaterEqual((self.n - 1) / self.n, 0.99)
+        write_cache(self.cache, "2207", self.hole, 7)
+        self.holdings(["2883", "3443"])
+        ok, msg = self.G.check(self.root, "integrity")
+        self.assertTrue(ok, msg)
+        self.assertIn("DEGRADED", msg)
+        self.assertIn("2207", msg)
+
+    def test_g2_held_invalid_blocks_2883(self):
+        write_cache(self.cache, "2883", self.hole, 7)
+        self.holdings(["2883", "3443"])
+        ok, msg = self.G.check(self.root, "integrity")
+        self.assertFalse(ok)
+        self.assertIn(E.UNSAFE, msg)
+        self.assertIn("2883", msg)
+
+    def test_g3_standing_book_holding_blocks_3443(self):
+        write_cache(self.cache, "3443", self.hole, 7)
+        self.standing_book(["3443", "2330"])               # not in my_holdings.csv
+        ok, msg = self.G.check(self.root, "integrity")
+        self.assertFalse(ok)
+        self.assertIn("3443", msg)
+
+    def test_g4_two_nonheld_invalid_below_99pct_blocks(self):
+        self.assertLess((self.n - 2) / self.n, 0.99)
+        for s in ("2207", "1101"):
+            write_cache(self.cache, s, self.hole, 7)
+        ok, msg = self.G.check(self.root, "integrity")
+        self.assertFalse(ok)
+        self.assertIn("< 99%", msg)
+
+
+class TestExclusionBookSemantics(unittest.TestCase):
+    """An excluded symbol gets no stale/neutral/bottom/synthetic score: it is
+    absent from the cross-section, and every z/rank/band/weight is computed
+    over valid names only (identical to a universe without that name)."""
+
+    def build(self, cache_syms, pred_syms, integ_rows):
+        import blended_decision_book as B
+        import paper_trading as P
+        root, out = tempfile.mkdtemp(), tempfile.mkdtemp()
+        cache = os.path.join(root, "research", "data_cache")
+        os.makedirs(cache)
+        for s in cache_syms:
+            write_cache(cache, s, CAL, int(s))              # per-symbol seed: same data in both builds
+        gd = os.path.join(root, "reports", "transformer_gpu")
+        os.makedirs(gd)
+        asof = str(CAL[-1])[:10]
+        sc = {s: np.random.default_rng(int(s)).normal() for s in cache_syms}
+        pd.DataFrame({"stock": pred_syms, "score": [sc[s] for s in pred_syms],
+                      "score_std": [0.1] * len(pred_syms), "sector": "x", "vol_20": 0.2}).to_csv(
+            os.path.join(gd, f"{asof}_predictions.csv"), index=False)
+        pd.DataFrame(integ_rows, columns=["symbol", "status", "reason", "last_cached_date", "asof",
+                                          "detail", "held"]).to_csv(
+            os.path.join(gd, f"{asof}_data_integrity.csv"), index=False)
+        saved = (D.CACHE_DIR, P.BOOK_DIR, B.ROOT, B.PT_DIR)
+        try:
+            D.CACHE_DIR, P.BOOK_DIR, B.ROOT, B.PT_DIR = cache, os.path.join(root, "nobooks"), root, out
+            db = B.build(asof)
+            uni = pd.read_csv(os.path.join(out, f"{asof}_blend50_universe_scores.csv"), dtype={"symbol": str})
+            md = open(os.path.join(out, f"{asof}_blend50_band10_decision_book.md"), encoding="utf-8").read()
+        finally:
+            D.CACHE_DIR, P.BOOK_DIR, B.ROOT, B.PT_DIR = saved
+            shutil.rmtree(root, ignore_errors=True)
+            shutil.rmtree(out, ignore_errors=True)
+        return db, uni, md
+
+    def test_x1_excluded_symbol_removed_and_cross_section_recomputed(self):
+        import pipeline_gate as G
+        syms = G.universe()                                   # full-size cross-section (name cap)
+        x = syms[7]
+        valid = [s for s in syms if s != x]
+        asof = str(CAL[-1])[:10]
+        row = [x, "DATA_INTEGRITY_FAILURE", "WINDOW_CROSSES_DATA_GAP", asof, asof,
+               E.CONFIRMED_NO_TRADE_IN_REQUIRED_WINDOW, False]
+        db, uni, md = self.build(syms, valid, [row])
+        self.assertNotIn(x, set(db["symbol"]))
+        self.assertNotIn(x, set(uni["symbol"]))
+        self.assertEqual(sorted(uni["rank"]), list(range(1, len(valid) + 1)))
+        self.assertIn(f"{x} — DATA_INTEGRITY_FAILURE / CONFIRMED_NO_TRADE_IN_REQUIRED_WINDOW", md)
+        self.assertIn(f"{len(syms)} → {len(valid)}", md)
+        db0, uni0, md0 = self.build(valid, valid, [])        # a universe that never had x
+        pd.testing.assert_frame_equal(db, db0)
+        pd.testing.assert_frame_equal(uni, uni0)
+        self.assertNotIn("DATA_INTEGRITY_FAILURE", md0)      # no section when nothing excluded
+
+
+class TestInferencePolicy(unittest.TestCase):
+
+    def setUp(self):
+        self.root = tempfile.mkdtemp()
+        self.cache = os.path.join(self.root, "research", "data_cache")
+        os.makedirs(self.cache)
+        import pipeline_gate as G
+        for i, s in enumerate(G.universe()[:20]):
+            write_cache(self.cache, s, CAL, i)
+        write_cache(self.cache, "2883", CAL.delete(len(CAL) - 40), 3)
+
+    def tearDown(self):
+        shutil.rmtree(self.root, ignore_errors=True)
+
+    def integ(self):
+        asof = str(CAL[-1])[:10]
+        return pd.DataFrame([{"symbol": "2883", "status": "DATA_INTEGRITY_FAILURE",
+                              "reason": "WINDOW_CROSSES_DATA_GAP", "last_cached_date": asof, "asof": asof}])
+
+    def test_i1_held_symbol_invalid_blocks_inference_publication(self):
+        import inference_transformer_eod as I
+        pd.DataFrame({"symbol": ["2883"], "shares": [1000]}).to_csv(
+            os.path.join(self.root, "my_holdings.csv"), index=False)
+        df, pol = I.apply_integrity_policy(self.integ(), 107, str(CAL[-1])[:10], root=self.root)
+        self.assertFalse(pol["publication_allowed"])
+        self.assertTrue(bool(df["held"].iloc[0]))
+
+    def test_i2_nonheld_symbol_degraded_with_detail(self):
+        import inference_transformer_eod as I
+        df, pol = I.apply_integrity_policy(self.integ(), 107, str(CAL[-1])[:10], root=self.root)
+        self.assertEqual(pol["status"], E.DEGRADED)
+        self.assertEqual((pol["eligible"], pol["valid"]), (108, 107))
+        self.assertEqual(df["detail"].iloc[0], E.MISSING_SESSION_IN_REQUIRED_WINDOW)
+
+
 class TestFrozenInputBook(unittest.TestCase):
 
     def test_17_frozen_input_decision_book_byte_identical(self):
@@ -437,10 +698,13 @@ class TestFrozenInputBook(unittest.TestCase):
         THIS branch's code and compare bytes. Runtime files live in the
         production working tree (AIQUANT_RUNTIME_ROOT, default: this repo)."""
         rt = os.environ.get("AIQUANT_RUNTIME_ROOT", REPO)
+        # the runtime cache is being repaired; the frozen comparison needs the
+        # immutable pre-repair snapshot (AIQUANT_FROZEN_CACHE) when it exists
+        frozen = os.environ.get("AIQUANT_FROZEN_CACHE", os.path.join(rt, "research", "data_cache"))
         pt = os.path.join(rt, "reports", "paper_trading")
         books = sorted(f for f in os.listdir(pt) if f.endswith("_blend50_band10_decision_book.csv")) \
             if os.path.isdir(pt) else []
-        if not books or not os.path.isdir(os.path.join(rt, "research", "data_cache")):
+        if not books or not os.path.isdir(frozen):
             self.skipTest("no runtime decision book / cache available")
         asof = books[-1][:10]
         import blended_decision_book as B
@@ -448,7 +712,7 @@ class TestFrozenInputBook(unittest.TestCase):
         saved = (D.CACHE_DIR, P.BOOK_DIR, B.ROOT, B.PT_DIR)
         out = tempfile.mkdtemp()
         try:
-            D.CACHE_DIR = os.path.join(rt, "research", "data_cache")
+            D.CACHE_DIR = frozen
             P.BOOK_DIR = os.path.join(pt, "books")
             B.ROOT, B.PT_DIR = rt, out
             B.build(asof)

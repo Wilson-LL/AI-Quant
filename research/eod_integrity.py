@@ -54,7 +54,8 @@ INVALID_PAYLOAD_SUSPECT = "INVALID_PAYLOAD_SUSPECT"    # rows returned but faile
 UNRESOLVED = "UNRESOLVED"                              # retry budget exhausted
 # symbol-specific no-trade semantics: MARKET OPEN does not imply EVERY STOCK HAS A ROW
 MARKET_OPEN_SYMBOL_NO_DATA = "MARKET_OPEN_SYMBOL_NO_DATA"  # source served the month, not these days
-CONFIRMED_SYMBOL_NO_TRADE = "CONFIRMED_SYMBOL_NO_TRADE"    # explicit registry entry (e.g. suspension)
+CONFIRMED_SYMBOL_NO_TRADE = "CONFIRMED_NO_TRADE"           # explicit registry entry (exchange record)
+REGISTRY_CONFIRMED_STATUSES = ("CONFIRMED_NO_TRADE", "CONFIRMED_SYMBOL_NO_TRADE")
 SUSPENSION_STATUS_UNKNOWN = "SUSPENSION_STATUS_UNKNOWN"
 FETCH_STATES = (FETCH_OK, EMPTY_RESPONSE_SUSPECT, NETWORK_ERROR, RATE_LIMIT_SUSPECT,
                 INVALID_PAYLOAD_SUSPECT, UNRESOLVED, MARKET_OPEN_SYMBOL_NO_DATA,
@@ -76,7 +77,7 @@ def load_no_trade_registry(path=None):
     if not os.path.isfile(path):
         return set()
     r = pd.read_csv(path, dtype=str).fillna("")
-    r = r[(r["status"] == CONFIRMED_SYMBOL_NO_TRADE) & (r["source"].str.strip() != "")]
+    r = r[r["status"].isin(REGISTRY_CONFIRMED_STATUSES) & (r["source"].str.strip() != "")]
     return set(zip(r["symbol"], r["date"]))
 
 
@@ -95,6 +96,94 @@ def missing_exceptions(state_path=None, registry_path=None):
             if v.get("state") == UNRESOLVED:
                 out.setdefault((sym, key.split("|")[1]), UNRESOLVED)   # month-level
     return out
+
+# ------------------------------------------------------------ live (symbol-level) integrity policy
+# Two levels (user decision 2026-09-21):
+#   HARD BLOCK  any invalid symbol that is an open position (my_holdings.csv) or
+#               held in the standing model book -> UNSAFE_FOR_NEW_MODEL_OUTPUT,
+#               previous plan preserved.
+#   DEGRADE     invalid NON-held symbols are not scored, reported as
+#               DATA_INTEGRITY_FAILURE and removed from that session's model
+#               cross-section; publication is allowed only if
+#               valid / otherwise-eligible >= VALID_MODEL_COVERAGE_MIN.
+# This is deliberately separate from the newest-date coverage gate
+# (user_next_session_plan.PARTIAL_COVERAGE_MIN), which answers a different
+# question (did the latest session publish for the cross-section?).
+VALID_MODEL_COVERAGE_MIN = 0.99
+SAFE, DEGRADED, UNSAFE = "SAFE", "DEGRADED", "UNSAFE_FOR_NEW_MODEL_OUTPUT"
+CONFIRMED_NO_TRADE_IN_REQUIRED_WINDOW = "CONFIRMED_NO_TRADE_IN_REQUIRED_WINDOW"
+MISSING_SESSION_IN_REQUIRED_WINDOW = "MISSING_SESSION_IN_REQUIRED_WINDOW"
+
+
+def classify_live_integrity(eligible, invalid, held, min_ratio=VALID_MODEL_COVERAGE_MIN):
+    """Pure policy. eligible: otherwise-eligible model symbols; invalid: symbols
+    whose required inference window is not contiguous; held: open positions and
+    standing-book holdings. Never 'one symbol is fine': the threshold is the
+    ratio rule, and a held invalid symbol always blocks."""
+    eligible, invalid, held = set(eligible), set(invalid) & set(eligible), set(held)
+    valid = eligible - invalid
+    ratio = len(valid) / max(len(eligible), 1)
+    held_invalid = sorted(invalid & held)
+    if held_invalid:
+        status, reason = UNSAFE, f"held/position symbol(s) invalid: {held_invalid}"
+    elif ratio < min_ratio:
+        status, reason = UNSAFE, f"valid model coverage {len(valid)}/{len(eligible)} = {ratio:.2%} < {min_ratio:.0%}"
+    elif invalid:
+        status, reason = DEGRADED, f"{len(invalid)} non-held symbol(s) excluded; valid {len(valid)}/{len(eligible)} = {ratio:.2%}"
+    else:
+        status, reason = SAFE, "no invalid current model symbols"
+    return {"status": status, "reason": reason, "eligible": len(eligible), "valid": len(valid),
+            "valid_ratio": ratio, "threshold": min_ratio, "excluded": sorted(invalid),
+            "held_invalid": held_invalid, "publication_allowed": status != UNSAFE}
+
+
+def window_failure_reasons(cache_dir, symbols, calendar, asof, req=None, registry_path=None):
+    """{symbol: {"reason", "missing_in_window"}} for symbols whose required
+    inference window ending at `asof` misses expected sessions. A window whose
+    only missing sessions are registry-confirmed no-trade days is labelled
+    CONFIRMED_NO_TRADE_IN_REQUIRED_WINDOW (still invalid: a no-trade day
+    breaks contiguity); anything else MISSING_SESSION_IN_REQUIRED_WINDOW."""
+    req = req or required_windows()
+    n = req["REQUIRED_INFERENCE_CONTIGUOUS_SESSIONS"]
+    cal = pd.DatetimeIndex(calendar)
+    win = cal[cal <= pd.Timestamp(asof)][-n:]
+    conf = load_no_trade_registry(registry_path)
+    out = {}
+    raw = read_cache_dates(cache_dir, list(symbols))
+    for s, d in raw.items():
+        miss = win.difference(pd.DatetimeIndex(pd.unique(d)))
+        if len(miss) == 0:
+            continue
+        ms = [str(x)[:10] for x in miss]
+        allconf = all((s, x) in conf for x in ms)
+        out[s] = {"reason": CONFIRMED_NO_TRADE_IN_REQUIRED_WINDOW if allconf else MISSING_SESSION_IN_REQUIRED_WINDOW,
+                  "missing_in_window": ms}
+    return out
+
+
+def held_symbols(root):
+    """Symbols whose management requires a valid model view: open positions in
+    my_holdings.csv (any side) plus names held in the standing (latest)
+    blend50_band10 decision book. Returns (set, sources)."""
+    held, src = set(), []
+    hp = os.path.join(root, "my_holdings.csv")
+    if os.path.isfile(hp):
+        import holdings as H
+        lots, _ = H.load_lots(hp)
+        pos, _ = H.aggregate_positions(lots)
+        syms = set(pos["symbol"].astype(str))   # any side; unparseable qty still counts as held
+        held |= syms
+        src.append(f"my_holdings.csv ({len(syms)} open positions)")
+    pt = os.path.join(root, "reports", "paper_trading")
+    books = sorted(f for f in os.listdir(pt) if f.endswith("_blend50_band10_decision_book.csv")) \
+        if os.path.isdir(pt) else []
+    if books:
+        b = pd.read_csv(os.path.join(pt, books[-1]), dtype={"symbol": str})
+        syms = set(b.loc[b["target_weight"] > 0, "symbol"])
+        held |= syms
+        src.append(f"{books[-1]} ({len(syms)} held)")
+    return held, src
+
 
 # sample / symbol integrity statuses
 WINDOW_CROSSES_DATA_GAP = "WINDOW_CROSSES_DATA_GAP"

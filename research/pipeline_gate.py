@@ -112,13 +112,24 @@ def longitudinal_integrity(root):
     structural = sorted(r["symbol"] for r in rows
                         if r["duplicate_dates"] or r["non_monotonic_steps"])
     hist = [r for r in rows if r["missing_sessions"] > 0]
+    # symbol-level live policy: otherwise-eligible = model-eligible AND current
+    # at the newest session (stale tails are the TAIL/refresh gates' business)
+    current = [r["symbol"] for r in rows if r["tail_fresh"]]
+    held, held_src = E.held_symbols(root)
+    reasons = E.window_failure_reasons(cache_dir, recent_bad, cal, cal.max(), req)
+    pol = E.classify_live_integrity(current, recent_bad, held)
+    if structural:   # duplicate / non-monotonic dates = the integrity audit itself fails
+        pol.update(status=E.UNSAFE, publication_allowed=False,
+                   reason=f"structural date defects: {structural}")
     return {
         "TAIL_COVERAGE": {"ok": ratio >= PARTIAL_COVERAGE_MIN, "newest": newest,
                           "ratio": ratio, "threshold": PARTIAL_COVERAGE_MIN},
         "RECENT_WINDOW_INTEGRITY": {
             "ok": not recent_bad and not structural,
             "required_sessions": req["REQUIRED_INFERENCE_CONTIGUOUS_SESSIONS"],
-            "symbols_window_crosses_gap": recent_bad, "symbols_structural": structural},
+            "symbols_window_crosses_gap": recent_bad, "symbols_structural": structural,
+            "reasons": {s: v["reason"] for s, v in reasons.items()}},
+        "DATA_INTEGRITY_STATUS": pol, "held_sources": held_src,
         "HISTORICAL_TRAINING_INTEGRITY": {
             "ok": True, "symbols_with_holes": len(hist),
             "missing_symbol_sessions": int(sum(r["missing_sessions"] for r in hist)),
@@ -189,6 +200,7 @@ def check(root, stage, exit_code=None, since_marker=None):
                       li["HISTORICAL_TRAINING_INTEGRITY"])
         print(f"[gate integrity] TAIL_COVERAGE: {'PASS' if tc['ok'] else 'FAIL'} "
               f"({tc['ratio']:.0%} at {tc['newest']}, threshold {tc['threshold']:.0%})")
+        pol = li["DATA_INTEGRITY_STATUS"]
         print(f"[gate integrity] RECENT_WINDOW_INTEGRITY: {'PASS' if rw['ok'] else 'FAIL'} "
               f"({rw['required_sessions']}-session window; crosses gap: "
               f"{rw['symbols_window_crosses_gap'] or 'none'}; structural: "
@@ -198,12 +210,21 @@ def check(root, stage, exit_code=None, since_marker=None):
               f"({hi['symbols_with_holes']} symbols with holes, "
               f"{hi['missing_symbol_sessions']} missing symbol-sessions, "
               f"{hi['training_samples_excluded_by_guard']} training samples excluded by the gap guard)")
+        for s in pol["excluded"]:
+            print(f"[gate integrity]   {s} - DATA_INTEGRITY_FAILURE / {rw['reasons'].get(s, '?')}"
+                  f"{' (HELD)' if s in pol['held_invalid'] else ''}")
+        print(f"[gate integrity] DATA_INTEGRITY_STATUS: {pol['status']} - {pol['reason']} "
+              f"(valid model universe {pol['valid']}/{pol['eligible']} = {pol['valid_ratio']:.2%}, "
+              f"threshold {pol['threshold']:.0%}; held set from {li['held_sources'] or 'none'})")
         if not tc["ok"]:
             return False, "TAIL_COVERAGE below threshold"
-        if not rw["ok"]:
-            return False, ("RECENT_WINDOW_INTEGRITY failed: current model-input windows "
-                           "cross missing trading sessions — do not retrain/infer/publish "
+        if not pol["publication_allowed"]:
+            return False, (f"{pol['status']}: {pol['reason']} — do not retrain/infer/publish; "
+                           "the previous plan stays in force "
                            "(repair: refresh_data.py --repair-gaps --repair-priorities P0)")
+        if pol["status"] == "DEGRADED":
+            return True, (f"DEGRADED: {len(pol['excluded'])} non-held symbol(s) excluded "
+                          f"{pol['excluded']}; universe {pol['eligible']} -> {pol['valid']}")
         return True, "longitudinal integrity OK for current inference windows"
     if stage == "refresh":
         if ratio < PARTIAL_COVERAGE_MIN:

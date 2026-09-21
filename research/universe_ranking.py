@@ -132,6 +132,12 @@ def _excluded_reason(sym, root, asof, preds_syms):
               .drop_duplicates("date", keep="last"))
     except Exception:
         return "OTHER_VALIDATION_FAILURE"
+    ip = os.path.join(root, "reports", "transformer_gpu", f"{asof}_data_integrity.csv")
+    if sym not in preds_syms and os.path.isfile(ip):
+        integ = pd.read_csv(ip, dtype={"symbol": str})
+        if ((integ["symbol"] == sym) & (integ["reason"] != "STALE_TAIL")).any():
+            # H-DATA-INTEGRITY: explicitly excluded by the live integrity policy
+            return "DATA_INTEGRITY_FAILURE"
     if sym in preds_syms:
         # scored by the model but dropped at the momentum join
         return "INSUFFICIENT_HISTORY" if len(df) < 132 else \

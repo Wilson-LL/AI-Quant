@@ -330,6 +330,17 @@ def repair_gaps(cache_dir, calendar, requests, state_path=REPAIR_STATE_DEFAULT, 
     for sym, month in requests:
         key = f"{sym}|{month}"
         st = state.get(key, {"attempts": 0, "state": None, "added": 0})
+        nd = st.get("no_data_sessions") or []
+        if (st["state"] == E.MARKET_OPEN_SYMBOL_NO_DATA and nd
+                and all((sym, d) in confirmed for d in nd)):
+            # every no-data session is now explicitly registry-confirmed: the
+            # queue item is resolved (no fetch, no row, contiguity stays broken)
+            st.update(state=E.CONFIRMED_SYMBOL_NO_TRADE, registry_confirmed_no_trade=list(nd),
+                      note="upgraded from MARKET_OPEN_SYMBOL_NO_DATA via no-trade registry")
+            st.pop("suspension_status", None)
+            state[key] = st
+            log.append({"symbol": sym, "month": month, **st})
+            continue
         if st["state"] in terminal:
             continue
         if st["attempts"] >= REPAIR_MAX_ATTEMPTS:
