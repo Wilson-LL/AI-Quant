@@ -221,5 +221,138 @@
     },
     "seconds_per_epoch_estimate": 6.9,
     "compute": "9 fits x 100 epochs x ~6.9 s = ~1.7 h (plus per-epoch OOS scoring); run only when production is idle"
+  },
+  "P4_B0_LONG_AMENDMENT_1": {
+    "recorded_at": "2026-09-21 10:48 +0800",
+    "status": "PREREGISTERED DEVIATION recorded BEFORE any P4-B0-LONG artifact was opened, parsed or evaluated. The LONG run finished 2026-09-15 11:01 +0800; since then no evaluator has been run and no LONG JSON/NPZ has been decoded. Only byte-level SHA-256 checksums were taken (listed below) so that later alteration is detectable.",
+    "reason": "The blind Research Council review (Session 01, reports/model_audit/v17/COUNCIL_01_long_training_synthesis.md, commit 2692ded) found the original P4_B0_LONG.classification structurally unsuitable as the primary scientific decision rule.",
+    "findings_before_unblinding": {
+      "1_effective_sample_size": "The independent unit is the REFIT DATE (a distinct future market block), not seeds x epochs. Seeds are replicate models inside one block (within-refit seed SD of OOS IC 0.0385 vs between-refit SD 0.198 in P4-B0). Effective n = 3.",
+      "2_truncated_block": "The 2026-07-23 refit's OOS block is a single session (block_end = min(r0+4, e_rank) with e_rank = r0), so one of the three clusters is one cross-section of about 108 names.",
+      "3_no_benefit_unreachable": "LONG_EPOCH_NO_BENEFIT requires the mean per-fit maximum OOS IC over epochs >= 30 (71 noisy epochs) to fall below early_regime - 0.010. That maximum carries a simulated upward bias of about +0.11 (robust to within-fit autocorrelation up to 0.57), so the branch is effectively unreachable. Applying the exact rule to the clean-decay P4-B0 data for the same three refits returns POSSIBLE_RECOVERY.",
+      "4_possible_recovery_default": "Because NO_BENEFIT is shut and PROMISING is rare, LONG_EPOCH_POSSIBLE_RECOVERY is close to the default outcome under noisy null behaviour and is not evidence of recovery.",
+      "5_promising_false_positive": "Under the reviewed null simulation (between-refit SD 0.149, within-refit seed SD 0.069) the full PROMISING conjunction fires about 9.5% of the time, with near-zero power at the declared +0.010 effect.",
+      "6_selected_comparator": "Epoch 3 was itself selected on this burned interval (winner of the P4-B0 fixed-epoch comparison on the same 27 fits). Its premium over the mean of epochs 2-5 is +0.0128 (SE 0.0091). Any 'better than epoch 3' claim must clear a selection-aware bar of +0.023 (0.010 + 0.0128), and the unselected early regime (mean of epochs 2-5) is reported alongside."
+    },
+    "statement": "THE ORIGINAL FROZEN CLASSIFIER (NO_BENEFIT / POSSIBLE_RECOVERY / PROMISING) WILL STILL BE REPORTED FOR HISTORICAL TRANSPARENCY, LABELLED ORIGINAL_PREREGISTERED_CLASSIFIER / STRUCTURALLY_FLAWED / NOT_PRIMARY_EVIDENCE, BUT IT IS NOT PRIMARY EVIDENCE AND WILL NOT DETERMINE THE VERDICT.",
+    "primary_evidence": [
+      "mechanism trajectory (train loss, validation rank IC, prediction dispersion, gradient norm, weight norm, prediction movement)",
+      "raw preregistered OOS epoch trajectory at every checkpoint",
+      "refit-clustered uncertainty",
+      "selection-aware comparison against epoch 3 and against the unselected early regime",
+      "null context for any late-epoch maximum"
+    ],
+    "claim_boundary": "The experiment tests MORE OPTIMIZER STEPS UNDER THE CURRENT FROZEN RECIPE: batch 1024, constant LR 3e-4, AdamW with decoupled weight decay 1e-4 (numerically inert), no LR schedule or warm-up, same architecture, features and target; about 22,600-23,900 optimizer steps at 100 epochs (226/232/239 steps per epoch for the three refits). A negative result rejects only that. It does not test or falsify LR decay or annealing, cosine schedules, SWA or checkpoint averaging, different regularisation, or different optimiser schedules. Those are separate hypotheses (H-LR-SCHEDULE, H-WEIGHT-AVERAGING) and are not launched by this amendment.",
+    "unblinding_order": [
+      "STAGE 0: commit this amendment and the research-only evaluator before any LONG artifact is decoded.",
+      "STAGE 1 ANCHOR: compare LONG epochs 1-15 against the nine shared P4-B0 cells on NON-OUTCOME fields only (train_loss, val_ic, val_loss, oos_pred_std) plus split metadata, with the tolerance frozen below. OOS IC is not read in this stage. On LONG_HARNESS_PARITY_FAILURE: STOP; no mechanism or OOS reading until the discrepancy is explained.",
+      "STAGE 2 MECHANISM: read only train_loss, val_ic, val_loss, oos_pred_std (label-free), grad_norm_mean/max and weight_norm from the JSONs, and val_preds (validation block only) from the NPZs. The OOS-IC field is dropped at load time and the oos_preds array is never accessed. Classify with the frozen mechanism rules below; write and COMMIT the mechanism report before Stage 3.",
+      "STAGE 3 OOS: only after the committed mechanism report, compute the OOS trajectory, refit-clustered uncertainty, selection-aware comparison and late-max null; then the H-EPOCH-LONG verdict; then, last, the original classifier for transparency.",
+      "STAGE 4: reconvene the Research Council on one frozen evidence package."
+    ],
+    "anchor_tolerance": {
+      "basis": "Measured same-seed, same-data GPU reruns reproduced validation IC to four decimals (P0-A, 17_p0_a_daily_result.md). P4-B0 stores train_loss and val_ic rounded to 5 decimals. P4-B0 seed-to-seed SD at the three shared refits: val_ic about 0.02, train_loss about 0.0004 (epochs 1-3), val_loss about 0.0009, oos_pred_std about 56% relative. Non-deterministic CUDA kernels (no cudnn.deterministic) can amplify differences with steps, so later epochs get a wider band. Tolerances sit far below seed-to-seed variation, because a harness divergence (different rows, labels or RNG draws) would look like a different seed, and far above the measured rerun band.",
+      "metadata_exact": [
+        "train_end",
+        "val_start",
+        "val_end",
+        "oos_start",
+        "oos_end",
+        "horizon >= 15",
+        "epochs 1..15 present"
+      ],
+      "tier1_epochs_1_3_every_cell": {
+        "abs_train_loss": 0.0001,
+        "abs_val_ic": 0.002,
+        "abs_val_loss": 0.0002,
+        "rel_oos_pred_std": 0.05
+      },
+      "tier2_epochs_4_15_every_cell": {
+        "abs_train_loss": 0.0005,
+        "abs_val_ic": 0.01,
+        "abs_val_loss": 0.001,
+        "rel_oos_pred_std": 0.25
+      },
+      "tier2_pooled_epochs_4_15": {
+        "mean_abs_val_ic": 0.005,
+        "abs_mean_signed_val_ic": 0.003
+      },
+      "outcomes": {
+        "PARITY_PASS": "metadata exact; all tier-1 and tier-2 per-cell bounds and pooled bounds hold",
+        "PARITY_PASS_WITH_LATE_DRIFT": "metadata exact; all tier-1 bounds hold; pooled tier-2 bounds hold; per-cell tier-2 bounds exceeded in <= 10% of the 108 cell-epochs, all at epochs >= 6",
+        "LONG_HARNESS_PARITY_FAILURE": "anything else -> STOP"
+      },
+      "excluded_from_anchor": "oos_ic (outcome channel; embargoed until Stage 3). Its epoch-1..15 parity is reported after Stage 3 as a secondary check."
+    },
+    "mechanism_rules": {
+      "unit": "per refit: mean over its 3 seeds; n = 3 refits; checkpoints 1,3,5,10,15,20,30,50,75,100",
+      "Q1_train_loss": "CONTINUES if train_loss@15 - train_loss@100 >= 0.005 on 3/3 refits, else SLOWS. ACCELERATION (a phase signature) if the per-epoch slope over 50-100 is more negative than over 15-30 by a factor >= 2 on >= 2/3 refits. Also report in-sample R^2 = 1 - loss/(1/3).",
+      "Q2_val_rank_ic": "Scale-free per-date validation rank IC (OOS-blind, 263 sessions). R_late = mean(val@50,75,100) - val@15. YES (genuine late recovery) iff refit-mean R_late >= +0.02 AND R_late > 0 on 3/3 refits AND each of val@50, val@75, val@100 (refit mean) exceeds val@15. PARTIAL iff R_trough = mean(val@50,75,100) - min(val@15, val@20, val@30) >= +0.02 on >= 2/3 refits but YES fails. NO otherwise.",
+      "Q3_dispersion": "Using oos_pred_std (label-free) and the validation prediction SD: EXPANDING if SD@100 >= 1.10 x SD@50 on >= 2/3 refits; PLATEAU if within +/-10%; CONTRACTING if <= 0.90 x SD@50; else MIXED. The validation SD is primary (263 dates); both reported. Also report SD as a fraction of the target SD 0.577.",
+      "Q4_gradient_and_prediction_movement": "Report grad_norm_mean/max (pre-clip; clipping binds if the mean is >= 1.0). Prediction movement churn@e = 1 - Spearman(val_pred@e, val_pred@e-1); cross-seed agreement agree@e = mean pairwise Spearman of val_pred@e across the 3 seeds of a refit. STRUCTURED if agree@100 >= agree@15 - 0.05 and churn@100 < churn@15; NOISY if agree@100 < agree@15 - 0.10 and churn@100 >= churn@15; CONVERGED if churn@100 < 0.25 x churn@15 and grad_norm_mean@100 < grad_norm_mean@15; INSTABILITY if any non-finite value or grad_norm_max > 10 x grad_norm_mean at a checkpoint >= 20; else MIXED. Majority over refits; INSTABILITY on any refit is reported regardless.",
+      "Q5_weight_norm": "TRANSITION if the per-epoch growth rate over 50-100 differs from 15-30 by a factor > 2 or < 0.5, or changes sign, on >= 2/3 refits; else SMOOTH.",
+      "Q6_classification": {
+        "MECHANISM_CLEAR_PHASE_CHANGE": "Q2 = YES AND at least one coincident non-IC change on >= 2/3 refits in the 30-100 window: Q1 ACCELERATION, Q3 PLATEAU or CONTRACTING, Q4 CONVERGED, or Q5 TRANSITION",
+        "MECHANISM_WEAK_PHASE_CHANGE": "Q2 = PARTIAL; or Q2 = YES without a coincident non-IC change; or Q2 = NO with >= 2 distinct non-IC channels changing (Q1 ACCELERATION, Q3 PLATEAU/CONTRACTING, Q4 CONVERGED, Q5 TRANSITION)",
+        "MECHANISM_NO_PHASE_CHANGE": "otherwise",
+        "rule": "decided from mechanism channels only, before any OOS IC is computed"
+      }
+    },
+    "oos_primary_analysis": {
+      "cluster": "refit date; refit value = mean over its seeds; point estimate = equal-weight mean of the 3 refit values; SE = SD(refit values)/sqrt(3); 95% CI with t(df=2) = 4.303; leave-one-refit-out range; seeds reported only as descriptive diagnostics, never as independent observations",
+      "trajectory": "every checkpoint 1,3,5,10,15,20,30,50,75,100: mean OOS rank IC, per-refit values, per-seed values, clustered SE, positive-IC refit count; never only the best epoch",
+      "paired_vs_epoch3": "Delta_k = OOS@k - OOS@3 within fit, averaged to refit, with clustered SE, t-CI and the count of refits with Delta_k > 0. Epoch 3 is labelled SELECTED_COMPARATOR_ON_BURNED_INTERVAL; selection-aware bar +0.023. Also Delta vs the unselected early regime E2_5 = mean OOS@2..5.",
+      "late_max_null": "Statistic S = max over a window minus mean over the same window, per fit, averaged to refit then overall; windows W1 = {20,30,50,75,100} and W2 = epochs 30..100. Null = no systematic epoch effect inside the window: per-fit Gaussian AR(1) with that fit's own window SD and lag-1 autocorrelation (demeaned, not detrended, so any real trend inflates the null and makes a raw maximum harder to call real); 20,000 simulations aggregated with the same refit weighting. Report the observed S, the null mean and 95th percentile of S, the one-sided null percentile, and a null-corrected late maximum = raw mean maximum - null mean S. A raw maximum is never interpreted without this.",
+      "trajectory_classes": {
+        "definitions": "refit-mean curve. E3 = OOS@3 (selected), E2_5 = mean OOS@2..5 (unselected), T15 = OOS@15, L = mean OOS@50,75,100. Materiality band 0.02.",
+        "A_CONTINUED_DECAY": "L < T15 - 0.02",
+        "B_PLATEAU": "T15 - 0.02 <= L < T15 + 0.02",
+        "C_PARTIAL_RECOVERY": "L >= T15 + 0.02 and L < E2_5 - 0.02",
+        "D_FULL_RECOVERY": "L >= E2_5 - 0.02 and L < E3 + 0.023",
+        "E_LATE_IMPROVEMENT_BEYOND_EARLY_PEAK": "L >= E3 + 0.023",
+        "support_required_for_C_D_E": "each of OOS@50, @75 and @100 above T15 (neighbouring checkpoints), same direction on >= 2/3 refits, mechanism class not NO_PHASE_CHANGE, and (L - T15) > 2 clustered SE. If any fails, report 'B_PLATEAU (point estimate suggests C/D/E; unsupported)'."
+      },
+      "verdict_rules_H_EPOCH_LONG": {
+        "scope": "H-EPOCH-LONG under the frozen recipe only (see claim_boundary)",
+        "SUPPORTED": "class E supported, lower 95% t-CI of (L - E3) > 0, 3/3 refits, mechanism CLEAR_PHASE_CHANGE (practically unattainable at n = 3 on a burned interval; stated in advance)",
+        "WEAKLY_SUPPORTED": "class D or E supported with >= 2/3 refits and mechanism >= WEAK; uncertainty not excluding zero",
+        "INCONCLUSIVE": "class C supported; or unsupported C/D/E point estimates with mechanism >= WEAK; or refit directions split with mechanism >= WEAK",
+        "WEAKLY_CONTRADICTED": "class A or B (including unsupported C/D/E) with mechanism NO or WEAK and mean(L - E2_5) < 0, when the REJECTED criteria are not all met",
+        "REJECTED": "class A or B, mechanism NO_PHASE_CHANGE, L - E2_5 < 0 on 3/3 refits and on >= 7/9 fits, and mean(L - E2_5) + 1 clustered SE < 0",
+        "precedence": "evaluate REJECTED, then SUPPORTED, WEAKLY_SUPPORTED, INCONCLUSIVE, WEAKLY_CONTRADICTED; if none match exactly, INCONCLUSIVE",
+        "production": "No production change may be promoted from this experiment under any verdict."
+      },
+      "secondary_descriptive": [
+        "OOS-IC parity of epochs 1-15 vs P4-B0 (after Stage 3)",
+        "top-quintile overlap of seed-averaged transformer OOS scores at epoch k vs epoch 3 (label-free book-shape diagnostic, not a performance claim)",
+        "original frozen classifier output (transparency only)"
+      ],
+      "not_headlined": [
+        "Sharpe or any book-level P&L",
+        "best single epoch",
+        "original classifier label"
+      ]
+    },
+    "book_equivalence": "Research-only changes must leave production untouched: regenerate the latest production decision book from frozen inputs into a temporary directory and require a byte-identical match (BOOK_EQUIVALENCE BYTE_IDENTICAL).",
+    "long_artifact_sha256": {
+      "long_2026-01-05_c5_s0_tgt_rank_20_H100_9ea09291.json": "38ce47f48e0a02aa00a59bf07456369ef3b0d06720748d5956d56aad47c9f306",
+      "long_2026-01-05_c5_s0_tgt_rank_20_H100_9ea09291_preds.npz": "25bb9c7adc687282d669b28b1c7adca857f112dbb9a70f292ad36d993982877c",
+      "long_2026-01-05_c5_s1_tgt_rank_20_H100_9ea09291.json": "0e97e5c856027699c0c72e8de3d65a3e1cb4c3093ba6b821e7085ddc26ae7f61",
+      "long_2026-01-05_c5_s1_tgt_rank_20_H100_9ea09291_preds.npz": "aee704ff79183bd5e3bf9b5a31a6e3b8145195de6b52e89efbf4db545fad7101",
+      "long_2026-01-05_c5_s2_tgt_rank_20_H100_9ea09291.json": "e8a9ad98dca70cd735958a0fce0fb8ee84bfd0c33d7f8c1adc6d388bfb5e1662",
+      "long_2026-01-05_c5_s2_tgt_rank_20_H100_9ea09291_preds.npz": "a066879b202abde60ac0bc92a59a475947f2468bf0c720e9fbeca30d992d1911",
+      "long_2026-04-20_c5_s0_tgt_rank_20_H100_9ea09291.json": "16ce006000cc7a9ff70c5ef37d4eb55836d3dae85223cc04a64e80236d0f4612",
+      "long_2026-04-20_c5_s0_tgt_rank_20_H100_9ea09291_preds.npz": "680aae36d3352d47073d9a33e1417475c34e3b5b850493640a17abfa6876dfc2",
+      "long_2026-04-20_c5_s1_tgt_rank_20_H100_9ea09291.json": "6aece9e1ca8b844155b50e554415826ee14ea9d42da7e3d0ffba50fb8431846b",
+      "long_2026-04-20_c5_s1_tgt_rank_20_H100_9ea09291_preds.npz": "7340fac33ffa642a029d9e3f0dd246dc109168701cf74b01e1b1d99ce61b4fef",
+      "long_2026-04-20_c5_s2_tgt_rank_20_H100_9ea09291.json": "de3d812e758eee245fe2a62c7f912138f4aa0279df7763f2babde3d07e3767f7",
+      "long_2026-04-20_c5_s2_tgt_rank_20_H100_9ea09291_preds.npz": "68e3cd6b078c4e6611d4d98bf43571e9a5b6241e24c9ce4a93b842b2f07e6faa",
+      "long_2026-07-23_c5_s0_tgt_rank_20_H100_9ea09291.json": "87503d79323796aafbeaa6e9be4ff4d4ab07b6de63384ca27c6502391afc39e5",
+      "long_2026-07-23_c5_s0_tgt_rank_20_H100_9ea09291_preds.npz": "0c8156e37d7638b0e4b473fdcf910790e9ef4ec12442b18b2d886bc839c4eb1d",
+      "long_2026-07-23_c5_s1_tgt_rank_20_H100_9ea09291.json": "a5fc64cebb647730878430ccd1b945ba563b1fc0ec2af5daba48a084bdcd1ae7",
+      "long_2026-07-23_c5_s1_tgt_rank_20_H100_9ea09291_preds.npz": "f437058cbb7a6439f1cf0b150fd5167b91ab1bfde9c0acc674f5095963b7d749",
+      "long_2026-07-23_c5_s2_tgt_rank_20_H100_9ea09291.json": "cbab5533d81bf0300330f9cf4bc7a71494aae0b224fa177e0b9e3b82e69efd44",
+      "long_2026-07-23_c5_s2_tgt_rank_20_H100_9ea09291_preds.npz": "67ae18d46c8c83f0579e09c64784e06cb9c36abbc0c95a9213a1851ae24fbc0a"
+    }
   }
 }
