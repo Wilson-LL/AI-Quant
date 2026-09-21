@@ -1,0 +1,7 @@
+symbol,date,market_open,symbols_traded,symbol_present,shares,trades,value,prices,verdict
+1101,2025-08-13,True,1293,True,0.0,0.0,0.0,--|--|--|--,CONFIRMED_NO_TRADE_EVIDENCE
+2317,2025-07-30,True,1288,True,0.0,0.0,0.0,--|--|--|--,CONFIRMED_NO_TRADE_EVIDENCE
+2884,2025-11-05,True,1313,True,0.0,0.0,0.0,--|--|--|--,CONFIRMED_NO_TRADE_EVIDENCE
+2887,2024-08-22,True,1230,True,0.0,0.0,0.0,--|--|--|--,CONFIRMED_NO_TRADE_EVIDENCE
+9933,2025-05-13,True,1277,True,0.0,0.0,0.0,--|--|--|--,CONFIRMED_NO_TRADE_EVIDENCE
+2207,2025-12-18,True,1312,True,0.0,0.0,0.0,--|--|--|--,CONFIRMED_NO_TRADE_EVIDENCE
