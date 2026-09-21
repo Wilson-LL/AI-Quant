@@ -1,0 +1,9 @@
+symbol,missing_before,missing_after,window_191_contiguous,status,after_unrepaired,after_market_open_no_data,after_confirmed_no_trade
+2002,64,42,True,PASS,42,0,0
+2207,59,59,False,FAIL,58,0,1
+2312,32,20,True,PASS,20,0,0
+2376,21,0,True,PASS,0,0,0
+2610,53,41,True,PASS,41,0,0
+2883,21,0,True,PASS,0,0,0
+3443,55,35,True,PASS,35,0,0
+5880,61,20,True,PASS,20,0,0

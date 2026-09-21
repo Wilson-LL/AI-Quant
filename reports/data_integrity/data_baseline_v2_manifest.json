@@ -1,0 +1,635 @@
+{
+ "baseline": "DATA_BASELINE_V2",
+ "frozen_at": "2026-09-21T22:59:59+08:00",
+ "latest_market_date": "2026-09-21",
+ "calendar": {
+  "method": "CROSS_SECTIONAL_MAJORITY_v1",
+  "rule": "share of alive symbols with a row >= 0.5 AND >= 10 symbols",
+  "sessions": 2856,
+  "first": "2015-01-05",
+  "last": "2026-09-21",
+  "integrity_schema": "eod_integrity/1"
+ },
+ "required_windows": {
+  "feature_lookback_rows": 131,
+  "seq_len": 60,
+  "REQUIRED_INFERENCE_CONTIGUOUS_SESSIONS": 191,
+  "label_forward_sessions": 21,
+  "REQUIRED_TRAINING_CONTIGUOUS_SESSIONS": 212,
+  "derivation": "first sequence step needs 131 prior rows (max feature lookback, measured on the production feature code); a 60-step sequence therefore spans 131 + 60 = 191 contiguous sessions ending at the as-of date; a training sample additionally needs the 1+20 forward sessions of its label"
+ },
+ "symbols": {
+  "configured": 112,
+  "cached_files": 110,
+  "model_eligible": 108,
+  "configured_without_cache": [
+   "2809",
+   "2888"
+  ]
+ },
+ "total_rows": 309281,
+ "aggregate_sha256": "c37dc97035953502be074ce0df0e7c1f17af9c9259d691fdb0fbf9a005340a8a",
+ "total_bytes": 13048374,
+ "immutable_copy": "C:\\Users\\wilso\\source\\code\\AI-Quant-backups\\eod_cache_data_baseline_v2_20260921\\data_cache",
+ "baseline_v1": {
+  "aggregate_sha256": "52d8320cd7a6ed99a47c4baa5a69658ea8ca6c16e8f35b7b8f1d810bb0c22004",
+  "snapshot_dir": "C:\\Users\\wilso\\source\\code\\AI-Quant-backups\\eod_cache_pre_gap_repair_20260921\\data_cache"
+ },
+ "rows_added_since_v1": 3082,
+ "rows_added_breakdown": {
+  "gap_repair_P0": 149,
+  "gap_repair_P1": 339,
+  "gap_repair_P2": 1934,
+  "tail_refresh_2026-09-14_to_2026-09-21": 660
+ },
+ "existing_v1_rows_modified_or_removed": 0,
+ "unexplained_added_dates": 0,
+ "confirmed_no_trade_registry": [
+  {
+   "symbol": "2207",
+   "date": "2025-12-18",
+   "status": "CONFIRMED_NO_TRADE",
+   "reason": "Symbol-specific zero-trade session while the market was open: TWSE daily all-stock quote table lists 2207 with trade volume 0 shares, 0 transactions, 0 value and no open/high/low/close (--). Suspension/other cause not stated. No retry download, no synthetic OHLCV, no forward-fill or interpolation; the session remains missing and breaks model-window contiguity. Classified by user decision 2026-09-21.",
+   "source": "TWSE MI_INDEX https://www.twse.com.tw/exchangeReport/MI_INDEX?response=json&date=20251218&type=ALLBUT0999 retrieved 2026-09-21 (read-only); twstock monthly STOCK_DAY 2207 2025-12 returned 21 rows without 2025-12-18"
+  }
+ ],
+ "unresolved_no_trade_states": {
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN",
+  "symbol_months": 44,
+  "sessions": 114,
+  "list": [
+   "1101 2017-04-19",
+   "1101 2017-04-20",
+   "1101 2025-08-13",
+   "1102 2024-06-05",
+   "1216 2017-07-27",
+   "1229 2019-03-28",
+   "2027 2018-10-02",
+   "2201 2020-03-30",
+   "2201 2020-10-07",
+   "2201 2020-10-08",
+   "2201 2020-10-12",
+   "2201 2020-10-13",
+   "2201 2020-10-14",
+   "2201 2020-10-15",
+   "2201 2020-10-16",
+   "2231 2019-01-21",
+   "2303 2018-06-29",
+   "2317 2016-03-30",
+   "2317 2018-10-18",
+   "2317 2018-10-19",
+   "2317 2018-10-22",
+   "2317 2018-10-23",
+   "2317 2018-10-24",
+   "2317 2018-10-25",
+   "2317 2025-07-30",
+   "2324 2018-08-07",
+   "2337 2017-08-15",
+   "2337 2017-08-16",
+   "2337 2017-08-17",
+   "2337 2017-08-18",
+   "2337 2017-08-21",
+   "2337 2017-08-22",
+   "2337 2017-08-23",
+   "2337 2017-08-24",
+   "2337 2017-08-25",
+   "2354 2016-03-30",
+   "2368 2022-09-07",
+   "2368 2022-09-08",
+   "2368 2022-09-12",
+   "2368 2022-09-13",
+   "2368 2022-09-14",
+   "2368 2022-09-15",
+   "2368 2022-09-16",
+   "2409 2022-09-29",
+   "2409 2022-09-30",
+   "2409 2022-10-03",
+   "2409 2022-10-04",
+   "2409 2022-10-05",
+   "2409 2022-10-06",
+   "2409 2022-10-07",
+   "2449 2024-04-26",
+   "2454 2016-05-13",
+   "2458 2018-10-11",
+   "2458 2018-10-12",
+   "2458 2018-10-15",
+   "2458 2018-10-16",
+   "2458 2018-10-17",
+   "2458 2018-10-18",
+   "2458 2018-10-19",
+   "2603 2022-09-07",
+   "2603 2022-09-08",
+   "2603 2022-09-12",
+   "2603 2022-09-13",
+   "2603 2022-09-14",
+   "2603 2022-09-15",
+   "2603 2022-09-16",
+   "2609 2017-04-20",
+   "2609 2017-04-21",
+   "2609 2017-04-24",
+   "2609 2017-04-25",
+   "2609 2017-04-26",
+   "2609 2017-04-27",
+   "2609 2017-04-28",
+   "2609 2017-05-02",
+   "2609 2017-05-03",
+   "2884 2025-11-05",
+   "2887 2024-08-22",
+   "2912 2017-07-27",
+   "2915 2018-10-18",
+   "2915 2018-10-19",
+   "2915 2018-10-22",
+   "2915 2018-10-23",
+   "2915 2018-10-24",
+   "2915 2018-10-25",
+   "2915 2018-10-26",
+   "3037 2022-02-22",
+   "4938 2020-08-13",
+   "5903 2016-04-27",
+   "5903 2016-10-21",
+   "5903 2016-10-24",
+   "5903 2016-12-26",
+   "5903 2016-12-27",
+   "5903 2021-06-09",
+   "5903 2021-10-27",
+   "5903 2022-10-07",
+   "5903 2023-09-15",
+   "5903 2023-09-20",
+   "6414 2016-10-12",
+   "6414 2018-03-30",
+   "9933 2025-05-13",
+   "9945 2018-09-27",
+   "9945 2018-09-28",
+   "9945 2018-10-01",
+   "9945 2018-10-02",
+   "9945 2018-10-03",
+   "9945 2018-10-04",
+   "9945 2018-10-05",
+   "9945 2023-09-14",
+   "9945 2023-09-15",
+   "9945 2023-09-18",
+   "9945 2023-09-19",
+   "9945 2023-09-20",
+   "9945 2023-09-21",
+   "9945 2023-09-22"
+  ]
+ },
+ "verified_downloadable_gaps_remaining": 0,
+ "unresolved_after_retries": 0,
+ "missing_symbol_sessions_eligible": 115,
+ "current_invalid_inference_symbols": [
+  "2207"
+ ],
+ "current_invalid_reason": {
+  "2207": "CONFIRMED_NO_TRADE_IN_REQUIRED_WINDOW (2025-12-18); clears when 2025-12-18 leaves the 191-session window"
+ },
+ "training_samples_excluded_by_guard": {
+  "feature_window_cross": 7601,
+  "label_window_cross": 798,
+  "v1_feature_window_cross": 23951,
+  "v1_label_window_cross": 2483
+ },
+ "per_file": {
+  "0050.csv": {
+   "sha256": "5dcf2ca17427c7bfe15f517d39e5110cc587255885e779905cc4f4b9b2719b50",
+   "bytes": 125405
+  },
+  "0056.csv": {
+   "sha256": "cffa922d538caea6e0a665dfc0fcdaa536c016ac52c16428c7d9d83d0e84e40c",
+   "bytes": 122974
+  },
+  "1101.csv": {
+   "sha256": "195019d1eff48214d3349cd02c6459188fa4f6a214d3faad74a43c6b95a05914",
+   "bytes": 120673
+  },
+  "1102.csv": {
+   "sha256": "4e05d2f406786ba4aa77ae52af2d2c309dd0d5f0f21a8ebf535ea3db9f3ad77b",
+   "bytes": 119391
+  },
+  "1201.csv": {
+   "sha256": "1771e55951d259e66cbd05648cbc888326b676ef8465a0f9f63518bd842387db",
+   "bytes": 117499
+  },
+  "1210.csv": {
+   "sha256": "ab9398a657ffb586a6e638f146b15d45a3a9adee59fb09ebb3eae901ed9bb40e",
+   "bytes": 116419
+  },
+  "1215.csv": {
+   "sha256": "b2ccbdce18c799156160ae8445f38ffb863a6c3b2ac1c7e6248c298400973b96",
+   "bytes": 115266
+  },
+  "1216.csv": {
+   "sha256": "beb7488e1f260b053d5e758bc29e27c6ffaeeb3322176e7d5b8c011ecfe3e8ce",
+   "bytes": 115192
+  },
+  "1227.csv": {
+   "sha256": "3a5860e8863026e2613f4ab45e1b17e62d2ff05428db197c640d50cb6d1b9097",
+   "bytes": 114499
+  },
+  "1229.csv": {
+   "sha256": "fb6fba5bb63dd05a4432d815846e28453cbed81bd96a33a6591cbf54a97d18a2",
+   "bytes": 116516
+  },
+  "1231.csv": {
+   "sha256": "227919bde6e047b0472d90d1f890c22cae8b6dd175f949e270022b325fe68662",
+   "bytes": 114752
+  },
+  "1301.csv": {
+   "sha256": "b122ca72b9a1c0604d7b6e966d169329a201772a649646212608ea990bfb8206",
+   "bytes": 118455
+  },
+  "1303.csv": {
+   "sha256": "73615eadea699da6041577a7ec35273e9ba5877df6846ac63792939286055932",
+   "bytes": 116061
+  },
+  "1326.csv": {
+   "sha256": "923fca7a438ecc2dea6aeaee0b75f04d24f6dce843f076ee167f4ff4abb66568",
+   "bytes": 117124
+  },
+  "1402.csv": {
+   "sha256": "56ea4e7a83569664312a2309fc29ebad109a8d49abeb406c7486105bbd4d7eea",
+   "bytes": 120093
+  },
+  "1434.csv": {
+   "sha256": "da80786c0e857cc2524f27b504958570e980088ca0f6d80274802103e0b67be2",
+   "bytes": 118343
+  },
+  "1476.csv": {
+   "sha256": "655521836db156278e02b0097c4a2cbbf9c124e3433aeee585934a26bab41815",
+   "bytes": 124115
+  },
+  "1503.csv": {
+   "sha256": "eac80a469bb1f031c5c1f11d9dd1952b809835e4c08e1bdf8ce97fe90bb8d5f8",
+   "bytes": 117002
+  },
+  "1513.csv": {
+   "sha256": "1c1e6ff6f6dde6bc1041170d1ce5d4aad7a8bb48312906e8465e70af4c226a6b",
+   "bytes": 120339
+  },
+  "1519.csv": {
+   "sha256": "87815f756e7e874ac845c21c252c8753b50b2bc09ee5a379d549b7f2be300097",
+   "bytes": 119571
+  },
+  "1590.csv": {
+   "sha256": "220f7f058ec71efda2983aceda10ece8dd98f2560f775f09bd1ca7371f1b9e70",
+   "bytes": 125915
+  },
+  "1707.csv": {
+   "sha256": "cba4acc6564cbb99bda409d4bb2ebe7374e83cf840d2825228a82bbda7062852",
+   "bytes": 122722
+  },
+  "1789.csv": {
+   "sha256": "c5850aa83cbef98ec2b2c74427595b6b1eab21461318efb3f864410494f7a18f",
+   "bytes": 117252
+  },
+  "1802.csv": {
+   "sha256": "61e23aff397283df9edc47335af2720da94ab2c5ca28bf62dc083cb756d01a41",
+   "bytes": 119658
+  },
+  "2002.csv": {
+   "sha256": "17ac6c7b78f43391062feadad39cf71818227c5d2ec3209b0c8c50d631305e92",
+   "bytes": 121733
+  },
+  "2015.csv": {
+   "sha256": "a4c771b7d17119ff03a8021bd4306e4227ecaf7d49bfa2f5fad90bc428eb1174",
+   "bytes": 112299
+  },
+  "2027.csv": {
+   "sha256": "3cc54373bf3b694801fdd534c15fc083b4c75de0fee3f2ce0f810e6730380714",
+   "bytes": 119541
+  },
+  "2201.csv": {
+   "sha256": "6517a91366d72860fabea6c768ae3289a8eef347a32936ab7fe634ab80f0a649",
+   "bytes": 118146
+  },
+  "2207.csv": {
+   "sha256": "b07ed08d72bb1d3089bb1488db1ec3bfcf4b78df85915651abc515bc1adbf153",
+   "bytes": 122692
+  },
+  "2231.csv": {
+   "sha256": "7e92fb0847a7ccc82633827b86ce234d5be5562e281a9093c3a1952a81882f0c",
+   "bytes": 122131
+  },
+  "2303.csv": {
+   "sha256": "448b4c0ed624c4232dd24b17f4cf3ed5d8ecb9a9ab44d313d04faf1d0c34220d",
+   "bytes": 121907
+  },
+  "2308.csv": {
+   "sha256": "87fc4c303950274a2f90a1fe2b3c6506dbaf3158dd9ffa431fb3d0e527dc8343",
+   "bytes": 127065
+  },
+  "2312.csv": {
+   "sha256": "7058790a4cd1d85e7cf58f861e09d093bcf728db3fbf41520bc7a8403979f744",
+   "bytes": 119995
+  },
+  "2313.csv": {
+   "sha256": "3efec7bf35658d87528842c5caf8641f9799683dde30ff48bade86011b7f0658",
+   "bytes": 120529
+  },
+  "2317.csv": {
+   "sha256": "6cd6388fb26f3a1f0fbf553a614dff48cfa073432a8b95e96bacde8dfac0a53c",
+   "bytes": 122971
+  },
+  "2324.csv": {
+   "sha256": "1e96d9889de179d6877d96e25a0b054619f56e0953c4cd1490b980cb6ab771ea",
+   "bytes": 121265
+  },
+  "2330.csv": {
+   "sha256": "b0492fad9a93c4feb550503e346e04039e5018f094892a5487519ce00b6e844a",
+   "bytes": 130293
+  },
+  "2337.csv": {
+   "sha256": "351dd0010717900b5f410516eb0a9a95b03ea16592a4d7890956cb5dad6bfcba",
+   "bytes": 119719
+  },
+  "2344.csv": {
+   "sha256": "7f0f8638538d4304de9fe599824a886f103a0d082c7de051c9648fbe1bd3a977",
+   "bytes": 121597
+  },
+  "2345.csv": {
+   "sha256": "a93015423ad2772cda67ac462ffcbebd1d5a90a0228219e2bd27984fa475aabe",
+   "bytes": 124113
+  },
+  "2351.csv": {
+   "sha256": "d715613838889fbbd56fbe811d9b7ccaa56a8a296256c08e8dc888ecea543d2b",
+   "bytes": 117659
+  },
+  "2353.csv": {
+   "sha256": "449da6b1dfb9553745110ecee16d4091b04f463c202f67b1b623031fc227f526",
+   "bytes": 121181
+  },
+  "2354.csv": {
+   "sha256": "fe34389b03e71784c97c45a0572ec611e44a5db9326b65338b58eee5aa12df2e",
+   "bytes": 115109
+  },
+  "2356.csv": {
+   "sha256": "fab5b1d8a32b76e4ce5ee597db478126d5fa3e0fa28bb5b80df35cd40e6cedf7",
+   "bytes": 120177
+  },
+  "2357.csv": {
+   "sha256": "a6d183856fa1aaf04bdf8b726dbaa02e383032d21c322caa534acf06233d44e3",
+   "bytes": 125415
+  },
+  "2360.csv": {
+   "sha256": "cce314f91763cbfc2eef60b9668f7d9aef14daf68bcfa23d72af1fccf57edbb6",
+   "bytes": 122811
+  },
+  "2368.csv": {
+   "sha256": "757d50a67c70a3e9b4cac0971c120e63b5ed6033bcc742d6f1982e06bd32cc75",
+   "bytes": 120496
+  },
+  "2376.csv": {
+   "sha256": "d37287dd12d7eeba790400c3bd27c8b44511c6745df4786b06e7534e6fef75a2",
+   "bytes": 121017
+  },
+  "2377.csv": {
+   "sha256": "3e1441767dbdef41a3852113cf7c4868655e3c394da121e198c9423a3ad0e444",
+   "bytes": 121317
+  },
+  "2379.csv": {
+   "sha256": "08b538f7ce4253eb077c56d1bbd632bf70fccbc8c46a0091ad893855701c1f21",
+   "bytes": 124294
+  },
+  "2382.csv": {
+   "sha256": "27826184004d81e518486079809b0a2acf83a864c84b173d5e2fab9625882115",
+   "bytes": 118894
+  },
+  "2385.csv": {
+   "sha256": "ffb00224d27084f7cd5694620d4e7393011554cb4264e2f34216c43a6ffd6c2b",
+   "bytes": 116913
+  },
+  "2401.csv": {
+   "sha256": "a930f78ace547946eca1f139d09a0d166dd83aa143f1116b1cc6e88eaff26f6d",
+   "bytes": 119675
+  },
+  "2408.csv": {
+   "sha256": "e59c0f6e07f3a7aeb203b39e2e8d88f6d5bb41b27eb04bef03496c110f85234b",
+   "bytes": 118355
+  },
+  "2409.csv": {
+   "sha256": "51d531b1f02c60c7e3ad2bdc0fb4665371bc3014072d63e5bb59e3d8fef586f4",
+   "bytes": 121736
+  },
+  "2412.csv": {
+   "sha256": "fd954bbbc58cca6dd5f45d3cf3144844984dcc8d5c709e82229c2dfb535edfaa",
+   "bytes": 125565
+  },
+  "2449.csv": {
+   "sha256": "775a6ae76a836f767e8a890336c8119c9a878ccf8e3b05c433cc42c7989e2c16",
+   "bytes": 121074
+  },
+  "2451.csv": {
+   "sha256": "d15e56b72e90da8cf3a01d5c31598b2ee62b0558988b26fe97d6c15f2febe602",
+   "bytes": 114758
+  },
+  "2454.csv": {
+   "sha256": "105e77cf24472bddc619565093c7a5d968a1d1bed0aa235e7add0164478caf99",
+   "bytes": 129156
+  },
+  "2458.csv": {
+   "sha256": "acb9c414a41117d77430105a2cb65c5b713f6b7eab6cdcec2bb9955e00ef44f6",
+   "bytes": 120758
+  },
+  "2542.csv": {
+   "sha256": "35075e53319fbe63ab27d0e3c30f77d644cc637e11f54cde031335cd4a0949d0",
+   "bytes": 118445
+  },
+  "2548.csv": {
+   "sha256": "d91fd6338a230a6508767dc43709d2d9e9d44240e6adf6e21b559098a6c589de",
+   "bytes": 114498
+  },
+  "2603.csv": {
+   "sha256": "bb990e1cdf0b0a97ec0ec049546b13287fe8032c94de9db7500a9d7ead34bfcb",
+   "bytes": 123897
+  },
+  "2606.csv": {
+   "sha256": "e94c58468b716bef79384286967fda959673e5f12c116ec521d7ac74b1e6c80e",
+   "bytes": 117076
+  },
+  "2609.csv": {
+   "sha256": "577352d450e6d1eb6c95a3ca104de10aba9ce8302559c0b8cad1286fdd0bc4d9",
+   "bytes": 117483
+  },
+  "2610.csv": {
+   "sha256": "f64b88bd6c8aa63bfbbe7ca74d378d80c85d1160caac7e2de79120db16956d9d",
+   "bytes": 119923
+  },
+  "2615.csv": {
+   "sha256": "e7e3d79177fafec84aac60d8fdcb8e6e6b20459be7971164fb17b2707200b59f",
+   "bytes": 119478
+  },
+  "2618.csv": {
+   "sha256": "272238fbfe0ab7f610954e1d23520af4a8a2bed53a4e3bd11e5332ede361d195",
+   "bytes": 121768
+  },
+  "2634.csv": {
+   "sha256": "85a99bf8c7c3de7e4975d3b4fb1f6900d1540339a389843739841fdde45e2e71",
+   "bytes": 118247
+  },
+  "2637.csv": {
+   "sha256": "1861596969327d89ee14c1cb3544c4c2f86945b9edee268bce89dd6e3249b260",
+   "bytes": 116721
+  },
+  "2723.csv": {
+   "sha256": "37e2fbf4ba1cb26efd80625ab0a29eddbe1a3fe72e569d22ff5e5b76989b4250",
+   "bytes": 119970
+  },
+  "2801.csv": {
+   "sha256": "74cc5f7f09fd051115aba1ea53b3d0dcd3fa64000a6fa0a56d8fff9c0f932013",
+   "bytes": 120648
+  },
+  "2812.csv": {
+   "sha256": "8ed6321f67f7644d11d768e617a34f7872ae5ccb79cabad9d28f98f5d8988451",
+   "bytes": 118621
+  },
+  "2845.csv": {
+   "sha256": "0a8e6704ff9310fa37b864ff48bfa1da059161c2c6f2e0bbf120452b9f4608d1",
+   "bytes": 118271
+  },
+  "2880.csv": {
+   "sha256": "85c32f95d91275236f8af3c6d5ec6d80c124f0efe0133dd11431bc0c3d4c6ba0",
+   "bytes": 120849
+  },
+  "2881.csv": {
+   "sha256": "7afac1571ee6731d22c3b5b8dde5fb0c949611294a4a2c73de07a275ba29acd7",
+   "bytes": 118560
+  },
+  "2882.csv": {
+   "sha256": "2ef4547c5d632e9ee74289af57c3ff89e9785952ad5356e70277db0b8243b45a",
+   "bytes": 119669
+  },
+  "2883.csv": {
+   "sha256": "bfe9be1f31013c97a7818dd909135444acee33412c5ddd3a7dbfc44ef6024f80",
+   "bytes": 119822
+  },
+  "2884.csv": {
+   "sha256": "2851e4fc19b9989d3a90961d5a3b4274f5695bfbb4cb437e0d0d083ebe8082e0",
+   "bytes": 121855
+  },
+  "2886.csv": {
+   "sha256": "c48ac33fbd7354f1d39d93151548ff244a430da02dc9c0134118425d9643067b",
+   "bytes": 121711
+  },
+  "2887.csv": {
+   "sha256": "b16de6be24c184ceb2de5c321eed81fb2f22af6d57c1b27e03e8e7c58cdecf85",
+   "bytes": 122087
+  },
+  "2890.csv": {
+   "sha256": "7c3758921daad62063bebc120c543583bf107081b7974334301726fc504ed262",
+   "bytes": 120694
+  },
+  "2891.csv": {
+   "sha256": "e62d610e507f53f3e6a58ea9207aba18317d09cd521373ee1b9a84f3a8886a5e",
+   "bytes": 121917
+  },
+  "2892.csv": {
+   "sha256": "1766bc5238e615c023a9d3cc803982c74f8115ccebe614785dae08b1155ff7ad",
+   "bytes": 121515
+  },
+  "2903.csv": {
+   "sha256": "281295c8f44d3badb07f37f8dcc56b55d8b786214c69c3a86179bf2c65932e67",
+   "bytes": 118529
+  },
+  "2912.csv": {
+   "sha256": "b431af72db5f6c13bc4f8e9ce5cf88e787a4a15cec0cd8e10ead59fee8af1826",
+   "bytes": 124590
+  },
+  "2915.csv": {
+   "sha256": "abf0aa447c414278ffded7d03f6538c4943f3c38b7a2ca3ab861e59562c54178",
+   "bytes": 114989
+  },
+  "3008.csv": {
+   "sha256": "55da6690691dea38ac17acfb774aedb3965d93174ffe945dc66292cca115c078",
+   "bytes": 134952
+  },
+  "3034.csv": {
+   "sha256": "66e1121614c67aa54362103cc2b8546a0ef13fc66bec07bea56e66f35d353059",
+   "bytes": 125846
+  },
+  "3037.csv": {
+   "sha256": "de67fdb7d1db2eb5cee9ac478478c88d9e57c778dec5ac66b239106bcbbf821c",
+   "bytes": 123921
+  },
+  "3045.csv": {
+   "sha256": "203321b5e92b8774fede6cfb9e5ddbd789396c4298079e3f92a66ebdf6de58e6",
+   "bytes": 123420
+  },
+  "3231.csv": {
+   "sha256": "7d6a4bb117bcde6d4375df5e4e0bcd198d11763c48cf657d329ee51d4b32985a",
+   "bytes": 122596
+  },
+  "3443.csv": {
+   "sha256": "7dbe0699b146370c8a51682f0daf60209a677e533318c7ded36750f52ba5f2cc",
+   "bytes": 126426
+  },
+  "3661.csv": {
+   "sha256": "335a4729c096f9afe0cfbd9999eb9876bb08f246a135e118eda1961f286b140b",
+   "bytes": 125942
+  },
+  "3711.csv": {
+   "sha256": "cd918ec1622d52bf7afaf153931c86663375a53c2d55a3dd87f7a62074144726",
+   "bytes": 87915
+  },
+  "4133.csv": {
+   "sha256": "f16f16574eaa0742a9c65938640d62b4011a11f7e3ffe82c0c5a599b863b9403",
+   "bytes": 115010
+  },
+  "4904.csv": {
+   "sha256": "e3830977ee9626941d729b36b0ceb635507e6470b3c5167b3587227e136b22a3",
+   "bytes": 114689
+  },
+  "4938.csv": {
+   "sha256": "80f4592b3d12a75d84b65955d3e7f94ea33ee4b67ff0bc90a20909566c6caf0f",
+   "bytes": 115580
+  },
+  "5522.csv": {
+   "sha256": "b0c38deda0a4c46e28c20e97855f681dd4e41e15dbc56ca6ebe32d73f71dc3c1",
+   "bytes": 114814
+  },
+  "5880.csv": {
+   "sha256": "c4f7c79f319917cc6205666970175c16e84a55ea5936224a7e7b442b2bb59fed",
+   "bytes": 120960
+  },
+  "5903.csv": {
+   "sha256": "fec8305de75cdd5d36724e491b7c74cf7cc8dc9027aef4c260629a872c93b480",
+   "bytes": 119849
+  },
+  "6414.csv": {
+   "sha256": "28fdf290174abd100fb58cafdcccbef325f2e5c6dc253f955e18e7a21d1e336e",
+   "bytes": 123756
+  },
+  "6446.csv": {
+   "sha256": "ef63bee61977e36bb3c564b8eec3255d2392d7bb505695a996cd686edd4075fd",
+   "bytes": 28459
+  },
+  "6770.csv": {
+   "sha256": "c5b006258cc8191084a1b199bc925c39742b26473f4720da59cc9e3b63ab9594",
+   "bytes": 49206
+  },
+  "9904.csv": {
+   "sha256": "d09dca53bd389224b27198912c9d5ca34c14877714e275b35ebef0152b4e6eea",
+   "bytes": 119864
+  },
+  "9910.csv": {
+   "sha256": "a42c5b7563207694e8f2f64cfd64e228d6d325785e5c6152187efdd4242b8fb0",
+   "bytes": 123762
+  },
+  "9914.csv": {
+   "sha256": "ae0401269463fc1ea972a03278beacfb91c984c37397dd38ff770aa9c13e187b",
+   "bytes": 123157
+  },
+  "9921.csv": {
+   "sha256": "937c582efdbf1f0bb88bb20c43ee0c3efcca70e0c8317a239a927300e730a88c",
+   "bytes": 123293
+  },
+  "9933.csv": {
+   "sha256": "1440cd62006a61753f884fa6f3732901e5020601d6f757ea7fa7598c77905b01",
+   "bytes": 117594
+  },
+  "9945.csv": {
+   "sha256": "68b7efd6cc82d6859b32fe9ebf000b28fa362e283165bdb4b84beb342bc11d1e",
+   "bytes": 117938
+  }
+ }
+}

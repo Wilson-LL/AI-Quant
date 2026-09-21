@@ -1,0 +1,2564 @@
+{
+ "1101|2017-04": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 2,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 16
+  },
+  "no_data_sessions": [
+   "2017-04-19",
+   "2017-04-20"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 2,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "1101|2018-07": {
+  "added": 22,
+  "attempts": 1,
+  "expected_missing": 22,
+  "last_request": {
+   "rows_accepted": 22,
+   "rows_added": 22,
+   "rows_rejected": 0,
+   "rows_returned": 22
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "1101|2024-02": {
+  "added": 13,
+  "attempts": 1,
+  "expected_missing": 13,
+  "last_request": {
+   "rows_accepted": 13,
+   "rows_added": 13,
+   "rows_rejected": 0,
+   "rows_returned": 13
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "1101|2024-06": {
+  "added": 19,
+  "attempts": 1,
+  "expected_missing": 19,
+  "last_request": {
+   "rows_accepted": 19,
+   "rows_added": 19,
+   "rows_rejected": 0,
+   "rows_returned": 19
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "1101|2025-08": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 1,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "no_data_sessions": [
+   "2025-08-13"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 1,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "1102|2024-06": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 1,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 18
+  },
+  "no_data_sessions": [
+   "2024-06-05"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 1,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "1216|2017-07": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 1,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "no_data_sessions": [
+   "2017-07-27"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 1,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "1229|2019-03": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 1,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 19
+  },
+  "no_data_sessions": [
+   "2019-03-28"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 1,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "1229|2020-02": {
+  "added": 19,
+  "attempts": 1,
+  "expected_missing": 19,
+  "last_request": {
+   "rows_accepted": 19,
+   "rows_added": 19,
+   "rows_rejected": 0,
+   "rows_returned": 19
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "1229|2023-08": {
+  "added": 22,
+  "attempts": 1,
+  "expected_missing": 22,
+  "last_request": {
+   "rows_accepted": 22,
+   "rows_added": 22,
+   "rows_rejected": 0,
+   "rows_returned": 22
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2002|2019-06": {
+  "added": 19,
+  "attempts": 1,
+  "expected_missing": 19,
+  "last_request": {
+   "rows_accepted": 19,
+   "rows_added": 19,
+   "rows_rejected": 0,
+   "rows_returned": 19
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2002|2019-07": {
+  "added": 23,
+  "attempts": 1,
+  "expected_missing": 23,
+  "last_request": {
+   "rows_accepted": 23,
+   "rows_added": 23,
+   "rows_rejected": 0,
+   "rows_returned": 23
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2002|2026-03": {
+  "added": 22,
+  "attempts": 1,
+  "expected_missing": 22,
+  "last_request": {
+   "rows_accepted": 22,
+   "rows_added": 22,
+   "rows_rejected": 0,
+   "rows_returned": 22
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2027|2018-10": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 1,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 21
+  },
+  "no_data_sessions": [
+   "2018-10-02"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 1,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "2201|2019-11": {
+  "added": 21,
+  "attempts": 1,
+  "expected_missing": 21,
+  "last_request": {
+   "rows_accepted": 21,
+   "rows_added": 21,
+   "rows_rejected": 0,
+   "rows_returned": 21
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2201|2020-03": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 1,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 21
+  },
+  "no_data_sessions": [
+   "2020-03-30"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 1,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "2201|2020-10": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 7,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 12
+  },
+  "no_data_sessions": [
+   "2020-10-07",
+   "2020-10-08",
+   "2020-10-12",
+   "2020-10-13",
+   "2020-10-14",
+   "2020-10-15",
+   "2020-10-16"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 7,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "2201|2022-04": {
+  "added": 19,
+  "attempts": 1,
+  "expected_missing": 19,
+  "last_request": {
+   "rows_accepted": 19,
+   "rows_added": 19,
+   "rows_rejected": 0,
+   "rows_returned": 19
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2207|2018-04": {
+  "added": 18,
+  "attempts": 1,
+  "expected_missing": 18,
+  "last_request": {
+   "rows_accepted": 18,
+   "rows_added": 18,
+   "rows_rejected": 0,
+   "rows_returned": 18
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2207|2022-03": {
+  "added": 23,
+  "attempts": 1,
+  "expected_missing": 23,
+  "last_request": {
+   "rows_accepted": 23,
+   "rows_added": 23,
+   "rows_rejected": 0,
+   "rows_returned": 23
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2207|2023-04": {
+  "added": 17,
+  "attempts": 1,
+  "expected_missing": 17,
+  "last_request": {
+   "rows_accepted": 17,
+   "rows_added": 17,
+   "rows_rejected": 0,
+   "rows_returned": 17
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2207|2025-12": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 1,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 21
+  },
+  "no_data_sessions": [
+   "2025-12-18"
+  ],
+  "note": "upgraded from MARKET_OPEN_SYMBOL_NO_DATA via no-trade registry",
+  "registry_confirmed_no_trade": [
+   "2025-12-18"
+  ],
+  "remaining": 1,
+  "state": "CONFIRMED_NO_TRADE"
+ },
+ "2231|2019-01": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 1,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "no_data_sessions": [
+   "2019-01-21"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 1,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "2303|2018-06": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 1,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 19
+  },
+  "no_data_sessions": [
+   "2018-06-29"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 1,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "2303|2022-04": {
+  "added": 19,
+  "attempts": 1,
+  "expected_missing": 19,
+  "last_request": {
+   "rows_accepted": 19,
+   "rows_added": 19,
+   "rows_rejected": 0,
+   "rows_returned": 19
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2303|2022-08": {
+  "added": 23,
+  "attempts": 1,
+  "expected_missing": 23,
+  "last_request": {
+   "rows_accepted": 23,
+   "rows_added": 23,
+   "rows_rejected": 0,
+   "rows_returned": 23
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2308|2019-08": {
+  "added": 21,
+  "attempts": 1,
+  "expected_missing": 21,
+  "last_request": {
+   "rows_accepted": 21,
+   "rows_added": 21,
+   "rows_rejected": 0,
+   "rows_returned": 21
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2312|2018-06": {
+  "added": 20,
+  "attempts": 1,
+  "expected_missing": 20,
+  "last_request": {
+   "rows_accepted": 20,
+   "rows_added": 20,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2312|2026-02": {
+  "added": 12,
+  "attempts": 1,
+  "expected_missing": 12,
+  "last_request": {
+   "rows_accepted": 12,
+   "rows_added": 12,
+   "rows_rejected": 0,
+   "rows_returned": 12
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2313|2019-03": {
+  "added": 20,
+  "attempts": 1,
+  "expected_missing": 20,
+  "last_request": {
+   "rows_accepted": 20,
+   "rows_added": 20,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2313|2021-10": {
+  "added": 20,
+  "attempts": 1,
+  "expected_missing": 20,
+  "last_request": {
+   "rows_accepted": 20,
+   "rows_added": 20,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2313|2023-02": {
+  "added": 18,
+  "attempts": 1,
+  "expected_missing": 18,
+  "last_request": {
+   "rows_accepted": 18,
+   "rows_added": 18,
+   "rows_rejected": 0,
+   "rows_returned": 18
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2313|2023-09": {
+  "added": 20,
+  "attempts": 1,
+  "expected_missing": 20,
+  "last_request": {
+   "rows_accepted": 20,
+   "rows_added": 20,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2317|2016-03": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 1,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 22
+  },
+  "no_data_sessions": [
+   "2016-03-30"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 1,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "2317|2018-10": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 6,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 16
+  },
+  "no_data_sessions": [
+   "2018-10-18",
+   "2018-10-19",
+   "2018-10-22",
+   "2018-10-23",
+   "2018-10-24",
+   "2018-10-25"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 6,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "2317|2019-06": {
+  "added": 19,
+  "attempts": 1,
+  "expected_missing": 19,
+  "last_request": {
+   "rows_accepted": 19,
+   "rows_added": 19,
+   "rows_rejected": 0,
+   "rows_returned": 19
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2317|2025-07": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 1,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 22
+  },
+  "no_data_sessions": [
+   "2025-07-30"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 1,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "2317|2025-09": {
+  "added": 21,
+  "attempts": 1,
+  "expected_missing": 21,
+  "last_request": {
+   "rows_accepted": 21,
+   "rows_added": 21,
+   "rows_rejected": 0,
+   "rows_returned": 21
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2324|2018-08": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 1,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 22
+  },
+  "no_data_sessions": [
+   "2018-08-07"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 1,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "2337|2017-08": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 9,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 14
+  },
+  "no_data_sessions": [
+   "2017-08-15",
+   "2017-08-16",
+   "2017-08-17",
+   "2017-08-18",
+   "2017-08-21",
+   "2017-08-22",
+   "2017-08-23",
+   "2017-08-24",
+   "2017-08-25"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 9,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "2337|2025-05": {
+  "added": 20,
+  "attempts": 1,
+  "expected_missing": 20,
+  "last_request": {
+   "rows_accepted": 20,
+   "rows_added": 20,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2344|2024-04": {
+  "added": 20,
+  "attempts": 1,
+  "expected_missing": 20,
+  "last_request": {
+   "rows_accepted": 20,
+   "rows_added": 20,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2344|2024-07": {
+  "added": 21,
+  "attempts": 1,
+  "expected_missing": 21,
+  "last_request": {
+   "rows_accepted": 21,
+   "rows_added": 21,
+   "rows_rejected": 0,
+   "rows_returned": 21
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2344|2025-08": {
+  "added": 21,
+  "attempts": 1,
+  "expected_missing": 21,
+  "last_request": {
+   "rows_accepted": 21,
+   "rows_added": 21,
+   "rows_rejected": 0,
+   "rows_returned": 21
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2345|2020-05": {
+  "added": 20,
+  "attempts": 1,
+  "expected_missing": 20,
+  "last_request": {
+   "rows_accepted": 20,
+   "rows_added": 20,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2351|2021-07": {
+  "added": 22,
+  "attempts": 1,
+  "expected_missing": 22,
+  "last_request": {
+   "rows_accepted": 22,
+   "rows_added": 22,
+   "rows_rejected": 0,
+   "rows_returned": 22
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2351|2024-11": {
+  "added": 21,
+  "attempts": 1,
+  "expected_missing": 21,
+  "last_request": {
+   "rows_accepted": 21,
+   "rows_added": 21,
+   "rows_rejected": 0,
+   "rows_returned": 21
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2353|2018-02": {
+  "added": 13,
+  "attempts": 1,
+  "expected_missing": 13,
+  "last_request": {
+   "rows_accepted": 13,
+   "rows_added": 13,
+   "rows_rejected": 0,
+   "rows_returned": 13
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2354|2016-03": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 1,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 22
+  },
+  "no_data_sessions": [
+   "2016-03-30"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 1,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "2356|2019-03": {
+  "added": 20,
+  "attempts": 1,
+  "expected_missing": 20,
+  "last_request": {
+   "rows_accepted": 20,
+   "rows_added": 20,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2356|2020-04": {
+  "added": 20,
+  "attempts": 1,
+  "expected_missing": 20,
+  "last_request": {
+   "rows_accepted": 20,
+   "rows_added": 20,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2356|2024-05": {
+  "added": 22,
+  "attempts": 1,
+  "expected_missing": 22,
+  "last_request": {
+   "rows_accepted": 22,
+   "rows_added": 22,
+   "rows_rejected": 0,
+   "rows_returned": 22
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2360|2018-11": {
+  "added": 22,
+  "attempts": 1,
+  "expected_missing": 22,
+  "last_request": {
+   "rows_accepted": 22,
+   "rows_added": 22,
+   "rows_rejected": 0,
+   "rows_returned": 22
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2360|2022-10": {
+  "added": 20,
+  "attempts": 1,
+  "expected_missing": 20,
+  "last_request": {
+   "rows_accepted": 20,
+   "rows_added": 20,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2368|2022-09": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 7,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 14
+  },
+  "no_data_sessions": [
+   "2022-09-07",
+   "2022-09-08",
+   "2022-09-12",
+   "2022-09-13",
+   "2022-09-14",
+   "2022-09-15",
+   "2022-09-16"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 7,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "2376|2026-01": {
+  "added": 21,
+  "attempts": 1,
+  "expected_missing": 21,
+  "last_request": {
+   "rows_accepted": 21,
+   "rows_added": 21,
+   "rows_rejected": 0,
+   "rows_returned": 21
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2379|2019-08": {
+  "added": 21,
+  "attempts": 1,
+  "expected_missing": 21,
+  "last_request": {
+   "rows_accepted": 21,
+   "rows_added": 21,
+   "rows_rejected": 0,
+   "rows_returned": 21
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2379|2021-09": {
+  "added": 20,
+  "attempts": 1,
+  "expected_missing": 20,
+  "last_request": {
+   "rows_accepted": 20,
+   "rows_added": 20,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2379|2022-09": {
+  "added": 21,
+  "attempts": 1,
+  "expected_missing": 21,
+  "last_request": {
+   "rows_accepted": 21,
+   "rows_added": 21,
+   "rows_rejected": 0,
+   "rows_returned": 21
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2382|2017-03": {
+  "added": 23,
+  "attempts": 1,
+  "expected_missing": 23,
+  "last_request": {
+   "rows_accepted": 23,
+   "rows_added": 23,
+   "rows_rejected": 0,
+   "rows_returned": 23
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2382|2017-04": {
+  "added": 18,
+  "attempts": 1,
+  "expected_missing": 18,
+  "last_request": {
+   "rows_accepted": 18,
+   "rows_added": 18,
+   "rows_rejected": 0,
+   "rows_returned": 18
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2382|2017-05": {
+  "added": 20,
+  "attempts": 1,
+  "expected_missing": 20,
+  "last_request": {
+   "rows_accepted": 20,
+   "rows_added": 20,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2382|2017-06": {
+  "added": 23,
+  "attempts": 1,
+  "expected_missing": 23,
+  "last_request": {
+   "rows_accepted": 23,
+   "rows_added": 23,
+   "rows_rejected": 0,
+   "rows_returned": 23
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2382|2017-07": {
+  "added": 21,
+  "attempts": 1,
+  "expected_missing": 21,
+  "last_request": {
+   "rows_accepted": 21,
+   "rows_added": 21,
+   "rows_rejected": 0,
+   "rows_returned": 21
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2382|2017-08": {
+  "added": 23,
+  "attempts": 1,
+  "expected_missing": 23,
+  "last_request": {
+   "rows_accepted": 23,
+   "rows_added": 23,
+   "rows_rejected": 0,
+   "rows_returned": 23
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2382|2017-09": {
+  "added": 22,
+  "attempts": 1,
+  "expected_missing": 22,
+  "last_request": {
+   "rows_accepted": 22,
+   "rows_added": 22,
+   "rows_rejected": 0,
+   "rows_returned": 22
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2382|2017-10": {
+  "added": 19,
+  "attempts": 1,
+  "expected_missing": 19,
+  "last_request": {
+   "rows_accepted": 19,
+   "rows_added": 19,
+   "rows_rejected": 0,
+   "rows_returned": 19
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2382|2017-11": {
+  "added": 22,
+  "attempts": 1,
+  "expected_missing": 22,
+  "last_request": {
+   "rows_accepted": 22,
+   "rows_added": 22,
+   "rows_rejected": 0,
+   "rows_returned": 22
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2382|2017-12": {
+  "added": 21,
+  "attempts": 1,
+  "expected_missing": 21,
+  "last_request": {
+   "rows_accepted": 21,
+   "rows_added": 21,
+   "rows_rejected": 0,
+   "rows_returned": 21
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2382|2023-01": {
+  "added": 13,
+  "attempts": 1,
+  "expected_missing": 13,
+  "last_request": {
+   "rows_accepted": 13,
+   "rows_added": 13,
+   "rows_rejected": 0,
+   "rows_returned": 13
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2382|2025-03": {
+  "added": 21,
+  "attempts": 1,
+  "expected_missing": 21,
+  "last_request": {
+   "rows_accepted": 21,
+   "rows_added": 21,
+   "rows_rejected": 0,
+   "rows_returned": 21
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2385|2025-10": {
+  "added": 20,
+  "attempts": 1,
+  "expected_missing": 20,
+  "last_request": {
+   "rows_accepted": 20,
+   "rows_added": 20,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2408|2025-10": {
+  "added": 20,
+  "attempts": 1,
+  "expected_missing": 20,
+  "last_request": {
+   "rows_accepted": 20,
+   "rows_added": 20,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2409|2022-09": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 2,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 19
+  },
+  "no_data_sessions": [
+   "2022-09-29",
+   "2022-09-30"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 2,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "2409|2022-10": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 5,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 15
+  },
+  "no_data_sessions": [
+   "2022-10-03",
+   "2022-10-04",
+   "2022-10-05",
+   "2022-10-06",
+   "2022-10-07"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 5,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "2409|2025-01": {
+  "added": 15,
+  "attempts": 1,
+  "expected_missing": 15,
+  "last_request": {
+   "rows_accepted": 15,
+   "rows_added": 15,
+   "rows_rejected": 0,
+   "rows_returned": 15
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2409|2025-04": {
+  "added": 20,
+  "attempts": 1,
+  "expected_missing": 20,
+  "last_request": {
+   "rows_accepted": 20,
+   "rows_added": 20,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2412|2019-08": {
+  "added": 21,
+  "attempts": 1,
+  "expected_missing": 21,
+  "last_request": {
+   "rows_accepted": 21,
+   "rows_added": 21,
+   "rows_rejected": 0,
+   "rows_returned": 21
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2412|2020-10": {
+  "added": 19,
+  "attempts": 1,
+  "expected_missing": 19,
+  "last_request": {
+   "rows_accepted": 19,
+   "rows_added": 19,
+   "rows_rejected": 0,
+   "rows_returned": 19
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2449|2024-04": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 1,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 19
+  },
+  "no_data_sessions": [
+   "2024-04-26"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 1,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "2454|2016-05": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 1,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "no_data_sessions": [
+   "2016-05-13"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 1,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "2454|2022-02": {
+  "added": 15,
+  "attempts": 1,
+  "expected_missing": 15,
+  "last_request": {
+   "rows_accepted": 15,
+   "rows_added": 15,
+   "rows_rejected": 0,
+   "rows_returned": 15
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2458|2018-10": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 7,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 15
+  },
+  "no_data_sessions": [
+   "2018-10-11",
+   "2018-10-12",
+   "2018-10-15",
+   "2018-10-16",
+   "2018-10-17",
+   "2018-10-18",
+   "2018-10-19"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 7,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "2548|2021-12": {
+  "added": 22,
+  "attempts": 1,
+  "expected_missing": 22,
+  "last_request": {
+   "rows_accepted": 22,
+   "rows_added": 22,
+   "rows_rejected": 0,
+   "rows_returned": 22
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2603|2022-09": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 7,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 14
+  },
+  "no_data_sessions": [
+   "2022-09-07",
+   "2022-09-08",
+   "2022-09-12",
+   "2022-09-13",
+   "2022-09-14",
+   "2022-09-15",
+   "2022-09-16"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 7,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "2609|2017-04": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 7,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 11
+  },
+  "no_data_sessions": [
+   "2017-04-20",
+   "2017-04-21",
+   "2017-04-24",
+   "2017-04-25",
+   "2017-04-26",
+   "2017-04-27",
+   "2017-04-28"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 7,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "2609|2017-05": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 2,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 18
+  },
+  "no_data_sessions": [
+   "2017-05-02",
+   "2017-05-03"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 2,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "2609|2018-09": {
+  "added": 19,
+  "attempts": 1,
+  "expected_missing": 19,
+  "last_request": {
+   "rows_accepted": 19,
+   "rows_added": 19,
+   "rows_rejected": 0,
+   "rows_returned": 19
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2609|2021-10": {
+  "added": 20,
+  "attempts": 1,
+  "expected_missing": 20,
+  "last_request": {
+   "rows_accepted": 20,
+   "rows_added": 20,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2610|2024-09": {
+  "added": 20,
+  "attempts": 1,
+  "expected_missing": 20,
+  "last_request": {
+   "rows_accepted": 20,
+   "rows_added": 20,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2610|2025-08": {
+  "added": 21,
+  "attempts": 1,
+  "expected_missing": 21,
+  "last_request": {
+   "rows_accepted": 21,
+   "rows_added": 21,
+   "rows_rejected": 0,
+   "rows_returned": 21
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2610|2026-02": {
+  "added": 12,
+  "attempts": 1,
+  "expected_missing": 12,
+  "last_request": {
+   "rows_accepted": 12,
+   "rows_added": 12,
+   "rows_rejected": 0,
+   "rows_returned": 12
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2615|2021-08": {
+  "added": 22,
+  "attempts": 1,
+  "expected_missing": 22,
+  "last_request": {
+   "rows_accepted": 22,
+   "rows_added": 22,
+   "rows_rejected": 0,
+   "rows_returned": 22
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2880|2019-12": {
+  "added": 22,
+  "attempts": 1,
+  "expected_missing": 22,
+  "last_request": {
+   "rows_accepted": 22,
+   "rows_added": 22,
+   "rows_rejected": 0,
+   "rows_returned": 22
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2880|2020-08": {
+  "added": 21,
+  "attempts": 1,
+  "expected_missing": 21,
+  "last_request": {
+   "rows_accepted": 21,
+   "rows_added": 21,
+   "rows_rejected": 0,
+   "rows_returned": 21
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2881|2024-03": {
+  "added": 21,
+  "attempts": 1,
+  "expected_missing": 21,
+  "last_request": {
+   "rows_accepted": 21,
+   "rows_added": 21,
+   "rows_rejected": 0,
+   "rows_returned": 21
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2882|2024-07": {
+  "added": 21,
+  "attempts": 1,
+  "expected_missing": 21,
+  "last_request": {
+   "rows_accepted": 21,
+   "rows_added": 21,
+   "rows_rejected": 0,
+   "rows_returned": 21
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2883|2026-06": {
+  "added": 21,
+  "attempts": 1,
+  "expected_missing": 21,
+  "last_request": {
+   "rows_accepted": 21,
+   "rows_added": 21,
+   "rows_rejected": 0,
+   "rows_returned": 21
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2884|2018-09": {
+  "added": 19,
+  "attempts": 1,
+  "expected_missing": 19,
+  "last_request": {
+   "rows_accepted": 19,
+   "rows_added": 19,
+   "rows_rejected": 0,
+   "rows_returned": 19
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2884|2019-06": {
+  "added": 19,
+  "attempts": 1,
+  "expected_missing": 19,
+  "last_request": {
+   "rows_accepted": 19,
+   "rows_added": 19,
+   "rows_rejected": 0,
+   "rows_returned": 19
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2884|2025-11": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 1,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 19
+  },
+  "no_data_sessions": [
+   "2025-11-05"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 1,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "2886|2025-01": {
+  "added": 15,
+  "attempts": 1,
+  "expected_missing": 15,
+  "last_request": {
+   "rows_accepted": 15,
+   "rows_added": 15,
+   "rows_rejected": 0,
+   "rows_returned": 15
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2887|2024-08": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 1,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 21
+  },
+  "no_data_sessions": [
+   "2024-08-22"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 1,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "2903|2020-07": {
+  "added": 23,
+  "attempts": 1,
+  "expected_missing": 23,
+  "last_request": {
+   "rows_accepted": 23,
+   "rows_added": 23,
+   "rows_rejected": 0,
+   "rows_returned": 23
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2912|2017-07": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 1,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "no_data_sessions": [
+   "2017-07-27"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 1,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "2912|2023-05": {
+  "added": 22,
+  "attempts": 1,
+  "expected_missing": 22,
+  "last_request": {
+   "rows_accepted": 22,
+   "rows_added": 22,
+   "rows_rejected": 0,
+   "rows_returned": 22
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "2915|2018-10": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 7,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 15
+  },
+  "no_data_sessions": [
+   "2018-10-18",
+   "2018-10-19",
+   "2018-10-22",
+   "2018-10-23",
+   "2018-10-24",
+   "2018-10-25",
+   "2018-10-26"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 7,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "3008|2020-04": {
+  "added": 20,
+  "attempts": 1,
+  "expected_missing": 20,
+  "last_request": {
+   "rows_accepted": 20,
+   "rows_added": 20,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "3034|2019-05": {
+  "added": 22,
+  "attempts": 1,
+  "expected_missing": 22,
+  "last_request": {
+   "rows_accepted": 22,
+   "rows_added": 22,
+   "rows_rejected": 0,
+   "rows_returned": 22
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "3034|2025-04": {
+  "added": 20,
+  "attempts": 1,
+  "expected_missing": 20,
+  "last_request": {
+   "rows_accepted": 20,
+   "rows_added": 20,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "3037|2017-02": {
+  "added": 18,
+  "attempts": 1,
+  "expected_missing": 18,
+  "last_request": {
+   "rows_accepted": 18,
+   "rows_added": 18,
+   "rows_rejected": 0,
+   "rows_returned": 18
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "3037|2017-03": {
+  "added": 23,
+  "attempts": 1,
+  "expected_missing": 23,
+  "last_request": {
+   "rows_accepted": 23,
+   "rows_added": 23,
+   "rows_rejected": 0,
+   "rows_returned": 23
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "3037|2017-04": {
+  "added": 18,
+  "attempts": 1,
+  "expected_missing": 18,
+  "last_request": {
+   "rows_accepted": 18,
+   "rows_added": 18,
+   "rows_rejected": 0,
+   "rows_returned": 18
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "3037|2017-05": {
+  "added": 20,
+  "attempts": 1,
+  "expected_missing": 20,
+  "last_request": {
+   "rows_accepted": 20,
+   "rows_added": 20,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "3037|2017-06": {
+  "added": 23,
+  "attempts": 1,
+  "expected_missing": 23,
+  "last_request": {
+   "rows_accepted": 23,
+   "rows_added": 23,
+   "rows_rejected": 0,
+   "rows_returned": 23
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "3037|2017-07": {
+  "added": 21,
+  "attempts": 1,
+  "expected_missing": 21,
+  "last_request": {
+   "rows_accepted": 21,
+   "rows_added": 21,
+   "rows_rejected": 0,
+   "rows_returned": 21
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "3037|2017-08": {
+  "added": 23,
+  "attempts": 1,
+  "expected_missing": 23,
+  "last_request": {
+   "rows_accepted": 23,
+   "rows_added": 23,
+   "rows_rejected": 0,
+   "rows_returned": 23
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "3037|2017-09": {
+  "added": 22,
+  "attempts": 1,
+  "expected_missing": 22,
+  "last_request": {
+   "rows_accepted": 22,
+   "rows_added": 22,
+   "rows_rejected": 0,
+   "rows_returned": 22
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "3037|2017-10": {
+  "added": 19,
+  "attempts": 1,
+  "expected_missing": 19,
+  "last_request": {
+   "rows_accepted": 19,
+   "rows_added": 19,
+   "rows_rejected": 0,
+   "rows_returned": 19
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "3037|2017-11": {
+  "added": 22,
+  "attempts": 1,
+  "expected_missing": 22,
+  "last_request": {
+   "rows_accepted": 22,
+   "rows_added": 22,
+   "rows_rejected": 0,
+   "rows_returned": 22
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "3037|2017-12": {
+  "added": 21,
+  "attempts": 1,
+  "expected_missing": 21,
+  "last_request": {
+   "rows_accepted": 21,
+   "rows_added": 21,
+   "rows_rejected": 0,
+   "rows_returned": 21
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "3037|2020-05": {
+  "added": 20,
+  "attempts": 1,
+  "expected_missing": 20,
+  "last_request": {
+   "rows_accepted": 20,
+   "rows_added": 20,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "3037|2022-02": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 1,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 14
+  },
+  "no_data_sessions": [
+   "2022-02-22"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 1,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "3037|2024-09": {
+  "added": 20,
+  "attempts": 1,
+  "expected_missing": 20,
+  "last_request": {
+   "rows_accepted": 20,
+   "rows_added": 20,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "3037|2025-08": {
+  "added": 21,
+  "attempts": 1,
+  "expected_missing": 21,
+  "last_request": {
+   "rows_accepted": 21,
+   "rows_added": 21,
+   "rows_rejected": 0,
+   "rows_returned": 21
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "3045|2017-08": {
+  "added": 23,
+  "attempts": 1,
+  "expected_missing": 23,
+  "last_request": {
+   "rows_accepted": 23,
+   "rows_added": 23,
+   "rows_rejected": 0,
+   "rows_returned": 23
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "3045|2017-09": {
+  "added": 22,
+  "attempts": 1,
+  "expected_missing": 22,
+  "last_request": {
+   "rows_accepted": 22,
+   "rows_added": 22,
+   "rows_rejected": 0,
+   "rows_returned": 22
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "3045|2017-11": {
+  "added": 22,
+  "attempts": 1,
+  "expected_missing": 22,
+  "last_request": {
+   "rows_accepted": 22,
+   "rows_added": 22,
+   "rows_rejected": 0,
+   "rows_returned": 22
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "3045|2017-12": {
+  "added": 21,
+  "attempts": 1,
+  "expected_missing": 21,
+  "last_request": {
+   "rows_accepted": 21,
+   "rows_added": 21,
+   "rows_rejected": 0,
+   "rows_returned": 21
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "3045|2019-07": {
+  "added": 23,
+  "attempts": 1,
+  "expected_missing": 23,
+  "last_request": {
+   "rows_accepted": 23,
+   "rows_added": 23,
+   "rows_rejected": 0,
+   "rows_returned": 23
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "3045|2020-05": {
+  "added": 20,
+  "attempts": 1,
+  "expected_missing": 20,
+  "last_request": {
+   "rows_accepted": 20,
+   "rows_added": 20,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "3045|2021-07": {
+  "added": 22,
+  "attempts": 1,
+  "expected_missing": 22,
+  "last_request": {
+   "rows_accepted": 22,
+   "rows_added": 22,
+   "rows_rejected": 0,
+   "rows_returned": 22
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "3443|2023-11": {
+  "added": 22,
+  "attempts": 1,
+  "expected_missing": 22,
+  "last_request": {
+   "rows_accepted": 22,
+   "rows_added": 22,
+   "rows_rejected": 0,
+   "rows_returned": 22
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "3443|2024-02": {
+  "added": 13,
+  "attempts": 1,
+  "expected_missing": 13,
+  "last_request": {
+   "rows_accepted": 13,
+   "rows_added": 13,
+   "rows_rejected": 0,
+   "rows_returned": 13
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "3443|2026-04": {
+  "added": 20,
+  "attempts": 1,
+  "expected_missing": 20,
+  "last_request": {
+   "rows_accepted": 20,
+   "rows_added": 20,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "3661|2020-11": {
+  "added": 21,
+  "attempts": 1,
+  "expected_missing": 21,
+  "last_request": {
+   "rows_accepted": 21,
+   "rows_added": 21,
+   "rows_rejected": 0,
+   "rows_returned": 21
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "3711|2018-07": {
+  "added": 22,
+  "attempts": 1,
+  "expected_missing": 22,
+  "last_request": {
+   "rows_accepted": 22,
+   "rows_added": 22,
+   "rows_rejected": 0,
+   "rows_returned": 22
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "3711|2020-11": {
+  "added": 21,
+  "attempts": 1,
+  "expected_missing": 21,
+  "last_request": {
+   "rows_accepted": 21,
+   "rows_added": 21,
+   "rows_rejected": 0,
+   "rows_returned": 21
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "3711|2023-03": {
+  "added": 23,
+  "attempts": 1,
+  "expected_missing": 23,
+  "last_request": {
+   "rows_accepted": 23,
+   "rows_added": 23,
+   "rows_rejected": 0,
+   "rows_returned": 23
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "3711|2024-12": {
+  "added": 22,
+  "attempts": 1,
+  "expected_missing": 22,
+  "last_request": {
+   "rows_accepted": 22,
+   "rows_added": 22,
+   "rows_rejected": 0,
+   "rows_returned": 22
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "4904|2022-05": {
+  "added": 21,
+  "attempts": 1,
+  "expected_missing": 21,
+  "last_request": {
+   "rows_accepted": 21,
+   "rows_added": 21,
+   "rows_rejected": 0,
+   "rows_returned": 21
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "4938|2020-08": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 1,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "no_data_sessions": [
+   "2020-08-13"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 1,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "5880|2022-10": {
+  "added": 20,
+  "attempts": 1,
+  "expected_missing": 20,
+  "last_request": {
+   "rows_accepted": 20,
+   "rows_added": 20,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "5880|2025-11": {
+  "added": 20,
+  "attempts": 1,
+  "expected_missing": 20,
+  "last_request": {
+   "rows_accepted": 20,
+   "rows_added": 20,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "5880|2026-06": {
+  "added": 21,
+  "attempts": 1,
+  "expected_missing": 21,
+  "last_request": {
+   "rows_accepted": 21,
+   "rows_added": 21,
+   "rows_rejected": 0,
+   "rows_returned": 21
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "5903|2016-04": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 1,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 18
+  },
+  "no_data_sessions": [
+   "2016-04-27"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 1,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "5903|2016-10": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 2,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 18
+  },
+  "no_data_sessions": [
+   "2016-10-21",
+   "2016-10-24"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 2,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "5903|2016-12": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 2,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "no_data_sessions": [
+   "2016-12-26",
+   "2016-12-27"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 2,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "5903|2021-06": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 1,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "no_data_sessions": [
+   "2021-06-09"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 1,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "5903|2021-10": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 1,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 19
+  },
+  "no_data_sessions": [
+   "2021-10-27"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 1,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "5903|2022-10": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 1,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 19
+  },
+  "no_data_sessions": [
+   "2022-10-07"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 1,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "5903|2023-09": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 2,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 18
+  },
+  "no_data_sessions": [
+   "2023-09-15",
+   "2023-09-20"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 2,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "6414|2016-10": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 1,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 19
+  },
+  "no_data_sessions": [
+   "2016-10-12"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 1,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "6414|2018-03": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 1,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 22
+  },
+  "no_data_sessions": [
+   "2018-03-30"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 1,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "6770|2022-10": {
+  "added": 20,
+  "attempts": 1,
+  "expected_missing": 20,
+  "last_request": {
+   "rows_accepted": 20,
+   "rows_added": 20,
+   "rows_rejected": 0,
+   "rows_returned": 20
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "9904|2020-07": {
+  "added": 23,
+  "attempts": 1,
+  "expected_missing": 23,
+  "last_request": {
+   "rows_accepted": 23,
+   "rows_added": 23,
+   "rows_rejected": 0,
+   "rows_returned": 23
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "9910|2019-09": {
+  "added": 19,
+  "attempts": 1,
+  "expected_missing": 19,
+  "last_request": {
+   "rows_accepted": 19,
+   "rows_added": 19,
+   "rows_rejected": 0,
+   "rows_returned": 19
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "9910|2025-09": {
+  "added": 21,
+  "attempts": 1,
+  "expected_missing": 21,
+  "last_request": {
+   "rows_accepted": 21,
+   "rows_added": 21,
+   "rows_rejected": 0,
+   "rows_returned": 21
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "9914|2022-02": {
+  "added": 15,
+  "attempts": 1,
+  "expected_missing": 15,
+  "last_request": {
+   "rows_accepted": 15,
+   "rows_added": 15,
+   "rows_rejected": 0,
+   "rows_returned": 15
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "9921|2023-05": {
+  "added": 22,
+  "attempts": 1,
+  "expected_missing": 22,
+  "last_request": {
+   "rows_accepted": 22,
+   "rows_added": 22,
+   "rows_rejected": 0,
+   "rows_returned": 22
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "9933|2022-04": {
+  "added": 19,
+  "attempts": 1,
+  "expected_missing": 19,
+  "last_request": {
+   "rows_accepted": 19,
+   "rows_added": 19,
+   "rows_rejected": 0,
+   "rows_returned": 19
+  },
+  "registry_confirmed_no_trade": [],
+  "remaining": 0,
+  "state": "FETCH_OK"
+ },
+ "9933|2025-05": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 1,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 19
+  },
+  "no_data_sessions": [
+   "2025-05-13"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 1,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "9945|2018-09": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 2,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 17
+  },
+  "no_data_sessions": [
+   "2018-09-27",
+   "2018-09-28"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 2,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "9945|2018-10": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 5,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 17
+  },
+  "no_data_sessions": [
+   "2018-10-01",
+   "2018-10-02",
+   "2018-10-03",
+   "2018-10-04",
+   "2018-10-05"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 5,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ },
+ "9945|2023-09": {
+  "added": 0,
+  "attempts": 1,
+  "expected_missing": 7,
+  "last_request": {
+   "rows_accepted": 0,
+   "rows_added": 0,
+   "rows_rejected": 0,
+   "rows_returned": 13
+  },
+  "no_data_sessions": [
+   "2023-09-14",
+   "2023-09-15",
+   "2023-09-18",
+   "2023-09-19",
+   "2023-09-20",
+   "2023-09-21",
+   "2023-09-22"
+  ],
+  "registry_confirmed_no_trade": [],
+  "remaining": 7,
+  "state": "MARKET_OPEN_SYMBOL_NO_DATA",
+  "suspension_status": "SUSPENSION_STATUS_UNKNOWN"
+ }
+}
