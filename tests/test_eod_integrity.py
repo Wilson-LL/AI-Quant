@@ -493,6 +493,15 @@ class TestConfirmedNoTradeRegistry(unittest.TestCase):
         self.assertEqual(before, after)                                   # byte-identical file
         self.assertNotIn(str(self.day)[:10].encode(), after)
 
+    def test_nt8_confirmed_no_trade_is_not_a_downloadable_request(self):
+        d = pd.read_csv(os.path.join(self.tmp, "S.csv"))["date"]
+        a = E.audit_symbol("S", d, CAL, CAL.max(), REQ)
+        plan = E.backfill_plan([a], CAL, CAL.max(), REQ)
+        self.assertEqual(len(plan), 1)                                    # without the registry
+        conf = E.load_no_trade_registry(self.registry())
+        plan = E.backfill_plan([a], CAL, CAL.max(), REQ, confirmed=conf)
+        self.assertEqual(len(plan), 0)                                    # no longer downloadable
+
     def test_repo_registry_has_2207_with_evidence(self):
         reg = E.load_no_trade_registry(E.NO_TRADE_REGISTRY_DEFAULT)
         self.assertIn(("2207", "2025-12-18"), reg)

@@ -385,7 +385,12 @@ def model_eligible(symbols):
 
 # ------------------------------------------------------------ backfill plan
 
-def backfill_plan(audits, calendar, newest, req):
+def backfill_plan(audits, calendar, newest, req, confirmed=None):
+    """Downloadable repair requests. Registry-confirmed no-trade sessions
+    (`confirmed`, {(symbol, date)}) are NOT downloadable defects: a request
+    month whose missing sessions are all confirmed is omitted (the sessions
+    stay missing and keep breaking contiguity)."""
+    confirmed = confirmed or set()
     cal = pd.DatetimeIndex(calendar)
     cal = cal[cal <= pd.Timestamp(newest)]
     a_start = cal[-req["REQUIRED_INFERENCE_CONTIGUOUS_SESSIONS"]]
@@ -400,7 +405,10 @@ def backfill_plan(audits, calendar, newest, req):
             for m in months:
                 ms = max(s, m.start_time)
                 me = min(e, m.end_time.normalize())
-                n_exp = int(((cal >= ms) & (cal <= me)).sum())
+                miss = cal[(cal >= ms) & (cal <= me)]
+                n_exp = int(len(miss))
+                if n_exp and all((a["symbol"], str(d)[:10]) in confirmed for d in miss):
+                    continue
                 rows.append({"symbol": a["symbol"], "missing_start": g["start"], "missing_end": g["end"],
                              "interval_sessions": g["sessions"], "fetch_month": str(m),
                              "expected_sessions_in_request": n_exp, "priority": prio,
@@ -507,7 +515,8 @@ def run_audit(cache_dir, out_dir, state_path=None, registry_path=None):
     audits = [audit_symbol(s, raw[s], calendar, newest, req, exc) for s in cached]
     inv = pd.DataFrame([{k: v for k, v in a.items() if not k.startswith("_")} for a in audits])
     inv["model_eligible"] = inv["symbol"].isin(eligible)
-    plan = backfill_plan([a for a in audits if a["symbol"] in eligible], calendar, newest, req)
+    plan = backfill_plan([a for a in audits if a["symbol"] in eligible], calendar, newest, req,
+                         confirmed=load_no_trade_registry(registry_path))
     os.makedirs(out_dir, exist_ok=True)
     inv.to_csv(os.path.join(out_dir, "eod_cache_gap_inventory.csv"), index=False)
     plan.to_csv(os.path.join(out_dir, "eod_backfill_plan.csv"), index=False)
