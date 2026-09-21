@@ -46,14 +46,55 @@ EXEC_LAG, HORIZON = 1, 20    # production target: fwd_20 from close[t+1]
 RECENT_TRAINING_SESSIONS = 504   # "recent training data" for backfill priority P1 (~2 years)
 
 # fetch/repair states (refresh_data gap repair)
-FETCH_OK = "FETCH_OK"
-EMPTY_RESPONSE_SUSPECT = "EMPTY_RESPONSE_SUSPECT"
+FETCH_OK = "FETCH_OK"                                  # all wanted sessions now present (COMPLETE)
+EMPTY_RESPONSE_SUSPECT = "EMPTY_RESPONSE_SUSPECT"      # empty payload: never "no trading"
 NETWORK_ERROR = "NETWORK_ERROR"
 RATE_LIMIT_SUSPECT = "RATE_LIMIT_SUSPECT"
-CONFIRMED_NO_DATA = "CONFIRMED_NO_DATA"
-UNRESOLVED = "UNRESOLVED"
+INVALID_PAYLOAD_SUSPECT = "INVALID_PAYLOAD_SUSPECT"    # rows returned but failed validation
+UNRESOLVED = "UNRESOLVED"                              # retry budget exhausted
+# symbol-specific no-trade semantics: MARKET OPEN does not imply EVERY STOCK HAS A ROW
+MARKET_OPEN_SYMBOL_NO_DATA = "MARKET_OPEN_SYMBOL_NO_DATA"  # source served the month, not these days
+CONFIRMED_SYMBOL_NO_TRADE = "CONFIRMED_SYMBOL_NO_TRADE"    # explicit registry entry (e.g. suspension)
+SUSPENSION_STATUS_UNKNOWN = "SUSPENSION_STATUS_UNKNOWN"
 FETCH_STATES = (FETCH_OK, EMPTY_RESPONSE_SUSPECT, NETWORK_ERROR, RATE_LIMIT_SUSPECT,
-                CONFIRMED_NO_DATA, UNRESOLVED)
+                INVALID_PAYLOAD_SUSPECT, UNRESOLVED, MARKET_OPEN_SYMBOL_NO_DATA,
+                CONFIRMED_SYMBOL_NO_TRADE)
+RETRYABLE_STATES = (EMPTY_RESPONSE_SUSPECT, NETWORK_ERROR, RATE_LIMIT_SUSPECT, INVALID_PAYLOAD_SUSPECT)
+COMPLETE_STATES = (FETCH_OK,)
+RESOLVED_EXCEPTION_STATES = (CONFIRMED_SYMBOL_NO_TRADE,)
+UNRESOLVED_EXCEPTION_STATES = (MARKET_OPEN_SYMBOL_NO_DATA, UNRESOLVED)
+NO_TRADE_REGISTRY_DEFAULT = os.path.join(ROOT, "reports", "data_integrity", "symbol_no_trade_registry.csv")
+
+
+def load_no_trade_registry(path=None):
+    """Explicit, curated symbol-specific no-trade sessions {(symbol, 'YYYY-MM-DD')}.
+    Only entries with status CONFIRMED_SYMBOL_NO_TRADE and a non-empty source
+    count. Such sessions are never fetched or filled, but they still break
+    model contiguity (the gap guard treats every missing expected session as
+    a break unless a model/data convention explicitly supports it)."""
+    path = path or NO_TRADE_REGISTRY_DEFAULT
+    if not os.path.isfile(path):
+        return set()
+    r = pd.read_csv(path, dtype=str).fillna("")
+    r = r[(r["status"] == CONFIRMED_SYMBOL_NO_TRADE) & (r["source"].str.strip() != "")]
+    return set(zip(r["symbol"], r["date"]))
+
+
+def missing_exceptions(state_path=None, registry_path=None):
+    """{(symbol, date): category} for missing sessions with a known status:
+    CONFIRMED_SYMBOL_NO_TRADE (registry), MARKET_OPEN_SYMBOL_NO_DATA /
+    UNRESOLVED (repair state)."""
+    out = {k: CONFIRMED_SYMBOL_NO_TRADE for k in load_no_trade_registry(registry_path)}
+    if state_path and os.path.isfile(state_path):
+        with open(state_path, encoding="utf-8") as f:
+            st = json.load(f)
+        for key, v in st.items():
+            sym = key.split("|")[0]
+            for d in v.get("no_data_sessions", []):
+                out.setdefault((sym, d), MARKET_OPEN_SYMBOL_NO_DATA)
+            if v.get("state") == UNRESOLVED:
+                out.setdefault((sym, key.split("|")[1]), UNRESOLVED)   # month-level
+    return out
 
 # sample / symbol integrity statuses
 WINDOW_CROSSES_DATA_GAP = "WINDOW_CROSSES_DATA_GAP"
@@ -170,7 +211,7 @@ def contiguous_forward(gap, span):
 
 # ------------------------------------------------------------ per-symbol audit
 
-def audit_symbol(sym, raw_dates, calendar, newest, req):
+def audit_symbol(sym, raw_dates, calendar, newest, req, exceptions=None):
     raw = pd.DatetimeIndex(raw_dates)
     dup = int(raw.duplicated().sum())
     nonmono = int((np.diff(raw.values.astype("int64")) < 0).sum()) if len(raw) > 1 else 0
@@ -180,6 +221,12 @@ def audit_symbol(sym, raw_dates, calendar, newest, req):
     exp = cal[(cal >= first) & (cal <= last)]
     present = exp.intersection(d)
     missing = exp.difference(d)
+    exceptions = exceptions or {}
+    cat = []
+    for m in missing:
+        ds = str(m)[:10]
+        c = exceptions.get((sym, ds)) or (UNRESOLVED if exceptions.get((sym, ds[:7])) == UNRESOLVED else None)
+        cat.append(c or "MISSING_UNREPAIRED")
     extra = d.difference(cal)
     # gap intervals (maximal runs of consecutive missing expected sessions)
     pos = pd.Series(np.arange(len(cal)), index=cal)
@@ -233,6 +280,10 @@ def audit_symbol(sym, raw_dates, calendar, newest, req):
         "LEVEL_B_training_samples_feature_window_cross": feat_cross,
         "LEVEL_B_training_samples_label_window_cross": lab_cross,
         "LEVEL_C_history": "COMPLETE" if len(missing) == 0 else "INCOMPLETE",
+        "missing_unrepaired": int(cat.count("MISSING_UNREPAIRED")),
+        "missing_market_open_symbol_no_data": int(cat.count(MARKET_OPEN_SYMBOL_NO_DATA)),
+        "missing_confirmed_symbol_no_trade": int(cat.count(CONFIRMED_SYMBOL_NO_TRADE)),
+        "missing_unresolved_after_retries": int(cat.count(UNRESOLVED)),
         "listing_boundary": UNKNOWN_LISTING_BOUNDARY,
         "_intervals": iv,
     }
@@ -286,7 +337,75 @@ def cache_hash(cache_dir, symbols):
     return h.hexdigest()
 
 
-def run_audit(cache_dir, out_dir):
+def file_hashes(cache_dir):
+    out = {}
+    for f in sorted(os.listdir(cache_dir)):
+        if f.endswith(".csv"):
+            with open(os.path.join(cache_dir, f), "rb") as fh:
+                b = fh.read()
+            out[f] = {"sha256": hashlib.sha256(b).hexdigest(), "bytes": len(b)}
+    return out
+
+
+def snapshot_cache(cache_dir, dest):
+    """Byte-exact copy of every cache CSV into `dest` (must not exist), verified
+    file by file. Returns the snapshot manifest. Reads the cache only."""
+    import shutil
+    if os.path.exists(dest):
+        raise FileExistsError(f"{dest} exists; snapshots are immutable")
+    before = file_hashes(cache_dir)
+    os.makedirs(dest)
+    for f in before:
+        shutil.copy2(os.path.join(cache_dir, f), os.path.join(dest, f))
+    after_src, copy = file_hashes(cache_dir), file_hashes(dest)
+    if not (before == after_src == copy):
+        raise RuntimeError("snapshot verification failed (cache changed during copy or copy differs)")
+    syms = [f[:-4] for f in before]
+    return {"snapshot_dir": os.path.abspath(dest), "source_dir": os.path.abspath(cache_dir),
+            "file_count": len(before), "total_bytes": int(sum(v["bytes"] for v in before.values())),
+            "aggregate_sha256": cache_hash(cache_dir, syms), "per_file": before, "verified": True}
+
+
+def verify_against_snapshot(snapshot_dir, cache_dir, calendar=None):
+    """Prove that every pre-repair line survives byte-identical and in order,
+    and classify every added line. Returns (per-symbol rows, totals)."""
+    cal = set(pd.DatetimeIndex(calendar).strftime("%Y-%m-%d")) if calendar is not None else None
+    rows = []
+    for f in sorted(x for x in os.listdir(snapshot_dir) if x.endswith(".csv")):
+        old = open(os.path.join(snapshot_dir, f), "rb").read()
+        new_p = os.path.join(cache_dir, f)
+        if not os.path.isfile(new_p):
+            rows.append({"symbol": f[:-4], "file_missing": True})
+            continue
+        new = open(new_p, "rb").read()
+        eol = b"\r\n" if b"\r\n" in old else b"\n"
+        ol = [x for x in old.split(eol) if x]
+        nl = [x for x in new.split(eol) if x]
+        j, kept, added = 0, 0, []
+        for line in nl:                                  # ordered subsequence match
+            if j < len(ol) and line == ol[j]:
+                j += 1
+                kept += 1
+            else:
+                added.append(line)
+        modified = len(ol) - kept                        # old lines not found in order
+        adates = [a.split(b",", 1)[0].decode() for a in added if a != ol[0]]
+        old_dates = {x.split(b",", 1)[0].decode() for x in ol[1:]}
+        unexplained = [d for d in adates if d in old_dates or (cal is not None and d not in cal)]
+        rows.append({"symbol": f[:-4], "old_lines": len(ol), "new_lines": len(nl),
+                     "existing_rows_modified_or_removed": int(modified), "rows_added": len(adates),
+                     "unexplained_added_dates": ";".join(unexplained),
+                     "byte_identical": old == new})
+    df = pd.DataFrame(rows)
+    tot = {"files": int(len(df)),
+           "files_changed": int((~df["byte_identical"]).sum()) if len(df) else 0,
+           "existing_rows_modified_or_removed": int(df["existing_rows_modified_or_removed"].sum()) if len(df) else 0,
+           "rows_added": int(df["rows_added"].sum()) if len(df) else 0,
+           "unexplained_added_dates": int((df["unexplained_added_dates"] != "").sum()) if len(df) else 0}
+    return df, tot
+
+
+def run_audit(cache_dir, out_dir, state_path=None, registry_path=None):
     from data import SECTOR_MAP
     configured = sorted(SECTOR_MAP)
     raw = read_cache_dates(cache_dir)
@@ -295,7 +414,8 @@ def run_audit(cache_dir, out_dir):
     calendar = derive_calendar({s: raw[s] for s in eligible})
     newest = calendar.max()
     req = required_windows()
-    audits = [audit_symbol(s, raw[s], calendar, newest, req) for s in cached]
+    exc = missing_exceptions(state_path, registry_path)
+    audits = [audit_symbol(s, raw[s], calendar, newest, req, exc) for s in cached]
     inv = pd.DataFrame([{k: v for k, v in a.items() if not k.startswith("_")} for a in audits])
     inv["model_eligible"] = inv["symbol"].isin(eligible)
     plan = backfill_plan([a for a in audits if a["symbol"] in eligible], calendar, newest, req)
@@ -332,6 +452,9 @@ def run_audit(cache_dir, out_dir):
         "backfill_requests_by_priority": plan["priority"].value_counts().to_dict() if len(plan) else {},
         "backfill_completion_state": "NOT_STARTED",
         "unresolved_symbols": sorted(el.loc[el["missing_sessions"] > 0, "symbol"].tolist()),
+        "missing_by_status": {k: int(el[k].sum()) for k in ("missing_unrepaired",
+                              "missing_market_open_symbol_no_data", "missing_confirmed_symbol_no_trade",
+                              "missing_unresolved_after_retries")},
         "cache_sha256": cache_hash(cache_dir, cached),
     }
     with open(os.path.join(out_dir, "eod_data_manifest.json"), "w", encoding="utf-8") as f:
@@ -344,6 +467,8 @@ if __name__ == "__main__":
     ap.add_argument("cmd", choices=["audit"])
     ap.add_argument("--cache-dir", default=os.path.join(ROOT, "research", "data_cache"))
     ap.add_argument("--out", default=os.path.join(ROOT, "reports", "data_integrity"))
+    ap.add_argument("--repair-state", default=None)
+    ap.add_argument("--registry", default=None)
     a = ap.parse_args()
-    s, inv, plan, cal = run_audit(a.cache_dir, a.out)
+    s, inv, plan, cal = run_audit(a.cache_dir, a.out, a.repair_state, a.registry)
     print(json.dumps({k: v for k, v in s.items() if k not in ("unresolved_symbols",)}, indent=1, default=str))

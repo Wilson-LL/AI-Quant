@@ -24,6 +24,7 @@ import os
 import sys
 import time
 
+import numpy as np
 import pandas as pd
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -113,9 +114,9 @@ def refresh_stock(sid, today, full_fields=False, dry_run=False, throttle_s=1.5, 
     add = add[add["date"] > last]
     if add.empty:
         return 0, suspect_months
-    out = (pd.concat([df, add], ignore_index=True)
-             .sort_values("date").drop_duplicates("date", keep="last"))
-    out.to_csv(cache_path(sid), index=False)
+    # Append only the new tail rows, keeping every existing line of the file
+    # byte-identical (no full rewrite of the history).
+    n_new = merge_missing_rows(cache_path(sid), add, add["date"])
     if full_fields and full_rows:
         os.makedirs(FULL_DIR, exist_ok=True)
         fp = os.path.join(FULL_DIR, f"{sid}.csv")
@@ -124,8 +125,8 @@ def refresh_stock(sid, today, full_fields=False, dry_run=False, throttle_s=1.5, 
             fdf = (pd.concat([pd.read_csv(fp, parse_dates=["date"]), fdf])
                      .sort_values("date").drop_duplicates("date", keep="last"))
         fdf.to_csv(fp, index=False)
-    print(f"[{sid}] +{len(add)} rows (last now {out['date'].max().date()})")
-    return len(add), suspect_months
+    print(f"[{sid}] +{n_new} rows (last now {add['date'].max().date()})")
+    return n_new, suspect_months
 
 
 def backfill_stock(sid, start, dry_run=False, throttle_s=1.5, fetch_fn=None):
@@ -209,11 +210,22 @@ def classify_fetch_exception(exc):
 
 
 def _row_ok(r):
-    try:
-        vals = [float(r[k]) for k in ("open", "high", "low", "close")]
-    except (TypeError, ValueError):
+    """A plausible EOD row: positive finite close; any present open/high/low
+    positive; high >= low when both present. (A row with a close but a missing
+    open is kept, as the previous writer did, rather than dropped into a hole.)"""
+    def num(k):
+        try:
+            v = float(r[k])
+        except (TypeError, ValueError, KeyError):
+            return None
+        return v if v == v else None
+    c = num("close")
+    if c is None or c <= 0:
         return False
-    return all(v > 0 and v == v for v in vals) and vals[1] >= vals[2]
+    o, h, lo = num("open"), num("high"), num("low")
+    if any(v is not None and v <= 0 for v in (o, h, lo)):
+        return False
+    return not (h is not None and lo is not None and h < lo)
 
 
 def rows_from_payload(data):
@@ -288,28 +300,41 @@ def _save_state(state_path, state):
 
 
 def repair_gaps(cache_dir, calendar, requests, state_path=REPAIR_STATE_DEFAULT, max_requests=20,
+                registry_path=None,
                 throttle_s=1.5, cooldown_s=120.0, fetch_factory=None, sleep_fn=time.sleep):
     """Bounded, resumable repair of HISTORICAL_MISSING_INTERVALS.
     `requests`: ordered list of (symbol, 'YYYY-MM') to attempt (priority order).
     For each: recompute the expected-but-missing sessions of that month inside
-    the symbol's cached span, fetch the month, keep only rows for those exact
-    sessions, merge without touching existing rows, and record the state:
-      FETCH_OK (all missing sessions now present), CONFIRMED_NO_DATA (the source
-      returned the month but not those sessions: e.g. a suspension), or a
-      suspect state (EMPTY_RESPONSE_SUSPECT / NETWORK_ERROR / RATE_LIMIT_SUSPECT)
-      that stays outstanding; after REPAIR_MAX_ATTEMPTS it becomes UNRESOLVED.
-    An EMPTY payload is never read as 'month had no trading'."""
+    the symbol's cached span, drop sessions the no-trade registry explicitly
+    confirms (never fetched, never filled), fetch the month, keep only rows for
+    the exact missing sessions, merge without touching existing rows, and
+    record the state:
+      FETCH_OK                     every wanted session is now present (COMPLETE)
+      CONFIRMED_SYMBOL_NO_TRADE    every remaining session is registry-confirmed
+                                   (e.g. an exchange-announced suspension)
+      MARKET_OPEN_SYMBOL_NO_DATA   the source returned the month but not these
+                                   sessions: symbol-specific no-data with
+                                   SUSPENSION_STATUS_UNKNOWN. Terminal for the
+                                   queue (not re-downloaded forever) and never
+                                   COMPLETE; it stays an unresolved exception
+      EMPTY_RESPONSE_SUSPECT / NETWORK_ERROR / RATE_LIMIT_SUSPECT /
+      INVALID_PAYLOAD_SUSPECT      retryable; after REPAIR_MAX_ATTEMPTS -> UNRESOLVED
+    An EMPTY payload is never read as 'month had no trading'. Every session that
+    is still missing keeps breaking contiguity for the model (gap guard)."""
     import eod_integrity as E
     cal = pd.DatetimeIndex(calendar)
     state = _load_state(state_path)
+    confirmed = E.load_no_trade_registry(registry_path)
     used, consecutive_suspect, log = 0, 0, []
+    terminal = (E.FETCH_OK, E.CONFIRMED_SYMBOL_NO_TRADE, E.MARKET_OPEN_SYMBOL_NO_DATA, E.UNRESOLVED)
     for sym, month in requests:
         key = f"{sym}|{month}"
         st = state.get(key, {"attempts": 0, "state": None, "added": 0})
-        if st["state"] in (E.FETCH_OK, E.CONFIRMED_NO_DATA, E.UNRESOLVED):
+        if st["state"] in terminal:
             continue
         if st["attempts"] >= REPAIR_MAX_ATTEMPTS:
             st["state"] = E.UNRESOLVED
+            st["suspension_status"] = E.SUSPENSION_STATUS_UNKNOWN
             state[key] = st
             continue
         if used >= max_requests:
@@ -318,14 +343,21 @@ def repair_gaps(cache_dir, calendar, requests, state_path=REPAIR_STATE_DEFAULT, 
         dates = pd.to_datetime(pd.read_csv(path, usecols=["date"])["date"])
         p = pd.Period(month, "M")
         span = cal[(cal >= dates.min()) & (cal <= dates.max())]
-        want = span[(span >= p.start_time) & (span <= p.end_time)].difference(pd.DatetimeIndex(dates))
+        missing = span[(span >= p.start_time) & (span <= p.end_time)].difference(pd.DatetimeIndex(dates))
+        conf = [d for d in missing if (sym, str(d)[:10]) in confirmed]
+        want = missing.difference(pd.DatetimeIndex(conf))
+        st["expected_missing"] = int(len(missing))
+        st["registry_confirmed_no_trade"] = [str(d)[:10] for d in conf]
         if len(want) == 0:
-            st.update(state=E.FETCH_OK, note="nothing missing")
+            st.update(state=E.CONFIRMED_SYMBOL_NO_TRADE if conf else E.FETCH_OK,
+                      note="no fetch needed", remaining=0)
             state[key] = st
+            log.append({"symbol": sym, "month": month, **st})
             continue
         fetch = (fetch_factory or _twstock_fetch)(sym)
         st["attempts"] += 1
         used += 1
+        rec = {"rows_returned": 0, "rows_accepted": 0, "rows_rejected": 0, "rows_added": 0}
         try:
             payload = fetch(p.year, p.month)
         except Exception as exc:  # noqa: BLE001
@@ -335,24 +367,38 @@ def repair_gaps(cache_dir, calendar, requests, state_path=REPAIR_STATE_DEFAULT, 
             st["state"] = E.EMPTY_RESPONSE_SUSPECT
         if payload:
             rows = rows_from_payload(payload)
+            rec["rows_returned"] = int(len(rows))
             rows = rows[(rows["date"] >= p.start_time) & (rows["date"] <= p.end_time)]
-            added = merge_missing_rows(path, rows, want)
-            got = set(pd.to_datetime(rows["date"]))
+            wanted = rows[rows["date"].isin(want)]
+            ok_mask = np.array([_row_ok(r) for _, r in wanted.iterrows()], dtype=bool)
+            rec["rows_accepted"] = int(ok_mask.sum())
+            rec["rows_rejected"] = int((~ok_mask).sum())
+            rec["rows_added"] = merge_missing_rows(path, wanted[ok_mask], want) if ok_mask.any() else 0
+            got = set(pd.to_datetime(wanted[ok_mask]["date"]))
             still = [d for d in want if d not in got]
-            st["added"] = st.get("added", 0) + added
+            st["added"] = st.get("added", 0) + rec["rows_added"]
             if not still:
-                st["state"] = E.FETCH_OK
+                st["state"] = E.CONFIRMED_SYMBOL_NO_TRADE if conf else E.FETCH_OK
+            elif rec["rows_rejected"]:
+                st["state"] = E.INVALID_PAYLOAD_SUSPECT
             elif len(rows):
-                st["state"] = E.CONFIRMED_NO_DATA
+                st["state"] = E.MARKET_OPEN_SYMBOL_NO_DATA
+                st["suspension_status"] = E.SUSPENSION_STATUS_UNKNOWN
                 st["no_data_sessions"] = [str(d)[:10] for d in still]
             else:
                 st["state"] = E.EMPTY_RESPONSE_SUSPECT
-        suspect = st["state"] in (E.EMPTY_RESPONSE_SUSPECT, E.NETWORK_ERROR, E.RATE_LIMIT_SUSPECT)
+            st["remaining"] = int(len(still))
+        else:
+            st["remaining"] = int(len(want))
+        suspect = st["state"] in E.RETRYABLE_STATES
         if suspect and st["attempts"] >= REPAIR_MAX_ATTEMPTS:
             st["state"] = E.UNRESOLVED
+            st["suspension_status"] = E.SUSPENSION_STATUS_UNKNOWN
+        st.update(last_request=rec)
         state[key] = st
         _save_state(state_path, state)
-        log.append({"symbol": sym, "month": month, **st})
+        log.append({"symbol": sym, "month": month, **{k: v for k, v in st.items() if k != "last_request"},
+                    **rec})
         consecutive_suspect = consecutive_suspect + 1 if suspect else 0
         if consecutive_suspect >= REPAIR_SUSPECT_ABORT_AFTER:
             print(f"[repair] {consecutive_suspect} consecutive suspect responses — stopping (resumable)")
@@ -393,12 +439,18 @@ def main():
     ap.add_argument("--repair-priorities", nargs="*", default=["P0"])
     ap.add_argument("--max-requests", type=int, default=20)
     ap.add_argument("--repair-state", default=REPAIR_STATE_DEFAULT)
+    ap.add_argument("--repair-log", default=None, help="append a per-request CSV log")
+    ap.add_argument("--registry", default=None,
+                    help="symbol no-trade registry CSV (default reports/data_integrity/)")
     ap.add_argument("--cache-dir", default=CACHE_DIR)
     args = ap.parse_args()
 
     ids = args.universe or sorted(SECTOR_MAP)
     today = pd.Timestamp.today().normalize()
     t0 = time.time()
+    if os.path.abspath(args.cache_dir) != os.path.abspath(CACHE_DIR):
+        import data as _data       # tail refresh / backfill read+write via data.cache_path
+        _data.CACHE_DIR = args.cache_dir
     if args.repair_gaps:
         import eod_integrity as E
         raw = E.read_cache_dates(args.cache_dir)
@@ -409,12 +461,24 @@ def main():
                   f"{len(reqs)} symbol-month requests ({args.repair_priorities})")
             return
         log, state = repair_gaps(args.cache_dir, cal, reqs, args.repair_state,
-                                 max_requests=args.max_requests)
+                                 max_requests=args.max_requests, registry_path=args.registry)
         for r in log:
             print(f"[repair] {r['symbol']} {r['month']}: {r['state']} "
-                  f"(+{r.get('added', 0)} rows, attempts {r['attempts']})")
+                  f"(expected {r.get('expected_missing')}, returned {r.get('rows_returned', 0)}, "
+                  f"accepted {r.get('rows_accepted', 0)}, added {r.get('rows_added', 0)}, "
+                  f"rejected {r.get('rows_rejected', 0)}, remaining {r.get('remaining')}, "
+                  f"attempts {r['attempts']})")
+        if args.repair_log and log:
+            cols = ["symbol", "month", "state", "expected_missing", "rows_returned", "rows_accepted",
+                    "rows_added", "rows_rejected", "remaining", "attempts", "suspension_status",
+                    "no_data_sessions", "registry_confirmed_no_trade"]
+            df = pd.DataFrame([{c: (";".join(r[c]) if isinstance(r.get(c), list) else r.get(c))
+                                for c in cols} for r in log])
+            df.insert(0, "run_at", pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S"))
+            df.to_csv(args.repair_log, mode="a", index=False,
+                      header=not os.path.isfile(args.repair_log))
         outstanding = [k for k, v in state.items()
-                       if v.get("state") not in (E.FETCH_OK, E.CONFIRMED_NO_DATA)]
+                       if v.get("state") not in (E.FETCH_OK, E.CONFIRMED_SYMBOL_NO_TRADE)]
         print(f"[repair] outstanding symbol-months: {len(outstanding)}")
         return
     if args.backfill_start:

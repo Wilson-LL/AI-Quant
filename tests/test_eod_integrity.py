@@ -157,7 +157,7 @@ class TestRefreshAndRepair(unittest.TestCase):
             log, st = RD.repair_gaps(self.tmp, CAL, [("S", "2024-06")], state_path=state,
                                      fetch_factory=lambda s: (lambda y, m: []), sleep_fn=lambda x: None)
         self.assertEqual(st["S|2024-06"]["state"], E.UNRESOLVED)
-        self.assertNotEqual(st["S|2024-06"]["state"], E.CONFIRMED_NO_DATA)
+        self.assertNotIn(st["S|2024-06"]["state"], E.COMPLETE_STATES + E.RESOLVED_EXCEPTION_STATES)
         self.assertEqual(open(os.path.join(self.tmp, "S.csv"), "rb").read(), before)
 
     def test_10_gap_merge_is_idempotent_and_preserves_existing_lines(self):
@@ -184,9 +184,143 @@ class TestRefreshAndRepair(unittest.TestCase):
                                  sleep_fn=lambda x: None)
         d = pd.read_csv(os.path.join(self.tmp, "S.csv"), parse_dates=["date"])["date"]
         self.assertEqual(len(set(d) & set(hole)), 5)                # only returned sessions added
-        self.assertEqual(st["S|2024-06"]["state"], E.CONFIRMED_NO_DATA)
+        self.assertEqual(st["S|2024-06"]["state"], E.MARKET_OPEN_SYMBOL_NO_DATA)
         self.assertEqual(len(st["S|2024-06"]["no_data_sessions"]), len(hole) - 5)
 
+
+class TestSymbolNoTradeSemantics(unittest.TestCase):
+    """MARKET OPEN does not imply EVERY STOCK HAS A ROW."""
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        self.hole = CAL[(CAL.year == 2024) & (CAL.month == 6)]
+        write_cache(self.tmp, "S", CAL.difference(self.hole))
+        self.state = os.path.join(self.tmp, "state.json")
+        self.calls = []
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def fetch_factory(self, days):
+        def factory(sym):
+            def fetch(y, m):
+                self.calls.append((sym, y, m))
+                return payload(days)
+            return fetch
+        return factory
+
+    def repair(self, days, registry=None, runs=1):
+        for _ in range(runs):
+            log, st = RD.repair_gaps(self.tmp, CAL, [("S", "2024-06")], state_path=self.state,
+                                     registry_path=registry, fetch_factory=self.fetch_factory(days),
+                                     sleep_fn=lambda x: None)
+        return st["S|2024-06"]
+
+    def test_nt1_genuine_missing_download_is_repaired(self):
+        st = self.repair(self.hole)
+        self.assertEqual(st["state"], E.FETCH_OK)
+        self.assertEqual(st["last_request"]["rows_added"], len(self.hole))
+        d = pd.read_csv(os.path.join(self.tmp, "S.csv"))["date"]
+        a = E.audit_symbol("S", d, CAL, CAL.max(), REQ)
+        self.assertEqual(a["missing_sessions"], 0)
+
+    def test_nt2_registry_confirmed_suspension_is_not_fetched_and_still_breaks_contiguity(self):
+        reg = os.path.join(self.tmp, "registry.csv")
+        pd.DataFrame({"symbol": "S", "date": self.hole.strftime("%Y-%m-%d"),
+                      "status": E.CONFIRMED_SYMBOL_NO_TRADE, "reason": "exchange-announced suspension",
+                      "source": "TWSE announcement (test)"}).to_csv(reg, index=False)
+        st = self.repair(self.hole, registry=reg)
+        self.assertEqual(st["state"], E.CONFIRMED_SYMBOL_NO_TRADE)
+        self.assertEqual(self.calls, [])                          # no download for confirmed days
+        d = pd.read_csv(os.path.join(self.tmp, "S.csv"))["date"]
+        self.assertEqual(len(set(pd.to_datetime(d)) & set(self.hole)), 0)   # nothing fabricated
+        gb = E.gap_before(pd.DatetimeIndex(pd.to_datetime(d)), CAL)
+        self.assertTrue(gb.any())                                  # still a break for the model
+        exc = E.missing_exceptions(None, reg)
+        a = E.audit_symbol("S", d, CAL, CAL.max(), REQ, exc)
+        self.assertEqual(a["missing_confirmed_symbol_no_trade"], len(self.hole))
+        self.assertEqual(a["missing_unrepaired"], 0)
+
+    def test_nt3_unresolved_symbol_specific_no_data(self):
+        served = self.hole[:3]                                     # source serves 3 days only
+        st = self.repair(served)
+        self.assertEqual(st["state"], E.MARKET_OPEN_SYMBOL_NO_DATA)
+        self.assertEqual(st["suspension_status"], E.SUSPENSION_STATUS_UNKNOWN)
+        self.assertEqual(len(st["no_data_sessions"]), len(self.hole) - 3)
+        d = pd.read_csv(os.path.join(self.tmp, "S.csv"))["date"]
+        a = E.audit_symbol("S", d, CAL, CAL.max(), REQ, E.missing_exceptions(self.state, None))
+        self.assertEqual(a["missing_market_open_symbol_no_data"], len(self.hole) - 3)
+        self.assertEqual(a["LEVEL_C_history"], "INCOMPLETE")
+
+    def test_nt4_unresolved_never_silently_becomes_complete(self):
+        self.repair(self.hole[:3], runs=5)                         # many later runs
+        st = self.repair(self.hole, runs=2)                        # even if the source changes
+        self.assertEqual(st["state"], E.MARKET_OPEN_SYMBOL_NO_DATA)
+        self.assertNotIn(st["state"], E.COMPLETE_STATES)
+        self.assertEqual(len(self.calls), 1)                       # no endless re-downloading
+        tmp2 = tempfile.mkdtemp()
+        try:                                                       # empty payloads end UNRESOLVED
+            write_cache(tmp2, "T", CAL.difference(self.hole))
+            s2 = os.path.join(tmp2, "state.json")
+            for _ in range(RD.REPAIR_MAX_ATTEMPTS + 2):
+                log, st2 = RD.repair_gaps(tmp2, CAL, [("T", "2024-06")], state_path=s2,
+                                          fetch_factory=lambda s: (lambda y, m: []), sleep_fn=lambda x: None)
+            self.assertEqual(st2["T|2024-06"]["state"], E.UNRESOLVED)
+            self.assertNotIn(st2["T|2024-06"]["state"], E.COMPLETE_STATES)
+        finally:
+            shutil.rmtree(tmp2, ignore_errors=True)
+
+
+class TestSnapshotAndTailAppend(unittest.TestCase):
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        self.cache = os.path.join(self.tmp, "cache")
+        os.makedirs(self.cache)
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def test_snapshot_is_exact_and_verifier_detects_changes(self):
+        hole = CAL[(CAL.year == 2024) & (CAL.month == 6)]
+        write_cache(self.cache, "A", CAL.difference(hole))
+        write_cache(self.cache, "B", CAL, seed=1)
+        man = E.snapshot_cache(self.cache, os.path.join(self.tmp, "snap"))
+        self.assertTrue(man["verified"])
+        self.assertEqual(man["file_count"], 2)
+        with self.assertRaises(FileExistsError):
+            E.snapshot_cache(self.cache, os.path.join(self.tmp, "snap"))
+        rows = pd.DataFrame([{"date": d, "open": 5.0, "high": 5.0, "low": 5.0, "close": 5.0, "volume": 1}
+                             for d in hole])
+        RD.merge_missing_rows(os.path.join(self.cache, "A.csv"), rows, hole)
+        df, tot = E.verify_against_snapshot(os.path.join(self.tmp, "snap"), self.cache, CAL)
+        self.assertEqual(tot["existing_rows_modified_or_removed"], 0)
+        self.assertEqual(tot["rows_added"], len(hole))
+        self.assertEqual(tot["unexplained_added_dates"], 0)
+        p = os.path.join(self.cache, "B.csv")                      # tamper with one existing row
+        b = open(p, "rb").read().replace(b",", b";", 3)
+        open(p, "wb").write(b)
+        df, tot = E.verify_against_snapshot(os.path.join(self.tmp, "snap"), self.cache, CAL)
+        self.assertGreater(tot["existing_rows_modified_or_removed"], 0)
+
+    def test_tail_refresh_appends_without_rewriting_history(self):
+        write_cache(self.cache, "S", CAL[CAL < "2025-06-01"])
+        p = os.path.join(self.cache, "S.csv")
+        before = open(p, "rb").read()
+        lc, cp = RD.load_cached, RD.cache_path
+        RD.load_cached = lambda s: pd.read_csv(os.path.join(self.cache, f"{s}.csv"), parse_dates=["date"])
+        RD.cache_path = lambda s: os.path.join(self.cache, f"{s}.csv")
+        june = CAL[(CAL >= "2025-06-01") & (CAL < "2025-06-20")]
+
+        def fetch(y, m):
+            return payload(june if (y, m) == (2025, 6) else CAL[(CAL.year == y) & (CAL.month == m)])
+        try:
+            n, _ = RD.refresh_stock("S", pd.Timestamp("2025-06-19"), throttle_s=0, fetch_fn=fetch)
+        finally:
+            RD.load_cached, RD.cache_path = lc, cp
+        after = open(p, "rb").read()
+        self.assertEqual(n, len(june))
+        self.assertTrue(after.startswith(before))                 # history untouched, rows appended
 
 class TestDatasetAndInferenceGuard(unittest.TestCase):
 
