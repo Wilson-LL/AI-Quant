@@ -16,18 +16,51 @@ Failed hypotheses are never deleted. Every entry says whether its evidence inter
 - **Next:** closed for the frozen recipe. Do NOT test 200/500/1000 epochs or batch 4096. Follow-ups are separate hypotheses: H-RESIDUAL-SIGNAL, H-FACTOR-PREMIUM, H-LR-SCHEDULE (early), H-WEIGHT-AVERAGING.
 - **Interval burned:** YES (2026-H1). **Last updated:** 2026-09-21 (Council Session 02).
 
-## H-RESIDUAL-SIGNAL — the deployed transformer carries ranking signal beyond its ten input features (DATA/TARGET vs model limit)
-- **Status:** UNTESTED as preregistered. Hints: report 11 residual IC 0.017 / −0.001 beyond momentum; Session 02 post-hoc epoch-3 residual validation IC beyond the ten last-step features ≈ 0.001 on three refits (ML Researcher); epoch-3 rank exposure to 12-1 momentum 0.77–0.90.
-- **Next (0 GPU):** paired per-date incremental IC of the production-selected fits (P0/P4 prediction caches, ≥ 9 refits) over a benchmark fitted only on training rows (ridge on the ten features; 12-1 momentum alone), clustered by refit. Equivalence rule, preregistered before computing: DATA/TARGET-limited only if the upper 95% bound < 0.01; non-factor signal only if the lower bound > 0; otherwise INCONCLUSIVE.
-- **Burned:** would use burned blocks (mechanism probe only). **Updated:** 2026-09-21.
+## H-RESIDUAL-SIGNAL — the deployed transformer carries ranking signal beyond its ten input features
+- **Status:** **RESIDUAL_SIGNAL_WEAK (frozen, preregistered `5012d5b`, arm B, 2026-H1).** Operative reading (Council Session 03, unanimous): **no residual signal demonstrated beyond the network's own inputs.**
+- **Evidence:**
+  - BURNED_DIAGNOSTIC: residual IC beyond the 10 inputs +0.056 (HAC CI −0.008, +0.120; 67% of blocks positive); 69% of the Transformer's IC is carried by the linear input span.
+  - Arms C and A reach PRESENT, but they share seeds, dates and labels with arm B (block correlation 0.80–0.92), and arm C falls to WEAK under df = 5.
+  - HISTORICAL_OOS, post-peek (`SCHED_P0_A_BR_7s`, 2021–25, 61 windows): residual +0.014 (CI −0.012, +0.040); Transformer IC +0.021; 12-1 momentum IC +0.041.
+  - Post-hoc: beyond raw-scale inputs plus 12-1 momentum, the residual is about zero (arm B −0.003, arm C +0.012, history +0.004).
+  - The residual co-moves with momentum payoff (r 0.62–0.74). In 2026-H1 it concentrates in rows whose input windows splice across cache holes (see H-DATA-INTEGRITY).
+- **Confounders:** momentum-extreme burned window; benchmark features built on the calendar while the network builds them on each stock's own rows; df convention; regime-variable placebo floor; calibration test run on Gaussian inputs.
+- **Next:** H-RESIDUAL-HIST (zero GPU, preregistered, post-peek). Use features built the way the network sees them, raw-scale and 12-1 benchmarks, clean-name and spliced-window splits, one df convention, and the residual regressed on momentum payoff.
+- **Burned:** YES (2026-H1); history is post-peek. **Updated:** 2026-09-21 (Council Session 03).
 
-## H-FACTOR-PREMIUM — the factor the early model learns (12-1 momentum / 60-day vol) pays positively out of sample
-- **Status:** UNTESTED. It decides whether long-training de-exposure is a cost or a hedge. Block values so far: 12-1 momentum OOS IC 0.329 / 0.264 / −0.016 on the three P4-B0-LONG blocks.
-- **Next (0 GPU):** factor OOS IC across all nine P4-B0 blocks plus the prospective window from 2026-07-24. **Updated:** 2026-09-21.
+## H-FACTOR-PREMIUM — the factor the early model learns pays positively out of sample
+- **Status:** **FACTOR_PREMIUM_REGIME_DEPENDENT (frozen)** for mom_126_5, 12-1 momentum and vol_60.
+- **2026-H1:** all three pay strongly Jan–Apr (+0.17 to +0.30) and turn negative Jun–Jul. Prospective slice (15 dates) +0.22 to +0.26.
+- **2016–2025 context:** yearly mom_126_5 IC −0.056 to +0.075.
+- **Split sensitivity:** for 12-1 momentum and vol_60 the label depends on the split date (a 40th-percentile split gives WEAK); mom_126_5 is robust. No decision changes.
+- **Attribution:** FACTOR_DEEXPOSURE_EXPLAINS_MOST (frozen). Met on only 2 qualifying refits, and close to an accounting identity. The P4-B0 epoch 3→15 gap tracks momentum payoff (r 0.82; permutation p optimistic).
+- **Next:** long-history factor premium 2016–2026 with one df convention (zero GPU). **Updated:** 2026-09-21.
+
+## H-DATA-INTEGRITY — EOD cache holes splice model inputs and labels
+- **Status:** **SUPPORTED as a defect** (MECHANICAL_CODE_PROOF; Council Session 03).
+- **Extent:** 70 of 110 cached stocks have missing sessions since 2016; 59 have runs of 5 or more; 24 have holes in 2025–26, often whole calendar months (2317 and 9910 all of Sep 2025; 2376 all of Jan 2026).
+- **Cause:**
+  - In `research/refresh_data.py`, a failed or empty month is skipped. A later successful month advances the cached last date, and the retry pass recomputes the needed months from that date, so the hole becomes permanent.
+  - `research/pipeline_gate.py` checks only coverage of the newest date.
+- **Effect:**
+  - `dataset_transformer_eod.py` and `inference_transformer_eod.py` build features, windows and labels on each stock's own rows, so they splice across holes.
+  - About 3% of 60-row windows, 6–9% of mom_126_5 lookbacks and about 1% of labels are affected.
+  - There is no look-ahead: maturity is tracked on the calendar.
+  - The live model is fed spliced inputs.
+- **Next (user decision; production-relevant):** add a history gap gate, fix the refresh path, re-fetch the missing months, freeze a cache hash, then rescore or re-document. **Updated:** 2026-09-21.
 
 ## H-LR-SCHEDULE — an LR schedule changes what the model learns in the early regime
-- **Status:** UNTESTED. The late-fork variant (anneal from epoch 50) is NOT motivated: it would start from a memorising iterate. Only an early variant has a rationale.
-- **Next (conditional, ~0.26 GPU-h):** anneal to zero by ~1,150 steps on the 27 P4-B0 fits, read on validation, with a pre-declared readout step and a λ ≡ 1 bit-parity smoke test. Run only if H-RESIDUAL-SIGNAL finds non-factor signal. Not launched. **Burned:** YES. **Updated:** 2026-09-21.
+- **Status:** UNTESTED. **NOT JUSTIFIED** (Council Session 03, unanimous): every member's non-factor-residual gate fails on every benchmark and sample. The late-fork variant (epoch 50) is ruled out.
+- **Conditional design (recorded, not launched):**
+  - Gate: H-RESIDUAL-HIST clean-name historical residual ≥ 0.02, lower CI > 0, and a positive momentum-payoff intercept.
+  - Data: a repaired cache.
+  - Arms: batch 1024 fixed; control at constant LR; treatment annealed to 0 between about 725 and 1,150 steps.
+  - Readout: one, pre-declared, at the end of epoch 5.
+  - Sample: primary the 2021–25 walk-forward; secondary the P4-B0 refits, read on validation only.
+  - Guards: raw IC must not fall; correlation with mom_126_5 must rise by no more than 0.05.
+  - Parity: a research-only fork of `fit_one`, bit-identical at λ ≡ 1.
+  - Cost: about 40–70 GPU-minutes.
+- **Burned:** YES. **Updated:** 2026-09-21.
 
 ## H-WEIGHT-AVERAGING — SWA / checkpoint averaging recovers signal from the late regime
 - **Status:** WEAKLY_CONTRADICTED (late window, prediction space, post-hoc BURNED_DIAGNOSTIC). Averaging epochs 50–100 recovers ≤ 0.0015 over the mean single epoch; the 30–100 average (~0.049) fails the early bar (0.102). Weight-space SWA is untested, with a low prior. Early-window averaging is untested.
