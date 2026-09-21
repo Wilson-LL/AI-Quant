@@ -1,0 +1,124 @@
+{
+  "title": "H-RESIDUAL-SIGNAL and H-FACTOR-PREMIUM: preregistration (zero GPU, burned mechanism diagnostics)",
+  "frozen_at": "2026-09-21, before any residual, benchmark or factor-premium quantity in this spec was computed",
+  "evidence_label": "BURNED MECHANISM DIAGNOSTIC: not independent validation, not prospective evidence (except the descriptive prospective slice), not a trading rule",
+  "prior_knowledge_disclosed": [
+    "reports/model_audit/v17/11_baseline_comparison.md: transformer rank correlation with momentum ~0.65; residual IC beyond momentum 0.017 / -0.001 on the historical panels",
+    "Council Session 02 (post hoc, 3 LONG refits, validation block): epoch-3 rank exposure to mom_126_5 0.77-0.90; epoch-3 residual validation IC beyond the 10 last-step features ~0.001; mom_126_5 OOS IC 0.329 / 0.264 / -0.016 on the three LONG blocks",
+    "P4-B0 per-epoch OOS IC curves for 9 refits are already known (burned)"
+  ],
+  "production_unchanged": "Nothing here changes production architecture, epochs, early stopping, LR, cadence, target, features, blend50, band10, portfolio construction or scheduled tasks.",
+  "data": {
+    "primary_tf_scores": "P0 arm B (5-session refit, 3 seeds, seed-mean score) panel reports/model_audit/v17/p0/panel_P0_A_armB.csv.gz: 131 decision dates 2026-01-05..2026-07-23, 27 refit blocks (block calendar from p0/fits/*_c5_s0_*.npz block_start/block_end), 108 names. Production-like: same architecture, recipe, features, target and validation policy as production; 3 seeds instead of 7; 5-session instead of daily refit.",
+    "secondary_tf_scores": [
+      "P0 arm C (daily full refit = production cadence, 3 seeds) panel_P0_A_armC.csv.gz, evaluated on the same 27 block calendar",
+      "P0 arm A (126-session refit) panel_P0_A_armA.csv.gz, descriptive"
+    ],
+    "prospective_descriptive": "production 7-seed daily predictions reports/transformer_gpu/<date>_predictions.csv for decision dates >= 2026-07-24 whose 20-session forward return is fully matured in the EOD cache (cache ends 2026-09-11). Descriptive only; about one independent label window; never mixed with immature returns.",
+    "no_retraining": "No model is trained or retrained. The only fitted objects are the linear benchmarks below. No GPU.",
+    "features": "the 10 close_only inputs (log_ret_1, mom_5, mom_20, mom_60, mom_126_5, vol_20, vol_60, dist_hi_60, dist_lo_60, px_over_ma20), recomputed on the shared close calendar with the formulas of dataset_transformer_eod._stock_features (close block); plus mom_12_1 = close(t-21)/close(t-252) - 1 (true 12-1 momentum; NOT a network input). Values at date t use closes up to t only.",
+    "forward_return": "fwd_20(t) = close(t+21)/close(t+1) - 1 (exec lag 1, audit_v17_signal.fwd_returns); a date is used only if its forward return is matured.",
+    "cross_sectional_transform": "per date, every score and feature is converted to rank-Gaussian normal scores (inverse normal CDF of (rank - 0.5)/n), standardised to mean 0 / SD 1 across the names present that date; forward returns are ranked the same way for the additive attribution, and ICs are Spearman. Rows missing any required field are dropped for that date."
+  },
+  "benchmarks": {
+    "A_mom_12_1": "true 12-1 momentum alone",
+    "B_d12_momentum": "the production D1.2 momentum score is close(t-5)/close(t-131) - 1 (research/blended_decision_book.py:49), which is IDENTICAL to the network input mom_126_5; benchmark B is therefore mom_126_5 alone. (Session-02 text called mom_126_5 '12-1 momentum'; that was a mislabel: it is ~6-month momentum skipping 5 sessions.)",
+    "C_ridge10": "pooled ridge regression of the per-date rank target (2 x pct_rank(fwd_20) - 1) on the 10 rank-z features, refitted once per arm-B refit block using ONLY decision dates whose forward return had matured by the refit (date position + 21 <= position of block start - 1), from the first date with all 10 features valid. Fixed alpha = 1.0 (no tuning; effectively OLS at ~250k rows). Scored on the block's own dates from date-t features only.",
+    "vol_60": "60-day volatility alone (the second exposure named by the Council), used in H-FACTOR-PREMIUM"
+  },
+  "residualisation": {
+    "rule": "Per decision date, cross-sectionally, using only date-t information (Transformer scores and date-t factor values). No forward return enters residualisation. The Transformer is never regressed on future returns.",
+    "definition": "s = rank-z(TF score). For a factor set X (with intercept), fit OLS s ~ X across the names of that date; factor_component = fitted value; residual = s - fitted value.",
+    "residual_sets": {
+      "R10_primary": "X = the 10 rank-z input features: removes ANY date-t linear combination of the network's own inputs (the most generous definition of factor repackaging); the remainder is the nonlinear / temporal part of the network's ranking",
+      "R_ridge": "X = rank-z(ridge10 benchmark score)",
+      "R_mom": "X = rank-z(mom_126_5)",
+      "R_mom12_1": "X = rank-z(mom_12_1)",
+      "R10_plus_12_1": "X = 10 features + mom_12_1 (descriptive)"
+    },
+    "residual_IC": "RESIDUAL_IC(date) = Spearman(residual, fwd_20) across names on that date",
+    "additive_attribution": "With s and y = rank-z(fwd_20) standardised (ddof 0), the rank-Pearson IC splits exactly: mean(s*y) = mean(fitted*y) + mean(residual*y). FACTOR_SHARE = sum over dates of mean(fitted*y) / sum over dates of mean(s*y), reported for R10 and R_mom. This is the answer to 'how much of the Transformer's OOS value is factor exposure'."
+  },
+  "metrics_per_block": [
+    "IC_TF (Spearman TF vs fwd)",
+    "IC_mom_126_5",
+    "IC_mom_12_1",
+    "IC_ridge10",
+    "IC_vol_60",
+    "RESIDUAL_IC for R10, R_ridge, R_mom, R_mom12_1",
+    "paired incremental IC_TF - IC_ridge10",
+    "Spearman(TF, mom_126_5), Spearman(TF, mom_12_1), Spearman(TF, ridge10)",
+    "R^2 of s on mom_126_5 and on the 10 features (rank variance explained)",
+    "top-20% minus bottom-20% mean fwd_20 spread for TF, R10 residual, mom_126_5, ridge10",
+    "FACTOR_SHARE (R10, R_mom)"
+  ],
+  "uncertainty": {
+    "unit": "REFIT BLOCK (27 arm-B blocks of 5 sessions; the last block is 1 session). Per-date values are averaged within a block; seeds are already averaged in the TF score and are never counted as observations.",
+    "estimate": "equal-weight mean of block values",
+    "se_primary": "Newey-West HAC on the block series in date order, lag 4 (20-session labels overlap about four 5-session blocks)",
+    "se_secondary": "naive refit-clustered SE = SD(block values)/sqrt(n)",
+    "ci": "estimate +/- t(0.975, df = n_blocks - 1) x HAC SE",
+    "loro": "leave-one-block-out range of the estimate",
+    "prospective": "no inferential statistic; reported descriptively"
+  },
+  "H_RESIDUAL_SIGNAL_classification": {
+    "applies_to": "RESIDUAL_IC of R10_primary on arm B. All other residual sets and arms are reported with the same rule for transparency but do not set the label.",
+    "RESIDUAL_SIGNAL_PRESENT": "mean > +0.01 AND lower 95% HAC bound > 0 AND > 50% of blocks positive AND leave-one-block-out minimum > 0",
+    "RESIDUAL_SIGNAL_ABSENT": "upper 95% HAC bound < +0.01 (equivalence: any residual signal is economically negligible)",
+    "RESIDUAL_SIGNAL_WEAK": "mean > 0 AND >= 50% of blocks positive, with the CI including 0 and the upper bound >= +0.01",
+    "RESIDUAL_SIGNAL_INCONCLUSIVE": "everything else",
+    "precedence": "PRESENT, ABSENT, WEAK, INCONCLUSIVE"
+  },
+  "feature_contribution": {
+    "status": "diagnostic only; correlation is not causation",
+    "metrics": "per feature: mean per-date Spearman with the TF score; mean univariate R^2; mean drop-one Delta R^2 from the 10-feature per-date regression; mean standardised coefficient",
+    "question": "is the network mostly a nonlinear momentum ranker, or a combination of several input signals?"
+  },
+  "H_FACTOR_PREMIUM": {
+    "question": "Do the factor exposures the early Transformer learns carry a positive OOS ranking payoff consistently?",
+    "factors": {
+      "primary": [
+        "mom_126_5 (D1.2 momentum; the network's dominant exposure)",
+        "mom_12_1",
+        "vol_60 (raw, high volatility ranked high, the network's exposure sign)"
+      ],
+      "descriptive": "the other 8 inputs"
+    },
+    "samples": {
+      "primary": "all 131 decision dates 2026-01-05..2026-07-23 (covers all nine P4-B0 refit blocks and all 27 arm-B blocks); matured forward returns only",
+      "prospective": "every trading date >= 2026-07-24 with a matured 20-session forward return (descriptive)",
+      "context": "calendar-year factor IC 2016-2025 (descriptive context only; not used for the label)"
+    },
+    "metrics": "daily rank IC; mean with Newey-West HAC lag 20 on the daily series; df = number of non-overlapping 21-session windows - 1; positive-IC frequency (daily and by 5-session block); top-20% minus bottom-20% fwd_20 spread; breakdown by the 9 P4-B0 blocks, the 27 arm-B blocks, calendar month, and the two halves split at the median decision date",
+    "classification_per_factor": {
+      "FACTOR_PREMIUM_ROBUST": "mean >= 0.02 AND lower 95% HAC bound > 0 AND >= 2/3 of the 27 blocks positive AND both halves positive AND (prospective mean >= -0.05 or unavailable)",
+      "FACTOR_PREMIUM_ABSENT": "upper 95% HAC bound < 0.01, OR (mean <= 0 AND both halves <= 0)",
+      "FACTOR_PREMIUM_REGIME_DEPENDENT": "halves of opposite sign with max |half mean| >= 0.05, OR (mean > 0 AND < 60% of blocks positive AND max half mean >= 0.05)",
+      "FACTOR_PREMIUM_WEAK": "mean > 0 and none of the above",
+      "INCONCLUSIVE": "everything else",
+      "precedence": "ROBUST, ABSENT, REGIME_DEPENDENT, WEAK, INCONCLUSIVE",
+      "guard": "no label may rest on one block: ROBUST requires breadth (2/3 of blocks and both halves)"
+    }
+  },
+  "long_training_attribution": {
+    "question": "How much of the early-minus-late Transformer OOS gap is explained by factor de-exposure?",
+    "LONG_decomposition": "3 LONG refits x 3 seeds, retained OOS predictions (epoch 3 vs the mean over epochs 50/75/100). Per date: additive rank-Pearson split of each epoch's IC into fitted (R10 span, and mom_126_5 alone) and residual parts. GAP_total = early - late; GAP_factor = fitted-part early - late. Refit value = mean over seeds and dates; pooled share = mean GAP_factor / mean GAP_total over refits.",
+    "B0_cross_refit": "9 P4-B0 refits: Delta_r = seed-mean (OOS IC epoch 3 - epoch 15) from b0_epoch_curves.csv; payoff_r = mom_126_5 IC on the refit's own OOS block; exposure_r = mean Spearman(arm-B TF score, mom_126_5) on that block. Report Pearson corr(Delta, exposure x payoff) and corr(Delta, payoff) with one-sided permutation p (20,000 permutations).",
+    "classification": {
+      "FACTOR_DEEXPOSURE_EXPLAINS_MOST": "pooled R10 share >= 0.5 AND R10 share >= 0.5 on >= 2 of the refits whose |GAP_total| >= 0.02",
+      "FACTOR_DEEXPOSURE_PARTIAL": "pooled R10 share in [0.25, 0.5)",
+      "FACTOR_DEEXPOSURE_NOT_EXPLAINED": "pooled R10 share < 0.25",
+      "note": "mechanistic attribution on 3 burned refits, not a trading rule"
+    }
+  },
+  "decision_tree": {
+    "CASE_A": "RESIDUAL_SIGNAL_ABSENT and factor premium explains most Transformer behaviour -> the network is mostly a factor extractor; no GPU on larger architecture or longer training; next work = targets, independent features/data, point-in-time universe, corporate-action-adjusted data",
+    "CASE_B": "RESIDUAL_SIGNAL_PRESENT -> H-LR-SCHEDULE (EARLY decay near the epoch 3-5 step region) becomes the next justified GPU hypothesis; design only, do not launch",
+    "CASE_C": "RESIDUAL_SIGNAL_WEAK or INCONCLUSIVE -> no architecture scaling; first increase independent diagnostic sample / prospective shadow history"
+  },
+  "method_calibration": {
+    "synthetic": "before any real result: with plain uniform ranks, a score that is purely a linear mix of its inputs left a spurious residual IC of ~0.026 (rank of a sum is not linear in the ranks of its parts); rank-Gaussian scores are used instead and the synthetic unit tests require |residual IC| < 0.02 for pure repackaging and > 0.15 for an injected non-input signal",
+    "PLACEBO_real_data": "per date, placebo score = rank-Gauss(z_winsorised(raw mom_126_5) + z_winsorised(raw vol_60)); a pure function of two inputs, so its R10 residual IC measures the method's false-positive floor on the real cross-sections. Reported with the same block statistics.",
+    "METHOD_SENSITIVE_flag": "if |mean placebo residual IC| >= 0.01 on arm B, the H-RESIDUAL-SIGNAL label is reported together with the flag METHOD_SENSITIVE and PRESENT must additionally exceed the placebo by 0.01 (mean_R10 - mean_placebo > 0.01); otherwise the label stands as classified"
+  }
+}
