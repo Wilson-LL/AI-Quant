@@ -285,6 +285,10 @@ def build_plan(root, holdings_path, date=None, use_panel=True,
                     universe_rank_pct=rp, conflict=conflict,
                     material=(pd.notna(mv) and exp["gross_exposure"] > 0
                               and mv / exp["gross_exposure"] > 0.05))
+            if b is not None and bool(b.get("integrity_exit", False)):
+                reason = ("DATA_INTEGRITY_EXCLUSION — NOT AN ALPHA-DRIVEN SELL "
+                          "(signal_driven=false): model book dropped this name only "
+                          "because its current input window is invalid; " + reason)
             fresh = signal_freshness(act, side, in_uni)
             fa = feat_asof.get(sym)
             prev_close = float(fa["close"]) if fa is not None else np.nan

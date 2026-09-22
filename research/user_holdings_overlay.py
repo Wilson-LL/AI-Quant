@@ -193,7 +193,12 @@ def load_book(root, strategy, date):
         db = db.rename(columns={"model_score": "score"})
         cols = ["action", "target_weight", "previous_weight", "weight_change",
                 "rank", "score", "sector", "confidence"]
-        return db.set_index("symbol")[cols]
+        out = db.set_index("symbol")[cols]
+        # H-DATA-INTEGRITY: SELL rows tagged DATA_INTEGRITY_EXCLUSION in caveats
+        cav = db.set_index("symbol")["caveats"] if "caveats" in db else pd.Series(dtype=str)
+        out["integrity_exit"] = [isinstance(c, str) and c.startswith("DATA_INTEGRITY_EXCLUSION")
+                                 for c in cav.reindex(out.index)]
+        return out
 
     # weight-only strategies: derive actions vs the previous dated book
     try:
@@ -278,6 +283,11 @@ def classify(row, medium_gap, large_gap):
         return ("NOT_IN_MODEL_UNIVERSE", pri,
                 "AI-Quant currently has no model opinion on this stock.")
 
+    if action == "SELL" and bool(row.get("model_integrity_exit", False)):
+        return ("MODEL_SELL", "HIGH",
+                "DATA_INTEGRITY_EXCLUSION — NOT AN ALPHA-DRIVEN SELL: the model paper book "
+                "dropped this name only because its current input window is invalid. Review — "
+                "this is not an order.")
     if action == "SELL":
         return ("MODEL_SELL", "HIGH",
                 "Model paper book exits this name (rank fell out of the "
@@ -380,6 +390,7 @@ def build_overlay(root, positions, strategy, date, medium_gap, large_gap):
             "in_latest_decision_book": b is not None,
             "model_strategy_used": strategy,
             "model_action": b["action"] if b is not None else "",
+            "model_integrity_exit": bool(b.get("integrity_exit", False)) if b is not None else False,
             "model_target_weight": float(b["target_weight"]) if b is not None else np.nan,
             "model_previous_weight": float(b["previous_weight"]) if b is not None else np.nan,
             "model_weight_change": float(b["weight_change"]) if b is not None else np.nan,

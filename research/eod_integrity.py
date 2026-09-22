@@ -192,28 +192,44 @@ def reference_universe_n(valid_symbols, excluded, eligible_pool=None):
     return len(valid) + len(extra)
 
 
+DATA_INTEGRITY_EXCLUSION = "DATA_INTEGRITY_EXCLUSION"
+INTEGRITY_EXIT_CAVEAT = ("DATA_INTEGRITY_EXCLUSION; NOT AN ALPHA-DRIVEN SELL; signal_driven=false; "
+                         "previous model-book name removed only because its current input window "
+                         "is invalid")
+
+
+def is_integrity_exit(text):
+    """True for a book row whose caveats carry the DATA_INTEGRITY_EXCLUSION tag."""
+    return isinstance(text, str) and text.startswith(DATA_INTEGRITY_EXCLUSION)
+
+
 def held_symbols(root):
-    """Symbols whose management requires a valid model view: open positions in
-    my_holdings.csv (any side) plus names held in the standing (latest)
-    blend50_band10 decision book. Returns (set, sources)."""
-    held, src = set(), []
+    """REAL_HELD_SYMBOLS: open positions (any side; unparseable qty still
+    counts) in the canonical production holdings file <root>/my_holdings.csv.
+    This is the ONLY hard-block source of the live integrity policy. The
+    previous model book is model state, not the user's holdings (see
+    previous_book_symbols). Returns (set, sources)."""
     hp = os.path.join(root, "my_holdings.csv")
-    if os.path.isfile(hp):
-        import holdings as H
-        lots, _ = H.load_lots(hp)
-        pos, _ = H.aggregate_positions(lots)
-        syms = set(pos["symbol"].astype(str))   # any side; unparseable qty still counts as held
-        held |= syms
-        src.append(f"my_holdings.csv ({len(syms)} open positions)")
+    if not os.path.isfile(hp):
+        return set(), []
+    import holdings as H
+    lots, _ = H.load_lots(hp)
+    pos, _ = H.aggregate_positions(lots)
+    syms = set(pos["symbol"].astype(str))
+    return syms, [f"my_holdings.csv ({len(syms)} open positions)"]
+
+
+def previous_book_symbols(root):
+    """PREVIOUS_BOOK_SYMBOLS: names with target_weight > 0 in the latest
+    blend50_band10 decision book: band10 / hysteresis continuity and previous
+    model-portfolio state only. Never a hard-block source. Returns (set, source)."""
     pt = os.path.join(root, "reports", "paper_trading")
     books = sorted(f for f in os.listdir(pt) if f.endswith("_blend50_band10_decision_book.csv")) \
         if os.path.isdir(pt) else []
-    if books:
-        b = pd.read_csv(os.path.join(pt, books[-1]), dtype={"symbol": str})
-        syms = set(b.loc[b["target_weight"] > 0, "symbol"])
-        held |= syms
-        src.append(f"{books[-1]} ({len(syms)} held)")
-    return held, src
+    if not books:
+        return set(), None
+    b = pd.read_csv(os.path.join(pt, books[-1]), dtype={"symbol": str})
+    return set(b.loc[b["target_weight"] > 0, "symbol"]), books[-1]
 
 
 # sample / symbol integrity statuses

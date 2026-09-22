@@ -115,7 +115,8 @@ def longitudinal_integrity(root):
     # symbol-level live policy: otherwise-eligible = model-eligible AND current
     # at the newest session (stale tails are the TAIL/refresh gates' business)
     current = [r["symbol"] for r in rows if r["tail_fresh"]]
-    held, held_src = E.held_symbols(root)
+    held, held_src = E.held_symbols(root)            # REAL_HELD only = hard-block source
+    book, book_src = E.previous_book_symbols(root)    # model state; never blocks
     reasons = E.window_failure_reasons(cache_dir, recent_bad, cal, cal.max(), req)
     pol = E.classify_live_integrity(current, recent_bad, held)
     if structural:   # duplicate / non-monotonic dates = the integrity audit itself fails
@@ -130,6 +131,9 @@ def longitudinal_integrity(root):
             "symbols_window_crosses_gap": recent_bad, "symbols_structural": structural,
             "reasons": {s: v["reason"] for s, v in reasons.items()}},
         "DATA_INTEGRITY_STATUS": pol, "held_sources": held_src,
+        "HOLDINGS_VS_BOOK": {"REAL_HELD_SYMBOLS": sorted(held), "PREVIOUS_BOOK_SYMBOLS": sorted(book),
+                             "HELD_AND_BOOK_INTERSECTION": sorted(held & book),
+                             "BOOK_ONLY": sorted(book - held), "previous_book": book_src},
         "HISTORICAL_TRAINING_INTEGRITY": {
             "ok": True, "symbols_with_holes": len(hist),
             "missing_symbol_sessions": int(sum(r["missing_sessions"] for r in hist)),
@@ -210,12 +214,20 @@ def check(root, stage, exit_code=None, since_marker=None):
               f"({hi['symbols_with_holes']} symbols with holes, "
               f"{hi['missing_symbol_sessions']} missing symbol-sessions, "
               f"{hi['training_samples_excluded_by_guard']} training samples excluded by the gap guard)")
+        hb = li["HOLDINGS_VS_BOOK"]
+        print(f"[gate integrity] REAL_HELD_SYMBOLS={len(hb['REAL_HELD_SYMBOLS'])} "
+              f"PREVIOUS_BOOK_SYMBOLS={len(hb['PREVIOUS_BOOK_SYMBOLS'])} "
+              f"HELD_AND_BOOK_INTERSECTION={len(hb['HELD_AND_BOOK_INTERSECTION'])} "
+              f"BOOK_ONLY={len(hb['BOOK_ONLY'])} (hard-block source: REAL_HELD only; "
+              f"previous book {hb['previous_book'] or 'none'})")
         for s in pol["excluded"]:
-            print(f"[gate integrity]   {s} - DATA_INTEGRITY_FAILURE / {rw['reasons'].get(s, '?')}"
-                  f"{' (HELD)' if s in pol['held_invalid'] else ''}")
+            tag = (" (REAL_HELD -> HARD BLOCK)" if s in pol["held_invalid"] else
+                   " (BOOK_ONLY -> DEGRADED exclusion)" if s in hb["BOOK_ONLY"] else "")
+            print(f"[gate integrity]   {s} - DATA_INTEGRITY_FAILURE / {rw['reasons'].get(s, '?')}{tag}")
         print(f"[gate integrity] DATA_INTEGRITY_STATUS: {pol['status']} - {pol['reason']} "
               f"(valid model universe {pol['valid']}/{pol['eligible']} = {pol['valid_ratio']:.2%}, "
-              f"threshold {pol['threshold']:.0%}; held set from {li['held_sources'] or 'none'})")
+              f"threshold {pol['threshold']:.0%}; hard-block set = REAL_HELD from "
+              f"{li['held_sources'] or 'none'})")
         if not tc["ok"]:
             return False, "TAIL_COVERAGE below threshold"
         if not pol["publication_allowed"]:

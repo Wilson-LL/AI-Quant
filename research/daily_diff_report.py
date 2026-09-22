@@ -24,6 +24,16 @@ DIFF_DIR = os.path.join(ROOT, "reports", "continuous_research", "daily_diffs")
 STRATS = ("d12", "tf", "blend50", "blend50_band10")
 
 
+def _tag_exit(sym, asof):
+    """Mark exits caused only by a data-integrity exclusion (not alpha-driven)."""
+    p = os.path.join(ROOT, "reports", "transformer_gpu", f"{asof}_data_integrity.csv")
+    if os.path.isfile(p):
+        d = pd.read_csv(p, dtype={"symbol": str})
+        if len(d) and ((d["symbol"] == sym) & (d["reason"] == "WINDOW_CROSSES_DATA_GAP")).any():
+            return f"{sym} [DATA_INTEGRITY_EXCLUSION — not alpha-driven]"
+    return sym
+
+
 def _load(asof, strat):
     p = os.path.join(BOOK_DIR, f"{asof}_{strat}.csv")
     return pd.read_csv(p, dtype={"stock": str}) if os.path.exists(p) else None
@@ -63,7 +73,7 @@ def main(asof=None):
                           f"today's trades: {2*turn*60/1e4:.2%} @60bps / "
                           f"{2*turn*150/1e4:.2%} @150bps",
                           f"- entries ({len(entries)}): {', '.join(entries) or '—'}",
-                          f"- exits ({len(exits)}): {', '.join(exits) or '—'}"]
+                          f"- exits ({len(exits)}): {', '.join(_tag_exit(s, asof) for s in exits) or '—'}"]
                 if len(big):
                     lines.append("- weight deltas >1pp: " + ", ".join(
                         f"{s} {d:+.1%}" for s, d in big.items()))

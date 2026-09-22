@@ -242,7 +242,8 @@ HOLD_SIDES = ("LONG", "SHORT", "UNKNOWN")
 STATUS_ZH = {"IN_BOOK": "投組內", "WATCH": "觀察中",
              "RANKED_UNSELECTED": "未入選", "OUTSIDE_SCOPE": "模型未涵蓋",
              "DATA_UNAVAILABLE": "資料不足", "STALE_DATA": "資料過期",
-             "PLAN_MISSING": "夜間計畫未含"}
+             "PLAN_MISSING": "夜間計畫未含",
+             "DATA_INTEGRITY_EXCLUSION": "資料完整性排除（非賣出訊號）"}
 PRI_ZH = {"HIGH": "高", "MEDIUM": "中", "LOW": "低", "INFO": "資訊"}
 SIDE_ZH = {"LONG": "多", "SHORT": "空", "UNKNOWN": "?"}
 ACTION_ZH = {"EXIT_LONG": "賣出", "REDUCE_LONG": "減碼", "ADD_LONG": "加碼",
@@ -262,6 +263,8 @@ def _model_status(r):
     ma = str(r.get("model_action") or "")
     if ua == "NO_MODEL_OPINION":
         return "OUTSIDE_SCOPE"
+    if str(r.get("user_action_reason") or "").startswith("DATA_INTEGRITY_EXCLUSION"):
+        return "DATA_INTEGRITY_EXCLUSION"
     if ma in ("BUY", "HOLD", "REDUCE") and _f(r.get("model_rank")) is not None:
         return "IN_BOOK"
     if ma == "WATCH":

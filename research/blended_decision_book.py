@@ -102,6 +102,11 @@ def build(asof=None):
     db["intended_execution_date"] = f"next trading day after {asof}"
     db["holding_horizon_days"] = 20
     db["caveats"] = CAVEAT
+    # previous-book name removed only because its input is invalid: keep the
+    # existing SELL vocabulary, tag it (machine-readable) in caveats
+    excl = E.integrity_window_excluded(pred_dir, asof)
+    ix = (db["action"] == "SELL") & db["symbol"].isin(excl)
+    db.loc[ix, "caveats"] = E.INTEGRITY_EXIT_CAVEAT + "; " + CAVEAT
     db = db.sort_values(["action", "rank"]).reset_index(drop=True)
     db = db[["symbol", "model_score", "rank", "action", "target_weight",
              "previous_weight", "weight_change", "sector", "confidence",
@@ -131,7 +136,9 @@ def build(asof=None):
     md = ["# Blended decision book (blend50 + band10) — " + asof, "",
           f"names in book: {(db['target_weight'] > 0).sum()} · max weight "
           f"{db['target_weight'].max():.1%} · actions: " +
-          ", ".join(f"{a}:{c}" for a, c in db["action"].value_counts().items()), "",
+          ", ".join(f"{a}:{c}" for a, c in db["action"].value_counts().items()) +
+          (f" (of which SELL = DATA_INTEGRITY_EXCLUSION, NOT alpha-driven: {int(ix.sum())})"
+           if ix.any() else ""), "",
           "Sector exposure: " + ", ".join(f"{s} {w:.0%}" for s, w in sec.items()), "",
           "```",
           db[db["action"] != "WATCH"].drop(columns=["caveats", "intended_execution_date"]).to_string(index=False),
@@ -149,6 +156,13 @@ def build(asof=None):
                f"watch list sized on the reference universe {ref_n}, so an excluded name's "
                "slot goes to the next valid name).", ""]
         md += [f"- {s} — DATA_INTEGRITY_FAILURE / {d}" for s, d in zip(integ["symbol"], det)]
+        if ix.any():
+            md += ["", "### Previous-book exits: DATA_INTEGRITY_EXCLUSION — NOT AN ALPHA-DRIVEN SELL", "",
+                   "Removed from the model book only because the current input window is invalid "
+                   "(signal_driven=false). This is not a user sell instruction unless the name is a "
+                   "real holding — and a real holding with invalid data blocks publication instead.", ""]
+            md += [f"- {s}: DATA_INTEGRITY_EXCLUSION (previous weight {w:.2%})"
+                   for s, w in zip(db.loc[ix, "symbol"], db.loc[ix, "previous_weight"])]
     with open(csv_p.replace(".csv", ".md"), "w", encoding="utf-8") as f:
         f.write("\n".join(md) + "\n")
     print(f"[decision book {asof}] {(db['target_weight'] > 0).sum()} held, "

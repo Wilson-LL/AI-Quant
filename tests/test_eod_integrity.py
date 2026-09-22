@@ -594,14 +594,51 @@ class TestHeldSymbolGateRegression(unittest.TestCase):
         self.assertIn(E.UNSAFE, msg)
         self.assertIn("2883", msg)
 
-    def test_g3_standing_book_holding_blocks_3443(self):
+    def test_g3_A_book_only_invalid_is_degraded_not_blocked(self):
+        """3443 invalid, in the previous model book only, NOT in my_holdings.csv:
+        previous-book membership is model state, never a hard-block source."""
         write_cache(self.cache, "3443", self.hole, 7)
-        self.standing_book(["3443", "2330"])               # not in my_holdings.csv
+        self.standing_book(["3443", "2330"])
+        self.holdings(["2883"])
+        ok, msg = self.G.check(self.root, "integrity")
+        self.assertTrue(ok, msg)
+        self.assertIn("DEGRADED", msg)
+        self.assertIn("3443", msg)
+        li = self.G.longitudinal_integrity(self.root)
+        hb = li["HOLDINGS_VS_BOOK"]
+        self.assertEqual(hb["REAL_HELD_SYMBOLS"], ["2883"])
+        self.assertEqual(hb["PREVIOUS_BOOK_SYMBOLS"], ["2330", "3443"])
+        self.assertEqual(hb["BOOK_ONLY"], ["2330", "3443"])
+        self.assertEqual(li["DATA_INTEGRITY_STATUS"]["held_invalid"], [])
+
+    def test_g5_B_invalid_in_holdings_and_book_blocks(self):
+        write_cache(self.cache, "2883", self.hole, 7)
+        self.holdings(["2883", "0050"])
+        self.standing_book(["2883", "2330"])
         ok, msg = self.G.check(self.root, "integrity")
         self.assertFalse(ok)
-        self.assertIn("3443", msg)
+        self.assertIn(E.UNSAFE, msg)
+        self.assertIn("2883", msg)
 
-    def test_g4_two_nonheld_invalid_below_99pct_blocks(self):
+    def test_g6_C_real_holding_not_in_book_blocks(self):
+        """2330: real holding, in the model universe, NOT in the previous book.
+        (0050 / 6669 are real holdings outside the model universe -- ETF /
+        unconfigured -- so they have no model input window to invalidate; they
+        stay NO_MODEL_OPINION under holdings completeness.)"""
+        write_cache(self.cache, "2330", self.hole, 7)
+        self.holdings(["2330", "2883", "0050", "6669"])
+        self.standing_book(["2883", "3443"])              # 2330 not in the model book
+        ok, msg = self.G.check(self.root, "integrity")
+        self.assertFalse(ok)
+        self.assertIn("2330", msg)
+
+    def test_g7_held_symbols_is_real_holdings_only(self):
+        self.holdings(["0050"])
+        self.standing_book(["3443"])
+        self.assertEqual(E.held_symbols(self.root)[0], {"0050"})
+        self.assertEqual(E.previous_book_symbols(self.root)[0], {"3443"})
+
+    def test_g4_F_two_nonheld_invalid_below_99pct_blocks(self):
         self.assertLess((self.n - 2) / self.n, 0.99)
         for s in ("2207", "1101"):
             write_cache(self.cache, s, self.hole, 7)
@@ -615,10 +652,15 @@ class TestExclusionBookSemantics(unittest.TestCase):
     absent from the cross-section, and every z/rank/band/weight is computed
     over valid names only (identical to a universe without that name)."""
 
-    def build(self, cache_syms, pred_syms, integ_rows):
+    def build(self, cache_syms, pred_syms, integ_rows, prev_book=None):
         import blended_decision_book as B
         import paper_trading as P
         root, out = tempfile.mkdtemp(), tempfile.mkdtemp()
+        bdir = os.path.join(root, "nobooks")
+        if prev_book is not None:                            # previous paper band10 book
+            os.makedirs(bdir)
+            pd.DataFrame({"stock": list(prev_book), "weight": 1.0 / len(prev_book)}).to_csv(
+                os.path.join(bdir, "2025-12-01_blend50_band10.csv"), index=False)
         cache = os.path.join(root, "research", "data_cache")
         os.makedirs(cache)
         for s in cache_syms:
@@ -635,7 +677,7 @@ class TestExclusionBookSemantics(unittest.TestCase):
             os.path.join(gd, f"{asof}_data_integrity.csv"), index=False)
         saved = (D.CACHE_DIR, P.BOOK_DIR, B.ROOT, B.PT_DIR)
         try:
-            D.CACHE_DIR, P.BOOK_DIR, B.ROOT, B.PT_DIR = cache, os.path.join(root, "nobooks"), root, out
+            D.CACHE_DIR, P.BOOK_DIR, B.ROOT, B.PT_DIR = cache, bdir, root, out
             db = B.build(asof)
             uni = pd.read_csv(os.path.join(out, f"{asof}_blend50_universe_scores.csv"), dtype={"symbol": str})
             md = open(os.path.join(out, f"{asof}_blend50_band10_decision_book.md"), encoding="utf-8").read()
@@ -744,6 +786,81 @@ class TestExclusionBookSemantics(unittest.TestCase):
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
 
+    def prev_book_full(self):
+        """Full-universe book, then use its held names as the previous book."""
+        import pipeline_gate as G
+        syms = G.universe()
+        dbf, unif, _ = self.build(syms, syms, [])
+        return syms, dbf, unif
+
+    def test_x8_E_book_only_invalid_inside_previous_book(self):
+        """E: excluded, tagged DATA_INTEGRITY_EXCLUSION, next valid name fills the
+        reference-universe slot, cardinality preserved."""
+        syms, dbf, unif = self.prev_book_full()
+        prev = list(dbf.loc[dbf["target_weight"] > 0, "symbol"])
+        x = prev[3]
+        full2, _, _ = self.build(syms, syms, [], prev_book=prev)          # prev book, all valid
+        db, uni, md = self.build(syms, [s for s in syms if s != x], [self.row(x)], prev_book=prev)
+        h0 = set(full2.loc[full2["target_weight"] > 0, "symbol"])
+        h1 = set(db.loc[db["target_weight"] > 0, "symbol"])
+        self.assertEqual(len(h1), len(h0))                                 # cardinality preserved
+        self.assertNotIn(x, h1)
+        self.assertEqual(len(h1 - h0), 1)                                  # one valid name fills the slot
+        r = db.set_index("symbol").loc[x]
+        self.assertEqual(r["action"], "SELL")                              # existing vocabulary
+        self.assertTrue(E.is_integrity_exit(r["caveats"]))                 # machine-readable reason
+        self.assertIn("signal_driven=false", r["caveats"])
+        self.assertTrue(pd.isna(r["model_score"]) and pd.isna(r["rank"]))  # no stale score / rank
+        self.assertNotIn(x, set(uni["symbol"]))
+        self.assertIn("DATA_INTEGRITY_EXCLUSION — NOT AN ALPHA-DRIVEN SELL", md)
+        self.assertIn("of which SELL = DATA_INTEGRITY_EXCLUSION", md)
+        others = db[(db["action"] == "SELL") & (db["symbol"] != x)]
+        self.assertFalse(others["caveats"].map(E.is_integrity_exit).any())  # alpha sells untouched
+
+    def test_x9_D_book_only_invalid_outside_target_creates_no_exit(self):
+        syms, dbf, unif = self.prev_book_full()
+        prev = list(dbf.loc[dbf["target_weight"] > 0, "symbol"])
+        x = unif.sort_values("rank")["symbol"].tolist()[-1]               # not in the previous book
+        self.assertNotIn(x, prev)
+        db, uni, md = self.build(syms, [s for s in syms if s != x], [self.row(x)], prev_book=prev)
+        self.assertNotIn(x, set(db["symbol"]))                             # no synthetic exit record
+        self.assertFalse(db["caveats"].map(E.is_integrity_exit).any())
+
+    def test_x10_book_only_exit_never_a_user_sell_instruction(self):
+        """A DATA_INTEGRITY_EXCLUSION SELL for a symbol absent from my_holdings.csv
+        maps to NO_ACTION; only a real LONG could map to EXIT_LONG, and a real
+        holding with invalid data blocks publication instead."""
+        import holdings as H
+        ua, pri, _ = H.map_user_action(position_side="NONE", model_action="SELL", model_target=0.0,
+                                       in_universe=True, in_book=True, cmp_weight=np.nan)
+        self.assertEqual(ua, "NO_ACTION")
+        import user_holdings_overlay as O
+        cls = O.classify({"symbol": "9999", "in_model_universe": True, "in_data_cache": True,
+                          "model_action": "SELL", "model_integrity_exit": True, "weight_gap": np.nan,
+                          "my_current_weight": 0.0, "my_shares": 1000.0, "both_sides": False,
+                          "position_side": "LONG", "in_latest_decision_book": True}, 0.02, 0.05)
+        self.assertIn("NOT AN ALPHA-DRIVEN SELL", cls[2])
+        import simplified_reports as S
+        self.assertEqual(S._model_status({"user_action": "NO_ACTION", "model_action": "SELL",
+                                          "user_action_reason": "DATA_INTEGRITY_EXCLUSION — x"}),
+                         "DATA_INTEGRITY_EXCLUSION")
+
+    def test_x11_neural_target_book_tags_integrity_exit(self):
+        import inference_transformer_eod as I
+        self.assertEqual(I.E_INTEGRITY_EXIT_CAVEAT, E.INTEGRITY_EXIT_CAVEAT)
+        rng = np.random.default_rng(7)
+        pred = pd.DataFrame({"stock": [f"{1200 + i}" for i in range(107)], "score": rng.normal(size=107),
+                             "score_std": 0.1, "sector": "x", "vol_20": 0.2})
+        prev = pd.DataFrame({"symbol": ["9999", "1200"], "target_weight": [0.05, 0.05]})
+        book = I.make_decision_book(pred, prev, 0.2, 0.05, 20, "t+1", ref_n=108,
+                                    integrity_excluded={"9999", "8888"})
+        r = book.set_index("symbol")
+        self.assertEqual(r.loc["9999", "action"], "SELL")
+        self.assertTrue(E.is_integrity_exit(r.loc["9999", "caveats"]))
+        self.assertTrue(pd.isna(r.loc["9999", "prediction_score"]) and pd.isna(r.loc["9999", "rank"]))
+        self.assertNotIn("8888", r.index)                                  # never in the previous book
+        self.assertEqual(int((book["target_weight"] > 0).sum()), 22)
+
 class TestInferencePolicy(unittest.TestCase):
 
     def setUp(self):
@@ -770,6 +887,17 @@ class TestInferencePolicy(unittest.TestCase):
         df, pol = I.apply_integrity_policy(self.integ(), 107, str(CAL[-1])[:10], root=self.root)
         self.assertFalse(pol["publication_allowed"])
         self.assertTrue(bool(df["held"].iloc[0]))
+
+    def test_i3_book_only_symbol_does_not_block_inference(self):
+        import inference_transformer_eod as I
+        pt = os.path.join(self.root, "reports", "paper_trading")
+        os.makedirs(pt)
+        pd.DataFrame({"symbol": ["2883"], "target_weight": [0.05]}).to_csv(
+            os.path.join(pt, "2025-12-01_blend50_band10_decision_book.csv"), index=False)
+        df, pol = I.apply_integrity_policy(self.integ(), 107, str(CAL[-1])[:10], root=self.root)
+        self.assertTrue(pol["publication_allowed"])                        # book-only: DEGRADED
+        self.assertFalse(bool(df["held"].iloc[0]))
+        self.assertTrue(bool(df["in_previous_book"].iloc[0]))
 
     def test_i2_nonheld_symbol_degraded_with_detail(self):
         import inference_transformer_eod as I

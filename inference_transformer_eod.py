@@ -68,7 +68,13 @@ def previous_book():
     return pd.read_csv(books[-1], dtype={"symbol": str})
 
 
-def make_decision_book(pred, prev, top_frac, band, horizon, exec_date, ref_n=None):
+E_INTEGRITY_EXIT_CAVEAT = ("DATA_INTEGRITY_EXCLUSION; NOT AN ALPHA-DRIVEN SELL; signal_driven=false; "
+                           "previous model-book name removed only because its current input window "
+                           "is invalid")   # == eod_integrity.INTEGRITY_EXIT_CAVEAT (tested)
+
+
+def make_decision_book(pred, prev, top_frac, band, horizon, exec_date, ref_n=None,
+                       integrity_excluded=None):
     """pred: DataFrame [stock, score, score_std, sector, vol_20].
     ref_n: REFERENCE_ELIGIBLE_UNIVERSE_N. Book size k and band width are sized
     on the reference universe (valid + integrity-excluded names); ranks and
@@ -162,7 +168,22 @@ def make_decision_book(pred, prev, top_frac, band, horizon, exec_date, ref_n=Non
             "caveats": "survivorship-biased research universe; EOD close-to-close model; "
                        "execute next session; not investment advice",
         })
+    # A previous-book name removed only because its current input is invalid:
+    # SELL (existing vocabulary) with no score and no rank, explicitly tagged.
+    for sid in sorted(set(integrity_excluded or ()) - set(pred["stock"])):
+        pw = float(prev_w.get(sid, 0.0))
+        if pw > 0:
+            rows.append({
+                "symbol": sid, "prediction_score": np.nan, "rank": pd.NA, "action": "SELL",
+                "target_weight": 0.0, "previous_weight": round(pw, 5), "weight_change": round(-pw, 5),
+                "sector": SECTOR_MAP.get(sid, "other"), "confidence": "",
+                "execution_date": exec_date, "holding_horizon_days": horizon,
+                "caveats": E_INTEGRITY_EXIT_CAVEAT + "; survivorship-biased research universe; "
+                           "EOD close-to-close model; execute next session; not investment advice",
+            })
     book = pd.DataFrame(rows)
+    if len(book) and book["rank"].isna().any():
+        book["rank"] = book["rank"].astype("Int64")
     assert book.empty or book["target_weight"].max() <= NAME_CAP + 1e-4, \
         "hard 10% name cap violated"
     assert book.empty or abs(book["target_weight"].sum() - 1.0) < 1e-3, \
@@ -199,7 +220,8 @@ def apply_integrity_policy(integ_df, n_scored, asof, root=None, cache_dir=None):
     cache_dir = cache_dir or os.path.join(root, "research", "data_cache")
     integ_df = integ_df.copy()
     win_bad = integ_df.loc[integ_df["reason"] == "WINDOW_CROSSES_DATA_GAP", "symbol"].tolist()
-    held, _ = E.held_symbols(root)
+    held, _ = E.held_symbols(root)                  # REAL_HELD only
+    book_syms, _ = E.previous_book_symbols(root)
     detail = {}
     if win_bad:
         raw = E.read_cache_dates(cache_dir)
@@ -209,6 +231,7 @@ def apply_integrity_policy(integ_df, n_scored, asof, root=None, cache_dir=None):
     integ_df["detail"] = [detail.get(s, E.MISSING_SESSION_IN_REQUIRED_WINDOW) if r == "WINDOW_CROSSES_DATA_GAP"
                           else r for s, r in zip(integ_df["symbol"], integ_df["reason"])]
     integ_df["held"] = integ_df["symbol"].isin(held)
+    integ_df["in_previous_book"] = integ_df["symbol"].isin(book_syms)
     # otherwise-eligible = scored names + window-invalid names (stale tails excluded)
     policy = E.classify_live_integrity(
         [f"__scored_{i}" for i in range(n_scored)] + win_bad, win_bad, held)
@@ -256,7 +279,9 @@ def main(top_frac=0.2, band=0.05):
     prev = previous_book()
     exec_date = f"next trading day after {asof}"
     book = make_decision_book(pred, prev, top_frac, band, horizon, exec_date,
-                              ref_n=policy["eligible"])
+                              ref_n=policy["eligible"],
+                              integrity_excluded=set(integ_df.loc[
+                                  integ_df["reason"] == "WINDOW_CROSSES_DATA_GAP", "symbol"]))
 
     os.makedirs(REPORT_DIR, exist_ok=True)
     pred_out = pred.sort_values("score", ascending=False)
@@ -319,8 +344,15 @@ def main(top_frac=0.2, band=0.05):
                   "These symbols received no model score because their required input "
                   "window crosses a missing trading session or their cache tail is stale:", ""]
         lines += [f"- {r['symbol']} — DATA_INTEGRITY_FAILURE / {r['detail']} "
-                  f"(last cached {r['last_cached_date']}; held: {'yes' if r['held'] else 'no'})"
+                  f"(last cached {r['last_cached_date']}; real holding: {'yes' if r['held'] else 'no'}; "
+                  f"previous model book: {'yes' if r['in_previous_book'] else 'no'})"
                   for _, r in integ_df.iterrows()]
+        exits = book[book["caveats"].astype(str).str.startswith("DATA_INTEGRITY_EXCLUSION")] \
+            if len(book) else book
+        if len(exits):
+            lines += ["", "Previous-book exits caused only by invalid input "
+                          "(DATA_INTEGRITY_EXCLUSION — NOT AN ALPHA-DRIVEN SELL):", ""]
+            lines += [f"- {s}: DATA_INTEGRITY_EXCLUSION (not an alpha-driven sell)" for s in exits["symbol"]]
     lines += ["", "## Caveats",
               "- Research system on a survivorship-biased cached universe; not investment advice.",
               "- Scores are cross-sectional ranks, not return forecasts.",
