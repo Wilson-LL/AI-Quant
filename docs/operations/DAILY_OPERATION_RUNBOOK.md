@@ -19,12 +19,22 @@ is copied from research outputs:
 | item | requirement |
 |---|---|
 | `research\data_cache\` | EOD cache. Seeded from the immutable DATA_BASELINE_V2 copy (`AI-Quant-backups\eod_cache_data_baseline_v2_20260921`, aggregate SHA-256 `c37dc970…`); afterwards maintained only by `daily_ops.bat` (append-only). |
-| `.venv\` | the torch-nightly venv (junction to, or a copy of, the known-good venv) |
-| `my_holdings.csv` | the user's real holdings. Must be present: it feeds the held-symbol hard block of the integrity gate and steps 8–9. Exactly one canonical copy should be maintained. |
+| `.venv\` | **Shared environment:** a directory junction `AI-Quant-prod\.venv` → `AI-Quant\.venv` (created 2026-09-22). Verified with Python 3.12.3, torch 2.13.0.dev20260522+cu132, CUDA 13.2, RTX 4060 Ti. Production therefore depends on the research clone's venv. **Never install, upgrade or remove packages in it for research** without re-validating production; if research needs different packages, give research its own venv. |
+| `my_holdings.csv` | **AUTHORITATIVE PRODUCTION HOLDINGS** = `C:\Users\wilso\source\code\AI-Quant-prod\my_holdings.csv` (initialised 2026-09-22 from the research clone's file, SHA-256 verified). It feeds the integrity gate's held-symbol hard block and steps 8–9. Edit holdings **only here**. |
 | `reports\paper_trading\` books, decision books, ledger | the standing production lineage (previous book = band10 incumbents and the gate's held set) |
 | `reports\transformer_gpu\<date>_*` | the previous neural target book (band) and predictions |
 | `reports\user_actions\`, `reports\user_holdings\` | the previous standing plan (continuity and recovery) |
 | `checkpoints\` | not needed: the daily retrain trains from scratch |
+
+**Holdings source of truth.**
+- `AI-Quant\my_holdings.csv` in the research clone is **non-authoritative**. It is a stale copy kept only for reference.
+- There is no research → production write path. All code resolves `my_holdings.csv` relative to its own worktree root, so research code run in the research clone can only read or write the research clone's copy.
+- Research that needs holdings must take a read-only snapshot of the production file, never a link that writes back.
+- Do not point research tools at `AI-Quant-prod`.
+
+The initial state migration is recorded in `reports\operations\PROD_RUNTIME_MIGRATION_MANIFEST.json`: source, destination, SHA-256 and reason for each file. Copied history is continuity input only. Freshness is enforced by:
+- the step-start markers and dated-artifact gates for retrain, inference and book;
+- the next-session plan's book-date checks (a book older than the newest cache date publishes no plan; an existing plan for the same book date is not regenerated).
 
 **Intraday collector.** The `AIQuant-IntradayCollector` / `AIQuant-IntradayPostClose` scheduled tasks still run from the research clone. They pick their universe from that clone's latest decision book and write the intraday DB there. Until the tasks are repointed (a user decision), the morning plan in the production worktree needs `--db` pointing at the collector DB, and the collector universe lags the production book.
 
@@ -33,10 +43,10 @@ is copied from research outputs:
 | status | meaning | pipeline |
 |---|---|---|
 | SAFE | no current model symbol has a broken 191-session window | runs |
-| DEGRADED | one or more NON-held symbols excluded (DATA_INTEGRITY_FAILURE: no score, no rank); valid/eligible >= 99% | runs; exclusions listed in the report and book md |
-| UNSAFE_FOR_NEW_MODEL_OUTPUT | a held symbol (my_holdings.csv or standing book) invalid, or valid coverage < 99%, or structural date defects | aborts; the previous plan is untouched |
+| DEGRADED | one or more symbols that are not REAL_HELD excluded (DATA_INTEGRITY_FAILURE: no score, no rank). This includes names that are only in the previous model book; valid/eligible >= 99% | runs; exclusions listed in the report and book md |
+| UNSAFE_FOR_NEW_MODEL_OUTPUT | a REAL_HELD symbol (open position in the canonical `my_holdings.csv`) invalid, or valid coverage < 99%, or structural date defects | aborts; the previous plan is untouched |
 
-Under DEGRADED, portfolio construction keeps its size. The book size, band10 pool, neural k/band and watch list are sized on REFERENCE_ELIGIBLE_UNIVERSE_N, meaning valid names plus integrity-excluded names, while candidates are valid names only. An excluded name's slot therefore goes to the next valid name. Confirmed symbol no-trade days live in `reports\data_integrity\symbol_no_trade_registry.csv`. They are never filled, and they still break contiguity.
+Under DEGRADED, portfolio construction keeps its size. The book size, band10 pool, neural k/band and watch list are sized on REFERENCE_ELIGIBLE_UNIVERSE_N, meaning valid names plus integrity-excluded names, while candidates are valid names only. An excluded name's slot therefore goes to the next valid name. **Held vs model book.** The hard-block source is REAL_HELD_SYMBOLS only: the canonical `my_holdings.csv` open positions. The gate reports REAL_HELD, PREVIOUS_BOOK, their intersection and BOOK_ONLY separately. The previous decision book (PREVIOUS_BOOK_SYMBOLS) is band10 / hysteresis state and never blocks publication. A book-only name whose input is invalid leaves the model book with action `SELL`. Its `caveats` field starts with `DATA_INTEGRITY_EXCLUSION; NOT AN ALPHA-DRIVEN SELL; signal_driven=false`, and it has no score and no rank. Book md, overlay, plan reason, simplified status and daily diff all label it DATA_INTEGRITY_EXCLUSION. Because the name is not in `my_holdings.csv`, it maps to user action `NO_ACTION` and is never a user sell instruction. Real holdings outside the model universe (e.g. the ETF 0050, or the unconfigured 6669) have no model input window. They are reported as NO_MODEL_OPINION by holdings completeness. Confirmed symbol no-trade days live in `reports\data_integrity\symbol_no_trade_registry.csv`. They are never filled, and they still break contiguity.
 
 ## Commands
 
