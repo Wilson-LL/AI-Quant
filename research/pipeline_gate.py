@@ -131,6 +131,7 @@ def longitudinal_integrity(root):
             "symbols_window_crosses_gap": recent_bad, "symbols_structural": structural,
             "reasons": {s: v["reason"] for s, v in reasons.items()}},
         "DATA_INTEGRITY_STATUS": pol, "held_sources": held_src,
+        "_rows_tail_stale": [{"symbol": r["symbol"]} for r in rows if not r["tail_fresh"]],
         "HOLDINGS_VS_BOOK": {"REAL_HELD_SYMBOLS": sorted(held), "PREVIOUS_BOOK_SYMBOLS": sorted(book),
                              "HELD_AND_BOOK_INTERSECTION": sorted(held & book),
                              "BOOK_ONLY": sorted(book - held), "previous_book": book_src},
@@ -224,6 +225,10 @@ def check(root, stage, exit_code=None, since_marker=None):
             tag = (" (REAL_HELD -> HARD BLOCK)" if s in pol["held_invalid"] else
                    " (BOOK_ONLY -> DEGRADED exclusion)" if s in hb["BOOK_ONLY"] else "")
             print(f"[gate integrity]   {s} - DATA_INTEGRITY_FAILURE / {rw['reasons'].get(s, '?')}{tag}")
+        stale = sorted(r["symbol"] for r in li["_rows_tail_stale"]) if "_rows_tail_stale" in li else []
+        if stale:
+            print(f"[gate integrity] STALE_TAIL (no row at the newest session; counted in the "
+                  f"portfolio sizing reference, not in the coverage ratio): {stale}")
         print(f"[gate integrity] DATA_INTEGRITY_STATUS: {pol['status']} - {pol['reason']} "
               f"(valid model universe {pol['valid']}/{pol['eligible']} = {pol['valid_ratio']:.2%}, "
               f"threshold {pol['threshold']:.0%}; hard-block set = REAL_HELD from "

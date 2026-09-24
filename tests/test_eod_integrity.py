@@ -772,7 +772,33 @@ class TestExclusionBookSemantics(unittest.TestCase):
         same = I.make_decision_book(pred, None, 0.2, 0.05, 20, "t+1", ref_n=107)
         pd.testing.assert_frame_equal(full, same)
 
-    def test_x7_reference_universe_counts_only_window_exclusions(self):
+    def test_x13_unavailable_sets_separate_sizing_from_coverage(self):
+        tmp = tempfile.mkdtemp()
+        try:
+            pd.DataFrame([{"symbol": "a", "reason": "WINDOW_CROSSES_DATA_GAP"},
+                          {"symbol": "b", "reason": "STALE_TAIL"}]).to_csv(
+                os.path.join(tmp, "2026-01-02_data_integrity.csv"), index=False)
+            self.assertEqual(E.integrity_window_excluded(tmp, "2026-01-02"), {"a"})     # coverage
+            self.assertEqual(E.integrity_unavailable(tmp, "2026-01-02"), {"a", "b"})    # sizing
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_x14_stale_previous_book_name_exits_tagged(self):
+        """A stale-tail name that was in the previous book leaves it as a tagged
+        DATA_INTEGRITY_EXCLUSION, never an alpha-driven sell."""
+        syms, dbf, unif = self.prev_book_full()
+        prev = list(dbf.loc[dbf["target_weight"] > 0, "symbol"])
+        x = prev[5]
+        asof = str(CAL[-1])[:10]
+        row = [x, "DATA_INTEGRITY_FAILURE", "STALE_TAIL", "2026-09-21", asof, "STALE_TAIL", False]
+        db, uni, md = self.build(syms, [s for s in syms if s != x], [row], prev_book=prev)
+        r = db.set_index("symbol").loc[x]
+        self.assertEqual(r["action"], "SELL")
+        self.assertTrue(E.is_integrity_exit(r["caveats"]))
+        self.assertEqual(int((db["target_weight"] > 0).sum()),
+                         int((dbf["target_weight"] > 0).sum()))            # cardinality preserved
+
+    def test_x7_reference_universe_counts_unavailable_names(self):
         self.assertEqual(E.reference_universe_n(["a", "b"], {"c"}), 3)
         self.assertEqual(E.reference_universe_n(["a", "b"], {"c"}, eligible_pool=["a", "b"]), 2)
         self.assertEqual(E.reference_universe_n(["a", "b"], {"a"}), 2)
@@ -887,6 +913,31 @@ class TestInferencePolicy(unittest.TestCase):
         df, pol = I.apply_integrity_policy(self.integ(), 107, str(CAL[-1])[:10], root=self.root)
         self.assertFalse(pol["publication_allowed"])
         self.assertTrue(bool(df["held"].iloc[0]))
+
+    def test_x12_stale_tail_counts_for_sizing_not_for_coverage(self):
+        """User decision 2026-09-24 (option 1), reproducing the 2026-09-22 run:
+        106 valid + 2207 (invalid window) + 5903 (stale tail) -> sizing
+        reference 108 (book 22), coverage ratio still 106/107."""
+        import inference_transformer_eod as I
+        asof = str(CAL[-1])[:10]
+        integ = pd.DataFrame([
+            {"symbol": "2883", "status": "DATA_INTEGRITY_FAILURE", "reason": "WINDOW_CROSSES_DATA_GAP",
+             "last_cached_date": asof, "asof": asof},
+            {"symbol": "5903", "status": "DATA_INTEGRITY_FAILURE", "reason": "STALE_TAIL",
+             "last_cached_date": "2026-09-21", "asof": asof}])
+        df, pol = I.apply_integrity_policy(integ, 106, asof, root=self.root)
+        self.assertEqual(pol["status"], E.DEGRADED)
+        self.assertEqual((pol["valid"], pol["eligible"]), (106, 107))       # coverage: window only
+        self.assertAlmostEqual(pol["valid_ratio"], 106 / 107)
+        self.assertEqual(pol["stale_tails"], ["5903"])
+        self.assertEqual(pol["reference_eligible_universe_n"], 108)          # sizing: + stale tail
+        rng = np.random.default_rng(11)
+        pred = pd.DataFrame({"stock": [f"{1300 + i}" for i in range(106)], "score": rng.normal(size=106),
+                             "score_std": 0.1, "sector": "x", "vol_20": 0.2})
+        self.assertEqual(int((I.make_decision_book(pred, None, 0.2, 0.05, 20, "t+1",
+                                                   ref_n=108)["target_weight"] > 0).sum()), 22)
+        self.assertEqual(int((I.make_decision_book(pred, None, 0.2, 0.05, 20, "t+1",
+                                                   ref_n=107)["target_weight"] > 0).sum()), 21)
 
     def test_i3_book_only_symbol_does_not_block_inference(self):
         import inference_transformer_eod as I

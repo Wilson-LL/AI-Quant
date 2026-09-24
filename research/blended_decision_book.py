@@ -51,7 +51,7 @@ def build(asof=None):
     # REFERENCE_ELIGIBLE_UNIVERSE_N: integrity-excluded names (no score, not
     # ranked) still count toward every denominator-based book parameter.
     import eod_integrity as E
-    ref_n = E.reference_universe_n(mm["stock"], E.integrity_window_excluded(pred_dir, asof),
+    ref_n = E.reference_universe_n(mm["stock"], E.integrity_unavailable(pred_dir, asof),
                                    eligible_pool=[r["stock"] for r in rows])
     mm["z_tf"] = (mm["score"] - mm["score"].mean()) / (mm["score"].std() + 1e-9)
     mm["z_mom"] = (mm["mom"] - mm["mom"].mean()) / (mm["mom"].std() + 1e-9)
@@ -104,7 +104,7 @@ def build(asof=None):
     db["caveats"] = CAVEAT
     # previous-book name removed only because its input is invalid: keep the
     # existing SELL vocabulary, tag it (machine-readable) in caveats
-    excl = E.integrity_window_excluded(pred_dir, asof)
+    excl = E.integrity_unavailable(pred_dir, asof)
     ix = (db["action"] == "SELL") & db["symbol"].isin(excl)
     db.loc[ix, "caveats"] = E.INTEGRITY_EXIT_CAVEAT + "; " + CAVEAT
     db = db.sort_values(["action", "rank"]).reset_index(drop=True)

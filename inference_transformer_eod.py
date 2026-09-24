@@ -235,6 +235,11 @@ def apply_integrity_policy(integ_df, n_scored, asof, root=None, cache_dir=None):
     # otherwise-eligible = scored names + window-invalid names (stale tails excluded)
     policy = E.classify_live_integrity(
         [f"__scored_{i}" for i in range(n_scored)] + win_bad, win_bad, held)
+    # sizing reference: stale tails are temporarily unavailable too, and must
+    # not shrink the portfolio; they do NOT enter the 99% coverage rule above
+    stale = sorted(set(integ_df.loc[integ_df["reason"] == "STALE_TAIL", "symbol"]) - set(win_bad))
+    policy["stale_tails"] = stale
+    policy["reference_eligible_universe_n"] = policy["eligible"] + len(stale)
     return integ_df, policy
 
 
@@ -279,9 +284,8 @@ def main(top_frac=0.2, band=0.05):
     prev = previous_book()
     exec_date = f"next trading day after {asof}"
     book = make_decision_book(pred, prev, top_frac, band, horizon, exec_date,
-                              ref_n=policy["eligible"],
-                              integrity_excluded=set(integ_df.loc[
-                                  integ_df["reason"] == "WINDOW_CROSSES_DATA_GAP", "symbol"]))
+                              ref_n=policy["reference_eligible_universe_n"],
+                              integrity_excluded=set(integ_df["symbol"]))
 
     os.makedirs(REPORT_DIR, exist_ok=True)
     pred_out = pred.sort_values("score", ascending=False)
@@ -300,8 +304,10 @@ def main(top_frac=0.2, band=0.05):
         "seeds": len(nets),
         "data_integrity": {
             "status": policy["status"],
-            "reference_eligible_universe_n": policy["eligible"],
+            "reference_eligible_universe_n": policy["reference_eligible_universe_n"],
             "valid_scored_universe_n": policy["valid"],
+            "coverage_denominator_n": policy["eligible"],
+            "stale_tails": policy["stale_tails"],
             "universe_before_exclusion": policy["eligible"],
             "effective_universe": policy["valid"],
             "valid_ratio": round(policy["valid_ratio"], 6),
@@ -338,7 +344,8 @@ def main(top_frac=0.2, band=0.05):
     if len(integ_df):
         lines += ["", "## DATA_INTEGRITY_FAILURE (not scored)", "",
                   f"DATA_INTEGRITY_STATUS: **{policy['status']}** — {policy['reason']}. "
-                  f"Model universe {policy['eligible']} → {policy['valid']} "
+                  f"Model universe: reference {policy['reference_eligible_universe_n']} "
+                  f"(sizing), coverage {policy['valid']}/{policy['eligible']} "
                   "(excluded names were removed from the cross-section; z-score, rank, "
                   "top fraction, band and weights are computed over valid names only).", "",
                   "These symbols received no model score because their required input "

@@ -124,7 +124,7 @@ def snapshot(asof=None):
     d12 = pd.DataFrame(rows)
     mm = preds[["stock", "score"]].merge(d12, on="stock", how="inner")
     import eod_integrity as E
-    ref_n = E.reference_universe_n(mm["stock"], E.integrity_window_excluded(pred_dir, asof),
+    ref_n = E.reference_universe_n(mm["stock"], E.integrity_unavailable(pred_dir, asof),
                                    eligible_pool=d12["stock"])
     mm["z_tf"] = (mm["score"] - mm["score"].mean()) / (mm["score"].std() + 1e-9)
     mm["z_mom"] = (mm["mom"] - mm["mom"].mean()) / (mm["mom"].std() + 1e-9)

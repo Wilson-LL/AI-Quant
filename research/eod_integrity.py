@@ -176,10 +176,26 @@ def integrity_window_excluded(pred_dir, asof):
     return set(d.loc[d["reason"] == "WINDOW_CROSSES_DATA_GAP", "symbol"])
 
 
+def integrity_unavailable(pred_dir, asof):
+    """Every symbol the live policy left out of the `asof` cross-section for a
+    DATA reason: invalid required window AND stale tail (source had not
+    published its row yet). This is the SIZING set: a temporarily unavailable
+    non-held name must not shrink the portfolio (user decision 2026-09-24,
+    option 1). The 99% valid-model coverage rule keeps using
+    integrity_window_excluded only; stale tails stay governed by the
+    latest-date refresh coverage gate."""
+    p = os.path.join(pred_dir, f"{asof}_data_integrity.csv")
+    if not os.path.isfile(p):
+        return set()
+    d = pd.read_csv(p, dtype={"symbol": str})
+    return set() if d.empty else set(d["symbol"])
+
+
 def reference_universe_n(valid_symbols, excluded, eligible_pool=None):
     """REFERENCE_ELIGIBLE_UNIVERSE_N: the otherwise-eligible model universe
-    BEFORE temporary data-integrity exclusions = valid scored names + excluded
-    names that would otherwise have entered the same cross-section
+    BEFORE temporary data exclusions = valid scored names + temporarily
+    unavailable names that would otherwise have entered the same cross-section
+    (integrity_unavailable: invalid window or stale tail)
     (`eligible_pool`, e.g. names with a momentum score for the blend book).
     Every denominator-based portfolio parameter (top-N, band, watch list) uses
     this N; ranks and candidates come from valid names only, so an excluded
