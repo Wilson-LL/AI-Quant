@@ -36,7 +36,7 @@ The initial state migration is recorded in `reports\operations\PROD_RUNTIME_MIGR
 - the step-start markers and dated-artifact gates for retrain, inference and book;
 - the next-session plan's book-date checks (a book older than the newest cache date publishes no plan; an existing plan for the same book date is not regenerated).
 
-**Intraday tasks (migrated 2026-09-25).** `AIQuant-IntradayCollector` (Mon–Fri 08:54) and `AIQuant-IntradayPostClose` (Mon–Fri 13:40) run from `AI-Quant-prod`. Their universe is the production decision book, and they read/write `AI-Quant-prodesearch\intraday_cache\intraday.sqlite`, migrated with the SQLite backup API and verified (see `reports\operations\INTRADAY_DB_MIGRATION.json`). `morning_execution_plan.bat` therefore needs no `--db` override when run from prod. The research clone's intraday DB is a retained fallback: never let both worktrees write a SQLite DB concurrently, and run the morning plan only from prod.
+**Intraday tasks (migrated 2026-09-25).** `AIQuant-IntradayCollector` (Mon–Fri 08:54) and `AIQuant-IntradayPostClose` (Mon–Fri 13:40) run from `AI-Quant-prod`. Their universe is the production decision book, and they read/write `AI-Quant-prodesearch\intraday_cache\intraday.sqlite`, migrated with the SQLite backup API and verified (see `reports\operations\INTRADAY_DB_MIGRATION.json`). `morning_execution_plan.bat` therefore needs no `--db` override when run from prod. The research clone's intraday DB is a retained fallback: never let both worktrees write a SQLite DB concurrently, and run the morning plan only from prod.
 
 ## Data integrity statuses (integrity gate, step 1)
 
